@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MDE Multi-Framework Audit Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet"/>
+<style>
+/* ── TOKENS ── */
+:root[data-theme="dark"] {
+  --bg0: #080c12;
+  --bg1: #0e1420;
+  --bg2: #131c2e;
+  --bg3: #1a243a;
+  --bg4: #1f2d45;
+  --border: #243047;
+  --border2: #2d3d5a;
+  --t1: #e8eef8;
+  --t2: #8fa3c0;
+  --t3: #4e6280;
+  --t4: #2d3d5a;
+  --shadow: 0 6px 32px rgba(0,0,0,.55);
+  --shadow-sm: 0 2px 10px rgba(0,0,0,.4);
+  --glow: 0 0 0 1px rgba(255,255,255,.04);
+  --s-complete:#10b981; --s-complete-bg:rgba(16,185,129,.08);
+  --s-progress:#f59e0b; --s-progress-bg:rgba(245,158,11,.08);
+  --s-blocked:#ef4444;  --s-blocked-bg:rgba(239,68,68,.08);
+  --s-pending:#4e6280;  --s-pending-bg:transparent;
+  --p-high:#f87171; --p-high-bg:rgba(248,113,113,.1);
+  --p-med:#fbbf24;  --p-med-bg:rgba(251,191,36,.1);
+  --p-low:#34d399;  --p-low-bg:rgba(52,211,153,.1);
+}
+:root[data-theme="light"] {
+  --bg0: #edf1f7;
+  --bg1: #f4f7fb;
+  --bg2: #ffffff;
+  --bg3: #f0f4fa;
+  --bg4: #e8edf5;
+  --border: #d0d9e8;
+  --border2: #c0cde0;
+  --t1: #0f172a;
+  --t2: #475569;
+  --t3: #94a3b8;
+  --t4: #cbd5e1;
+  --shadow: 0 6px 32px rgba(0,0,0,.08);
+  --shadow-sm: 0 2px 10px rgba(0,0,0,.05);
+  --glow: 0 0 0 1px rgba(0,0,0,.04);
+  --s-complete:#059669; --s-complete-bg:rgba(5,150,105,.07);
+  --s-progress:#d97706; --s-progress-bg:rgba(217,119,6,.07);
+  --s-blocked:#dc2626;  --s-blocked-bg:rgba(220,38,38,.07);
+  --s-pending:#94a3b8;  --s-pending-bg:transparent;
+  --p-high:#dc2626; --p-high-bg:rgba(220,38,38,.08);
+  --p-med:#d97706;  --p-med-bg:rgba(217,119,6,.08);
+  --p-low:#059669;  --p-low-bg:rgba(5,150,105,.08);
+}
+
+/* Framework colors */
+:root {
+  --csf-c:#0078D4; --csf-g:rgba(0,120,212,.12);
+  --ce-c:#16a34a;  --ce-g:rgba(22,163,74,.12);
+  --soc-c:#7c3aed; --soc-g:rgba(124,58,237,.12);
+  --n53-c:#ea580c; --n53-g:rgba(234,88,12,.12);
+}
+
+/* ── RESET ── */
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--bg1)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+body{
+  font-family:'DM Sans',sans-serif;
+  background:var(--bg0);
+  color:var(--t1);
+  min-height:100vh;
+  font-size:13.5px;
+  line-height:1.6;
+  transition:background .25s,color .25s;
+}
+
+/* ── HEADER ── */
+header{
+  background:var(--bg1);
+  border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:200;
+}
+.hdr{
+  max-width:1600px;margin:0 auto;
+  padding:0 24px;height:56px;
+  display:flex;align-items:center;gap:12px;
+}
+.hdr-logo{display:flex;align-items:center;gap:9px;flex-shrink:0}
+.hdr-logo-icon{
+  width:30px;height:30px;
+  background:linear-gradient(135deg,var(--fw-color,#0078D4) 0%,color-mix(in srgb,var(--fw-color,#0078D4) 60%,#000) 100%);
+  border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;
+  transition:background .3s;
+}
+.hdr-brand{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;letter-spacing:-.3px;color:var(--t1)}
+.hdr-sub{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3);letter-spacing:.8px;text-transform:uppercase;margin-top:-2px}
+
+/* Framework switcher */
+.fw-switcher{
+  display:flex;align-items:center;gap:3px;
+  background:var(--bg0);
+  border:1px solid var(--border);
+  border-radius:9px;padding:3px;
+  flex-shrink:0;
+}
+.fw-btn{
+  padding:5px 12px;
+  border-radius:6px;border:none;
+  background:transparent;
+  color:var(--t3);
+  font-family:'DM Sans',sans-serif;font-size:11.5px;font-weight:600;
+  cursor:pointer;white-space:nowrap;
+  transition:all .18s;
+  display:flex;align-items:center;gap:5px;
+}
+.fw-btn .fw-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.fw-btn:hover{background:var(--bg2);color:var(--t2)}
+.fw-btn.active{background:var(--bg2);color:var(--t1);box-shadow:var(--shadow-sm)}
+.fw-btn.active .fw-dot{box-shadow:0 0 0 2px color-mix(in srgb,var(--dot-color,#888) 40%,transparent)}
+
+.hdr-right{display:flex;align-items:center;gap:6px;margin-left:auto;flex-shrink:0}
+.btn{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:6px 12px;border-radius:6px;
+  border:1px solid var(--border);background:var(--bg2);
+  color:var(--t2);font-family:'DM Sans',sans-serif;
+  font-size:11.5px;font-weight:500;cursor:pointer;
+  transition:all .18s;white-space:nowrap;
+}
+.btn:hover{background:var(--bg3);color:var(--t1);border-color:var(--fw-color,#0078D4)}
+.btn-accent{background:var(--fw-color,#0078D4);color:#fff;border-color:var(--fw-color,#0078D4)}
+.btn-accent:hover{filter:brightness(1.12);color:#fff}
+.btn-icon{width:30px;height:30px;padding:0;justify-content:center;font-size:14px}
+
+/* ── MAIN ── */
+.main{max-width:1600px;margin:0 auto;padding:22px 24px 60px}
+
+/* ── OVERVIEW PAGE ── */
+.ov-page{}
+.ov-page-title{
+  font-family:'Syne',sans-serif;font-size:20px;font-weight:800;
+  color:var(--t1);margin-bottom:4px;
+}
+.ov-page-sub{font-size:12px;color:var(--t3);margin-bottom:20px}
+
+.fw-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-bottom:28px}
+.fw-card{
+  background:var(--bg2);border:1px solid var(--border);border-radius:12px;
+  padding:20px;cursor:pointer;transition:all .2s;
+  position:relative;overflow:hidden;
+}
+.fw-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:var(--card-color);
+}
+.fw-card:hover{border-color:var(--card-color);transform:translateY(-1px);box-shadow:var(--shadow)}
+.fw-card-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px}
+.fw-card-id{
+  font-family:'Syne',sans-serif;font-size:11px;font-weight:700;
+  letter-spacing:1.2px;text-transform:uppercase;
+  color:var(--card-color);margin-bottom:4px;
+}
+.fw-card-name{font-size:15px;font-weight:700;color:var(--t1)}
+.fw-card-desc{font-size:11.5px;color:var(--t3);line-height:1.45;margin-top:3px}
+.fw-card-pct{
+  font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:700;
+  color:var(--card-color);flex-shrink:0;
+}
+.fw-card-pct-label{font-size:9px;color:var(--t3);text-align:right;text-transform:uppercase;letter-spacing:.5px}
+.fw-prog{height:4px;background:var(--border);border-radius:3px;overflow:hidden;margin-top:6px}
+.fw-prog-fill{height:100%;border-radius:3px;background:var(--card-color);transition:width .6s cubic-bezier(.4,0,.2,1)}
+.fw-stat-row{display:flex;gap:12px;margin-top:14px}
+.fw-stat{text-align:center}
+.fw-stat-val{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700}
+.fw-stat-label{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px}
+
+/* Cross-framework table */
+.cross-table-wrap{
+  background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;
+  margin-bottom:28px;
+}
+.cross-table-hdr{
+  padding:14px 18px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.cross-table-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--t1)}
+table.cross-tbl{width:100%;border-collapse:collapse}
+table.cross-tbl th{
+  padding:9px 14px;font-size:10px;font-weight:600;
+  letter-spacing:.7px;text-transform:uppercase;color:var(--t3);
+  border-bottom:1px solid var(--border);text-align:left;
+  background:var(--bg1);
+}
+table.cross-tbl td{
+  padding:10px 14px;font-size:12px;
+  border-bottom:1px solid var(--border);vertical-align:middle;
+}
+table.cross-tbl tr:last-child td{border-bottom:none}
+table.cross-tbl tbody tr:hover td{background:var(--bg3)}
+.fw-badge{
+  display:inline-flex;align-items:center;gap:4px;
+  font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;
+  padding:3px 9px;border-radius:5px;
+}
+
+/* ── FRAMEWORK VIEW ── */
+.fw-view{display:none}
+.fw-view.active{display:block}
+
+.fw-view-header{
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:var(--bg2);
+  padding:18px 20px;
+  margin-bottom:16px;
+  display:flex;align-items:flex-start;justify-content:space-between;gap:16px;
+}
+.fw-view-tag{
+  font-family:'Syne',sans-serif;
+  font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
+  padding:3px 10px;border-radius:5px;display:inline-block;margin-bottom:7px;
+}
+.fw-view-name{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--t1);margin-bottom:3px}
+.fw-view-desc{font-size:12px;color:var(--t2);max-width:680px;line-height:1.5}
+.fw-view-stats{display:flex;gap:10px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end}
+.fw-stat-pill{
+  background:var(--bg3);border:1px solid var(--border);
+  border-radius:8px;padding:9px 14px;text-align:center;min-width:64px;
+}
+.fw-stat-pill-val{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700}
+.fw-stat-pill-label{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-top:1px}
+
+/* Category tabs */
+.cat-tabs{display:flex;gap:3px;margin-bottom:16px;overflow-x:auto;padding-bottom:4px;flex-wrap:nowrap}
+.cat-tab{
+  padding:7px 14px;border-radius:7px;border:1px solid transparent;
+  background:transparent;color:var(--t3);
+  font-family:'DM Sans',sans-serif;font-size:11.5px;font-weight:600;
+  cursor:pointer;white-space:nowrap;transition:all .18s;
+  display:flex;align-items:center;gap:5px;
+}
+.cat-tab:hover{background:var(--bg2);color:var(--t2)}
+.cat-tab.active{background:var(--bg2);border-color:var(--border);color:var(--t1)}
+.cat-tab-count{
+  font-family:'JetBrains Mono',monospace;font-size:9.5px;
+  padding:1px 6px;border-radius:9px;background:var(--bg0);color:var(--t3);
+}
+
+/* Category section */
+.cat-section{display:none}
+.cat-section.active{display:block}
+.cat-hdr{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  background:var(--bg2);border:1px solid var(--border);border-radius:10px;
+  padding:16px 18px;margin-bottom:12px;gap:14px;
+}
+.cat-hdr-label{
+  font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;
+  letter-spacing:1.2px;text-transform:uppercase;margin-bottom:5px;
+}
+.cat-hdr-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--t1);margin-bottom:3px}
+.cat-hdr-desc{font-size:12px;color:var(--t3);max-width:600px;line-height:1.45}
+.cat-hdr-pct{flex-shrink:0;text-align:right}
+.cat-pct-val{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700}
+.cat-pct-label{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px}
+
+/* Task rows */
+.tasks-list{display:flex;flex-direction:column;gap:7px;margin-bottom:24px}
+.task{
+  background:var(--bg2);border:1px solid var(--border);border-radius:8px;
+  padding:13px 15px;
+  display:grid;
+  grid-template-columns:20px 1fr auto auto auto;
+  align-items:start;gap:11px;
+  transition:all .18s;position:relative;overflow:hidden;
+}
+.task::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:2.5px;
+  background:var(--fw-color,#0078D4);opacity:.5;border-radius:2px 0 0 2px;
+}
+.task:hover{background:var(--bg3);border-color:var(--fw-color,#0078D4)}
+.task.done{opacity:.62}
+.task.done .task-name{text-decoration:line-through;color:var(--t3)}
+.task-cb{width:16px;height:16px;cursor:pointer;accent-color:var(--fw-color,#0078D4);margin-top:2px;flex-shrink:0}
+.task-body{min-width:0}
+.task-name{font-size:13px;font-weight:600;color:var(--t1);margin-bottom:3px;line-height:1.35}
+.task-tags{display:flex;flex-wrap:wrap;gap:5px;align-items:center;margin-bottom:4px}
+.task-ref{
+  font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.4px;
+  color:var(--t3);background:var(--bg0);padding:2px 7px;
+  border-radius:4px;border:1px solid var(--border);
+}
+.task-desc{font-size:11.5px;color:var(--t2);line-height:1.4}
+.task-status{
+  padding:5px 9px;border-radius:5px;
+  border:1px solid var(--border);background:var(--bg0);
+  color:var(--t1);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;
+  cursor:pointer;outline:none;transition:all .18s;min-width:118px;
+}
+.task-status:focus{border-color:var(--fw-color,#0078D4)}
+.task-status.ss-complete{color:var(--s-complete);border-color:color-mix(in srgb,var(--s-complete) 40%,transparent);background:var(--s-complete-bg)}
+.task-status.ss-progress{color:var(--s-progress);border-color:color-mix(in srgb,var(--s-progress) 40%,transparent);background:var(--s-progress-bg)}
+.task-status.ss-blocked{color:var(--s-blocked);border-color:color-mix(in srgb,var(--s-blocked) 40%,transparent);background:var(--s-blocked-bg)}
+.task-status.ss-pending{color:var(--t3)}
+.pbadge{
+  padding:3px 8px;border-radius:4px;font-size:9.5px;font-weight:700;
+  letter-spacing:.5px;text-transform:uppercase;white-space:nowrap;align-self:start;
+}
+.pb-high{color:var(--p-high);background:var(--p-high-bg)}
+.pb-med{color:var(--p-med);background:var(--p-med-bg)}
+.pb-low{color:var(--p-low);background:var(--p-low-bg)}
+.task-notes{
+  width:100%;padding:5px 8px;border-radius:5px;
+  border:1px solid var(--border);background:var(--bg0);color:var(--t1);
+  font-family:'DM Sans',sans-serif;font-size:11px;
+  resize:vertical;min-height:34px;outline:none;transition:border-color .18s;
+  line-height:1.4;min-width:180px;max-width:260px;
+}
+.task-notes:focus{border-color:var(--fw-color,#0078D4)}
+.task-notes::placeholder{color:var(--t4)}
+
+/* ── MODAL ── */
+.overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,.7);z-index:500;
+  align-items:center;justify-content:center;backdrop-filter:blur(5px);
+}
+.overlay.open{display:flex}
+.modal{
+  background:var(--bg2);border:1px solid var(--border2);border-radius:14px;
+  padding:26px;max-width:600px;width:92%;
+  box-shadow:var(--shadow);animation:modal-in .2s ease;
+}
+@keyframes modal-in{from{opacity:0;transform:scale(.96) translateY(6px)}to{opacity:1;transform:none}}
+.modal-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--t1);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.modal-body{margin-bottom:18px}
+.modal-body pre{
+  background:var(--bg0);border:1px solid var(--border);border-radius:8px;
+  padding:14px;font-family:'JetBrains Mono',monospace;font-size:10.5px;
+  color:var(--t2);max-height:340px;overflow-y:auto;white-space:pre-wrap;word-break:break-word;
+}
+.modal-footer{display:flex;gap:7px;justify-content:flex-end}
+.exp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.exp-card{
+  background:var(--bg0);border:1px solid var(--border);border-radius:9px;
+  padding:16px 12px;cursor:pointer;text-align:center;transition:all .18s;
+}
+.exp-card:hover{border-color:var(--fw-color,#0078D4);background:color-mix(in srgb,var(--fw-color,#0078D4) 6%,transparent)}
+.exp-card-icon{font-size:20px;margin-bottom:7px}
+.exp-card-label{font-size:12px;font-weight:600;color:var(--t1);margin-bottom:2px}
+.exp-card-desc{font-size:10px;color:var(--t3)}
+
+/* ── TOAST ── */
+.toast{
+  position:fixed;bottom:22px;right:22px;
+  background:var(--bg2);border:1px solid var(--border2);border-radius:9px;
+  padding:11px 17px;display:flex;align-items:center;gap:9px;
+  font-size:13px;font-weight:500;box-shadow:var(--shadow);z-index:600;
+  transform:translateY(70px);opacity:0;transition:all .28s cubic-bezier(.4,0,.2,1);
+}
+.toast.show{transform:translateY(0);opacity:1}
+
+/* ── UTIL ── */
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hdr">
+    <div class="hdr-logo">
+      <div class="hdr-logo-icon" id="logoIcon">🛡️</div>
+      <div>
+        <div class="hdr-brand">MDE Audit Tracker</div>
+        <div class="hdr-sub">Microsoft Security · MSSP</div>
+      </div>
+    </div>
+
+    <div class="fw-switcher" id="fwSwitcher"></div>
+
+    <div class="hdr-right">
+      <button class="btn" onclick="openExport()">⬆ Export</button>
+      <button class="btn btn-accent" id="jsonBtn" onclick="openJSON()">{ } JSON</button>
+      <button class="btn btn-icon" id="themeBtn" onclick="toggleTheme()">🌙</button>
+    </div>
+  </div>
+</header>
+
+<div class="main" id="mainArea"></div>
+
+<!-- EXPORT MODAL -->
+<div class="overlay" id="exportOverlay">
+  <div class="modal">
+    <div class="modal-title">⬆ Export Options</div>
+    <div class="modal-body">
+      <div class="exp-grid">
+        <div class="exp-card" onclick="doExportCSV()"><div class="exp-card-icon">📄</div><div class="exp-card-label">CSV</div><div class="exp-card-desc">Tasks with status & notes</div></div>
+        <div class="exp-card" onclick="doExportHTML()"><div class="exp-card-icon">🌐</div><div class="exp-card-label">HTML Report</div><div class="exp-card-desc">Printable audit report</div></div>
+        <div class="exp-card" onclick="doExportJSON()"><div class="exp-card-icon">{ }</div><div class="exp-card-label">JSON Config</div><div class="exp-card-desc">Full structured config</div></div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn" onclick="closeOverlay('exportOverlay')">Close</button></div>
+  </div>
+</div>
+
+<!-- JSON MODAL -->
+<div class="overlay" id="jsonOverlay">
+  <div class="modal">
+    <div class="modal-title">{ } JSON Configuration</div>
+    <div class="modal-body"><pre id="jsonPre"></pre></div>
+    <div class="modal-footer">
+      <button class="btn" onclick="copyJSON()">📋 Copy</button>
+      <button class="btn btn-accent" onclick="doExportJSON()">⬇ Download</button>
+      <button class="btn" onclick="closeOverlay('jsonOverlay')">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ════════════════════════════════════════════
+//  FRAMEWORK DATA
+// ════════════════════════════════════════════
+const FW = {
+  overview: {
+    id: 'overview', label: 'Overview', dot: '#8b9fc0', emoji: '📊',
+    shortName: 'Overview'
+  },
+
+  /* ── NIST CSF 2.0 ── */
+  csf: {
+    id: 'csf', label: 'NIST CSF 2.0', shortName: 'CSF 2.0', dot: '#0078D4', color: '#0078D4', gradient: 'var(--csf-g)',
+    emoji: '🔵',
+    desc: 'NIST Cybersecurity Framework 2.0 — maps Microsoft Defender for Endpoint deployment across all six CSF functions: Govern, Identify, Protect, Detect, Respond, and Recover.',
+    cats: [
+      { id:'GV', name:'GOVERN', emoji:'⚙️', desc:'Establish and monitor cybersecurity risk strategy, RBAC, licensing, and governance policy aligned to MDE tenancy controls.',
+        tasks:[
+          {id:'GV-01',name:'Assign & Validate MDE Plan 2 Licenses',ref:'GV.OC-01',pri:'high',desc:'Confirm E5/M365 Defender for Endpoint Plan 2 licenses assigned to all in-scope users/devices via M365 Admin Center.'},
+          {id:'GV-02',name:'Define Security Admin & Reader RBAC Roles',ref:'GV.OC-02',pri:'high',desc:'Assign Security Administrator and Security Reader roles in Entra ID for SOC team members using least privilege principle.'},
+          {id:'GV-03',name:'Configure Custom Roles in MDE RBAC',ref:'GV.OC-02',pri:'med',desc:'Create custom RBAC roles in Defender portal > Settings > Permissions > Roles for analyst tiering and device group scope.'},
+          {id:'GV-04',name:'Establish Device Groups & Tagging Strategy',ref:'GV.OC-03',pri:'high',desc:'Define device groups (Servers, Workstations, VIP) in Defender portal for scoped policy and investigation access control.'},
+          {id:'GV-05',name:'Document MDE Governance Policy',ref:'GV.PO-01',pri:'med',desc:'Create internal policy document covering MDE scope, RBAC assignments, alert handling SLAs, and escalation procedures.'},
+          {id:'GV-06',name:'Capture Secure Score Baseline',ref:'GV.RM-01',pri:'med',desc:'Record initial Secure Score from Defender portal as pre-deployment risk baseline. Document current posture snapshot.'},
+          {id:'GV-07',name:'Enable Tenant-Level MDE Settings',ref:'GV.OC-01',pri:'high',desc:'Configure: EDR in block mode, deception, SIEM export toggle, endpoint alert sharing. Review all advanced features tab.'},
+          {id:'GV-08',name:'Configure Security Notification Emails',ref:'GV.OC-05',pri:'low',desc:'Set up alert email notifications for security operations team in Defender portal > Settings > Email Notifications.'},
+        ]},
+      { id:'ID', name:'IDENTIFY', emoji:'🔍', desc:'Understand organizational assets, vulnerabilities, and risks through MDE device inventory, TVM, and continuous asset discovery.',
+        tasks:[
+          {id:'ID-01',name:'Onboard Windows 10/11 Devices via GPO',ref:'ID.AM-01',pri:'high',desc:'Deploy MDE onboarding package to Windows endpoints via Group Policy Object. Verify sensor heartbeat in Devices inventory.'},
+          {id:'ID-02',name:'Onboard Windows Server 2016/2019/2022',ref:'ID.AM-01',pri:'high',desc:'Deploy MDE unified agent on Windows Servers. For 2012 R2/2016 use modern unified agent. Verify AV-MDE coexistence.'},
+          {id:'ID-03',name:'Onboard Linux Endpoints (MDATP)',ref:'ID.AM-01',pri:'high',desc:'Deploy MDE on Linux via mdatp CLI or Ansible/Chef. Configure exclusions for high-I/O processes. Validate telemetry.'},
+          {id:'ID-04',name:'Onboard macOS Devices',ref:'ID.AM-01',pri:'med',desc:'Deploy MDE on macOS via Intune, JAMF Pro, or manual package. Grant system extensions and Full Disk Access via MDM.'},
+          {id:'ID-05',name:'Configure Device Inventory View',ref:'ID.AM-01',pri:'med',desc:'Customize Devices inventory columns (OS, risk level, onboarding status). Set filters per device group. Audit inactive devices.'},
+          {id:'ID-06',name:'Enable Threat & Vulnerability Management (TVM)',ref:'ID.RA-01',pri:'high',desc:'Activate TVM. Review Exposure Score, security recommendations, software inventory. Configure scheduled discovery scans.'},
+          {id:'ID-07',name:'Enable Network Device Discovery',ref:'ID.AM-03',pri:'med',desc:'Enable network discovery in MDE to map unmanaged devices and IoT assets. Configure discovery device (probe) schedule.'},
+          {id:'ID-08',name:'Enable Software Inventory & EOS Tracking',ref:'ID.AM-02',pri:'med',desc:'Review software inventory for end-of-support products in TVM. Configure alerts for newly discovered vulnerable software.'},
+          {id:'ID-09',name:'Tag Devices by Criticality & Business Unit',ref:'ID.AM-04',pri:'low',desc:'Apply device tags via MDE API, registry, or Intune policy to label criticality (Critical/High/Medium) and business owner.'},
+          {id:'ID-10',name:'Integrate MDE with Entra Device Compliance',ref:'ID.AM-04',pri:'med',desc:'Connect MDE device risk signal to Intune/Entra Conditional Access for device-level compliance enforcement.'},
+        ]},
+      { id:'PR', name:'PROTECT', emoji:'🔒', desc:'Implement preventive safeguards via MDE: ASR rules, NGAV, network/web protection, device control, and security baselines.',
+        tasks:[
+          {id:'PR-01',name:'Configure NGAV — Cloud Protection High',ref:'PR.PS-01',pri:'high',desc:'Set cloud-delivered protection to High, real-time protection enabled. Configure PUA protection, MAPS, auto-sample submission.'},
+          {id:'PR-02',name:'Deploy ASR Rules in Audit Mode',ref:'PR.PS-01',pri:'high',desc:'Deploy all ASR rules in Audit mode. Review rule hits in MDE > Reports > ASR for minimum 2 weeks before block enforcement.'},
+          {id:'PR-03',name:'Promote Critical ASR Rules to Block Mode',ref:'PR.PS-01',pri:'high',desc:'Enforce: Block Office macros, Block LSASS credential stealing, Block abuse of exploited vulnerable signed drivers.'},
+          {id:'PR-04',name:'Enable Network Protection — Block Mode',ref:'PR.AA-05',pri:'high',desc:'Set Network Protection to Block mode via Intune/GPO. Protects against web threats, phishing, and C2 IPs at kernel level.'},
+          {id:'PR-05',name:'Configure Web Content Filtering (WCF)',ref:'PR.AA-05',pri:'med',desc:'Create WCF policy in Defender portal. Block Adult, Gambling, Malicious categories. Assign policy per device group.'},
+          {id:'PR-06',name:'Configure Device Control (USB/Removable Media)',ref:'PR.DS-01',pri:'med',desc:'Deploy device control policy to block/audit unauthorized USB. Define allow-list for approved device IDs/vendor IDs.'},
+          {id:'PR-07',name:'Enable Controlled Folder Access (CFA)',ref:'PR.DS-01',pri:'med',desc:'Enable CFA for ransomware protection. Deploy audit mode first, identify blocked apps, then enforce block mode.'},
+          {id:'PR-08',name:'Enforce Windows Defender Firewall via Intune',ref:'PR.PS-02',pri:'med',desc:'Apply Intune Endpoint Security firewall policy. Baseline: block unsolicited inbound, allow outbound. Enable event logging.'},
+          {id:'PR-09',name:'Enable Tamper Protection (Tenant-Level)',ref:'PR.PS-01',pri:'high',desc:'Enable Tamper Protection via Intune Security Baselines or Defender portal (tenant-level). Prevents AV/EDR disabling.'},
+          {id:'PR-10',name:'Deploy Microsoft Security Baselines (Intune)',ref:'PR.PS-02',pri:'high',desc:'Deploy Microsoft Security Baseline for Windows 10/11, Edge, and MDE via Intune compliance policies. Document deviations.'},
+          {id:'PR-11',name:'Enable BitLocker via Endpoint Security',ref:'PR.DS-02',pri:'med',desc:'Configure BitLocker policy via Intune Endpoint Security > Disk Encryption. Enforce XTS-AES 256 on OS and data drives.'},
+          {id:'PR-12',name:'Conditional Access — Device Compliance Policy',ref:'PR.AA-03',pri:'high',desc:'Configure Entra Conditional Access requiring MDE device risk ≤ Medium for access to corporate resources.'},
+        ]},
+      { id:'DE', name:'DETECT', emoji:'📡', desc:'Identify cybersecurity events via MDE EDR, behavioral analytics, Advanced Hunting, and Microsoft Sentinel integration.',
+        tasks:[
+          {id:'DE-01',name:'Validate EDR Sensor Connectivity',ref:'DE.CM-01',pri:'high',desc:'Confirm all onboarded devices report Active in Defender portal. Create automated alert for devices Inactive > 7 days.'},
+          {id:'DE-02',name:'Configure Alert Severity & Suppression Rules',ref:'DE.AE-02',pri:'high',desc:'Review and tune default alert severity mappings. Create suppression rules for known false positives per device group.'},
+          {id:'DE-03',name:'Enable EDR in Block Mode',ref:'DE.CM-01',pri:'high',desc:'Enable EDR in Block mode for devices with third-party AV as primary. Blocks malicious artifacts based on EDR behavior.'},
+          {id:'DE-04',name:'Build Advanced Hunting Custom Detections (KQL)',ref:'DE.CM-06',pri:'high',desc:'Create custom detection rules in Advanced Hunting using KQL for environment-specific TTPs. Schedule hourly minimum.'},
+          {id:'DE-05',name:'Integrate MDE with Microsoft Sentinel',ref:'DE.CM-09',pri:'high',desc:'Connect MDE to Sentinel via Microsoft Defender XDR connector. Configure analytics rules, UEBA, and incident correlation.'},
+          {id:'DE-06',name:'Enable Behavioral Anomaly & Deception Alerts',ref:'DE.AE-04',pri:'med',desc:'Enable Defender XDR Deception capability for lateral movement detection. Review identity behavioral analytics alerts.'},
+          {id:'DE-07',name:'Configure Threat Analytics Monitoring',ref:'DE.AE-02',pri:'med',desc:'Subscribe to Threat Analytics reports. Configure email digests for analyst-level threat intelligence briefings.'},
+          {id:'DE-08',name:'Create TVM Vulnerability Alert Rules',ref:'DE.CM-07',pri:'med',desc:'Set up TVM-based alerts for critical CVEs (CVSS ≥9.0) and exposed devices. Route via Sentinel or email notification.'},
+          {id:'DE-09',name:'Configure Deception Honeytokens',ref:'DE.CM-06',pri:'low',desc:'Enable Defender Deception (MDE + Defender for Identity) to detect credential theft and lateral movement TTPs.'},
+          {id:'DE-10',name:'Establish Detection KPIs (MTTD / FP Rate)',ref:'DE.AE-07',pri:'med',desc:'Define detection KPIs: MTTD, alert volume by severity, false-positive rate. Export to Power BI or Sentinel Workbook.'},
+        ]},
+      { id:'RS', name:'RESPOND', emoji:'⚡', desc:'Contain and eradicate threats using MDE AIR, Live Response, device isolation, and automated response playbooks.',
+        tasks:[
+          {id:'RS-01',name:'Configure Automated Investigation & Remediation',ref:'RS.MA-04',pri:'high',desc:'Set AIR automation level: Full remediation for low-risk device groups, Semi-auto for critical servers. Review pending actions.'},
+          {id:'RS-02',name:'Enable & Configure Live Response',ref:'RS.MA-02',pri:'high',desc:'Enable Live Response in Defender settings. Populate Live Response library with remediation scripts. Restrict to Security Admin.'},
+          {id:'RS-03',name:'Define Device Isolation Workflow',ref:'RS.MA-01',pri:'high',desc:'Document and test Full/Selective isolation workflow. Define approval process for production server isolation.'},
+          {id:'RS-04',name:'Configure Incident Escalation Matrix',ref:'RS.CO-02',pri:'high',desc:'Define escalation chain: L1 → L2 → SOC Manager → CISO for Critical incidents. Set SLAs: Critical 1hr, High 4hr.'},
+          {id:'RS-05',name:'Integrate Ticketing System (ServiceNow/Jira)',ref:'RS.CO-03',pri:'med',desc:'Configure Defender XDR auto-ticket creation in ITSM via Logic App or Power Automate on High/Critical incidents.'},
+          {id:'RS-06',name:'Create Response Playbooks (Top 5 Scenarios)',ref:'RS.MA-05',pri:'med',desc:'Document and test playbooks: ransomware, credential theft, lateral movement, phishing, supply chain compromise.'},
+          {id:'RS-07',name:'Run Simulated Attack Scenarios',ref:'RS.MA-03',pri:'med',desc:'Execute Defender Attack Simulator scenarios: Credential Harvest, Malware Attachment, Drive-by URL. Review detections.'},
+          {id:'RS-08',name:'Build Power Automate Response Flows',ref:'RS.MA-04',pri:'low',desc:'Automate: isolate device on Critical alert, block IOC, notify SOC Teams/Slack channel via Power Automate.'},
+        ]},
+      { id:'RC', name:'RECOVER', emoji:'🔄', desc:'Restore operations after incidents using MDE remediation workflows, Secure Score improvement, and post-incident analysis.',
+        tasks:[
+          {id:'RC-01',name:'Define Device Remediation & Release Workflow',ref:'RC.RP-01',pri:'high',desc:'Document formal process for reviewing investigation evidence, approving remediation, and releasing isolated devices.'},
+          {id:'RC-02',name:'Configure Action Center Review Cadence',ref:'RC.RP-02',pri:'high',desc:'Establish daily Action Center review for pending remediation. SLA: 4hr approval for Critical, 24hr for High findings.'},
+          {id:'RC-03',name:'Establish Post-Incident Review Template',ref:'RC.CO-04',pri:'med',desc:'Create PIR template: root cause, timeline, containment actions, IOCs, Secure Score impact, control gap identification.'},
+          {id:'RC-04',name:'Secure Score Monthly Improvement Plan',ref:'RC.IM-02',pri:'med',desc:'Review Secure Score recommendations monthly. Assign remediation tasks to device/system owners with target completion dates.'},
+          {id:'RC-05',name:'Threat Analytics Recovery Guidance Review',ref:'RC.CO-03',pri:'low',desc:'Review Threat Analytics reports for active threats with recommended mitigations. Track mitigation % per threat report.'},
+          {id:'RC-06',name:'Quarterly MDE Deployment Health Review',ref:'RC.IM-01',pri:'med',desc:'Quarterly review: device coverage %, sensor health, alert trend, policy compliance rate, TVM exposure score trend.'},
+          {id:'RC-07',name:'Enable Microsoft Defender Experts (if licensed)',ref:'RC.CO-02',pri:'low',desc:'If MDE Expert tier licensed, configure Defender Experts for Hunting or XDR managed service as third-tier escalation.'},
+        ]}
+    ]
+  },
+
+  /* ── CYBER ESSENTIALS ── */
+  ce: {
+    id: 'ce', label: 'Cyber Essentials', shortName: 'CE', dot: '#16a34a', color: '#16a34a', gradient: 'var(--ce-g)',
+    emoji: '🟢',
+    desc: 'UK government-backed Cyber Essentials scheme — five technical controls mapped to Microsoft Defender for Endpoint configurations covering firewalls, secure configuration, access control, malware protection, and patch management.',
+    cats: [
+      { id:'FW', name:'FIREWALLS', emoji:'🔥', desc:'Boundary firewalls and internet gateways. Ensure only necessary and secure network services are accessible from the internet. MDE enforces host-based firewall and network-layer filtering.',
+        tasks:[
+          {id:'CE-FW-01',name:'Configure Windows Defender Firewall via Intune',ref:'CE:Firewalls',pri:'high',desc:'Deploy Endpoint Security > Firewall policy: block unsolicited inbound connections. Enable logging for dropped packets. Apply to all device groups.'},
+          {id:'CE-FW-02',name:'Enable Network Protection in Block Mode',ref:'CE:Firewalls',pri:'high',desc:'Set Network Protection to Block mode via Intune/GPO. Prevents connections to malicious domains, IPs, and C2 infrastructure at kernel level.'},
+          {id:'CE-FW-03',name:'Configure Web Content Filtering (WCF)',ref:'CE:Firewalls',pri:'high',desc:'Create WCF policy blocking Malicious, High Risk, and Illegal categories. Assign policy to all device groups. Review block logs weekly.'},
+          {id:'CE-FW-04',name:'Enable SmartScreen DNS & URL Filtering',ref:'CE:Firewalls',pri:'med',desc:'Ensure Microsoft Defender SmartScreen is enabled for Edge and Windows to block phishing URLs and malicious file downloads.'},
+          {id:'CE-FW-05',name:'Document Approved Inbound Services per Group',ref:'CE:Firewalls',pri:'med',desc:'Audit and document all approved inbound network services per device group. Any non-standard ports require formal justification and approval.'},
+          {id:'CE-FW-06',name:'Harden Server Firewall Rules (Servers Group)',ref:'CE:Firewalls',pri:'med',desc:'Apply restrictive inbound rules for server device group: allow only management ports (RDP/443/5985) from approved management subnets.'},
+        ]},
+      { id:'SC', name:'SECURE CONFIGURATION', emoji:'🔧', desc:'Ensure devices and software are configured securely by removing unnecessary software and applying security settings. MDE baselines, ASR rules, and tamper protection are key controls.',
+        tasks:[
+          {id:'CE-SC-01',name:'Deploy Windows 10/11 Security Baseline (Intune)',ref:'CE:SecConfig',pri:'high',desc:'Apply Microsoft Security Baseline for Windows 10/11 via Intune. Review and document all deviations from baseline with business justification.'},
+          {id:'CE-SC-02',name:'Deploy Windows Server Security Baseline',ref:'CE:SecConfig',pri:'high',desc:'Apply Microsoft Security Baseline for Windows Server via Intune. Verify baseline compliance reporting in Intune dashboard.'},
+          {id:'CE-SC-03',name:'Enable Tamper Protection (All Devices)',ref:'CE:SecConfig',pri:'high',desc:'Enable Tamper Protection via Intune Security Baselines at tenant level. Prevents unauthorized modification of Defender AV and EDR settings.'},
+          {id:'CE-SC-04',name:'Disable Unnecessary Services via Policy',ref:'CE:SecConfig',pri:'high',desc:'Via Intune, disable: Print Spooler (non-print servers), Remote Registry, Telnet, FTP client. Document all disabled services.'},
+          {id:'CE-SC-05',name:'Enable Controlled Folder Access (CFA)',ref:'CE:SecConfig',pri:'med',desc:'Enable CFA via Intune. Deploy audit mode for 2 weeks to identify legitimate blocked apps, then enforce block mode.'},
+          {id:'CE-SC-06',name:'Configure ASR Rule — Block Office Macros',ref:'CE:SecConfig',pri:'high',desc:'Enforce ASR rule: "Block all Office applications from creating child processes" and "Block Office macro content from the internet".'},
+          {id:'CE-SC-07',name:'Disable AutoRun / AutoPlay via Policy',ref:'CE:SecConfig',pri:'med',desc:'Configure Intune policy to disable AutoRun and AutoPlay on all removable media and CD/DVD drives across all device groups.'},
+          {id:'CE-SC-08',name:'Enforce Screen Lock Timeout (≤15 min)',ref:'CE:SecConfig',pri:'med',desc:'Apply Intune device configuration policy enforcing screen lock after max 15 minutes inactivity, requiring authentication to unlock.'},
+        ]},
+      { id:'UAC', name:'USER ACCESS CONTROL', emoji:'👤', desc:'Control who has access to applications and devices, and their privilege level. MDE RBAC, Conditional Access, Credential Guard, and privileged access controls map to this requirement.',
+        tasks:[
+          {id:'CE-UAC-01',name:'Enforce MFA for All Users (Conditional Access)',ref:'CE:AccessControl',pri:'high',desc:'Configure Entra Conditional Access policy requiring MFA for all users accessing corporate resources. No exclusions without documented exception.'},
+          {id:'CE-UAC-02',name:'Implement Separate Admin & User Accounts',ref:'CE:AccessControl',pri:'high',desc:'Enforce policy requiring separate admin accounts for privileged tasks. Standard user accounts must not have local admin rights. Audit via MDE TVM.'},
+          {id:'CE-UAC-03',name:'Configure MDE RBAC — Least Privilege',ref:'CE:AccessControl',pri:'high',desc:'Assign only required MDE roles per analyst tier. No users assigned Security Administrator role without documented justification.'},
+          {id:'CE-UAC-04',name:'Enable Credential Guard via Intune',ref:'CE:AccessControl',pri:'high',desc:'Deploy Credential Guard via Intune Device Configuration > Identity Protection. Protects derived domain credentials from theft.'},
+          {id:'CE-UAC-05',name:'Audit & Disable Unused Accounts (Entra)',ref:'CE:AccessControl',pri:'med',desc:'Review Entra ID for accounts inactive > 30 days. Disable or remove. MDE device tag strategy should align to account lifecycle.'},
+          {id:'CE-UAC-06',name:'Define PAW Device Group in MDE',ref:'CE:AccessControl',pri:'med',desc:'Create Privileged Access Workstation device group in MDE with elevated monitoring and stricter ASR/policy enforcement settings.'},
+        ]},
+      { id:'MP', name:'MALWARE PROTECTION', emoji:'🦠', desc:'Protect against malware with anti-malware tools and controls to prevent, detect, and respond to infection. MDE NGAV, behavioral monitoring, and EDR are core controls.',
+        tasks:[
+          {id:'CE-MP-01',name:'Enable NGAV — Cloud Protection (High+)',ref:'CE:Malware',pri:'high',desc:'Set Microsoft Defender AV cloud-delivered protection to High. Enable real-time protection, automatic sample submission, and behavior monitoring.'},
+          {id:'CE-MP-02',name:'Configure MAPS (Microsoft Active Protection)',ref:'CE:Malware',pri:'high',desc:'Enable MAPS membership (Advanced level) via Intune/GPO. Ensures real-time cloud lookups for unknown files during execution.'},
+          {id:'CE-MP-03',name:'Enable PUA (Potentially Unwanted App) Protection',ref:'CE:Malware',pri:'med',desc:'Configure PUA protection to Block mode via Intune. Prevents installation of adware, coin miners, and browser-modifying software.'},
+          {id:'CE-MP-04',name:'Enable Behavioral Monitoring',ref:'CE:Malware',pri:'high',desc:'Confirm behavioral monitoring is enabled in Defender AV policy. Detects suspicious runtime behaviors not caught by signature-based AV.'},
+          {id:'CE-MP-05',name:'Configure Scheduled Full Scan (Weekly)',ref:'CE:Malware',pri:'med',desc:'Configure weekly off-hours full scan via Intune Antivirus policy. Quick scans run daily. Review scan results in Defender dashboard.'},
+          {id:'CE-MP-06',name:'Validate 100% MDE Sensor Coverage',ref:'CE:Malware',pri:'high',desc:'Audit device inventory for ungoverned/unmanaged devices. Target 100% sensor Active status across all in-scope device groups.'},
+        ]},
+      { id:'PU', name:'PATCH MANAGEMENT', emoji:'📦', desc:'Keep devices and software up to date with the latest security patches. Patches for critical vulnerabilities must be applied within 14 days. MDE TVM and Windows Update for Business are key controls.',
+        tasks:[
+          {id:'CE-PU-01',name:'Enable TVM Vulnerability Tracking in MDE',ref:'CE:Patching',pri:'high',desc:'Activate Defender TVM. Review Exposure Score dashboard and software vulnerability inventory. Set priority by CVSS and device criticality.'},
+          {id:'CE-PU-02',name:'Configure Windows Update for Business (7-day OS)',ref:'CE:Patching',pri:'high',desc:'Deploy WUfB policy via Intune: OS security updates deploy within 7 days of release. Critical patches within 14 days. No deferral for security.'},
+          {id:'CE-PU-03',name:'Set TVM Alerts for Critical CVEs (14-day SLA)',ref:'CE:Patching',pri:'high',desc:'Create TVM alert rule: notify when CVSS ≥9.0 CVE affects in-scope devices. Set 14-day remediation SLA per CE requirements.'},
+          {id:'CE-PU-04',name:'Monitor EOS Software Inventory via TVM',ref:'CE:Patching',pri:'med',desc:'Review TVM software inventory for end-of-support (EOS) products. Escalate EOS findings to asset owner with 30-day remediation target.'},
+          {id:'CE-PU-05',name:'Establish Monthly Patch Review Cadence',ref:'CE:Patching',pri:'med',desc:'Schedule monthly patch review meeting. Use TVM Recommendations report as agenda. Track remediation closure rate as KPI.'},
+        ]}
+    ]
+  },
+
+  /* ── SOC 2 ── */
+  soc2: {
+    id: 'soc2', label: 'SOC 2', shortName: 'SOC 2', dot: '#7c3aed', color: '#7c3aed', gradient: 'var(--soc-g)',
+    emoji: '🟣',
+    desc: 'AICPA SOC 2 Trust Service Criteria — maps Microsoft Defender for Endpoint controls to Common Criteria (CC1–CC9) supporting Security, Availability, Confidentiality, and related trust commitments.',
+    cats: [
+      { id:'CC1', name:'CONTROL ENVIRONMENT', emoji:'🏛️', desc:'The overall governance, commitment to competence, assignment of authority and responsibility, and management\'s operating style as they relate to security controls.',
+        tasks:[
+          {id:'SOC-CC1-01',name:'Document MDE RBAC Roles & Responsibilities',ref:'CC1.1',pri:'high',desc:'Create formal RACI document for MDE operations: role definitions, access levels, and named owners for Security Administrator, Analyst, and Reader roles.'},
+          {id:'SOC-CC1-02',name:'Assign Named Security Officers for MDE',ref:'CC1.2',pri:'high',desc:'Formally designate accountable individuals for MDE operations (CISO/Security Manager). Document accountability chain in governance policy.'},
+          {id:'SOC-CC1-03',name:'Establish & Publish MDE Security Policy',ref:'CC1.3',pri:'med',desc:'Create documented and approved security policy governing MDE deployment, alert handling, data access, and retention. Review annually.'},
+        ]},
+      { id:'CC2', name:'COMMUNICATION & INFORMATION', emoji:'📢', desc:'Information identified, captured, processed, and reported to support the entity\'s commitment to security and availability.',
+        tasks:[
+          {id:'SOC-CC2-01',name:'Configure Alert Notification Emails (SOC Team)',ref:'CC2.1',pri:'high',desc:'Set up email notifications for High/Critical MDE alerts targeting SOC team distribution list. Test delivery and confirm receipt logging.'},
+          {id:'SOC-CC2-02',name:'Build Sentinel Incident Reporting Workbook',ref:'CC2.2',pri:'med',desc:'Create Sentinel workbook for executive/stakeholder incident reporting: incident counts, severity trends, MTTD/MTTR, top alerts.'},
+          {id:'SOC-CC2-03',name:'Document Security Incident Communication Procedures',ref:'CC2.3',pri:'med',desc:'Define and publish procedures for communicating security incidents to stakeholders, customers (if applicable), and regulatory bodies.'},
+        ]},
+      { id:'CC3', name:'RISK ASSESSMENT', emoji:'⚖️', desc:'Processes to identify and analyze relevant risks to achieving the entity\'s objectives and forming a basis for determining how they should be managed.',
+        tasks:[
+          {id:'SOC-CC3-01',name:'Complete Initial TVM Exposure Score Baseline',ref:'CC3.1',pri:'high',desc:'Document initial TVM Exposure Score, top 10 TVM recommendations, and software vulnerability count as formal risk assessment baseline.'},
+          {id:'SOC-CC3-02',name:'Document Risk Acceptance Criteria for TVM Findings',ref:'CC3.2',pri:'high',desc:'Define and document formal risk acceptance criteria: which vulnerability classes can be accepted vs. must be remediated. Requires CISO approval.'},
+          {id:'SOC-CC3-03',name:'Schedule Quarterly Risk Assessments via Secure Score',ref:'CC3.3',pri:'med',desc:'Conduct quarterly risk assessments using MDE Secure Score and TVM Exposure Score trends. Document findings and remediation commitments.'},
+        ]},
+      { id:'CC4', name:'MONITORING ACTIVITIES', emoji:'👁️', desc:'Ongoing and separate evaluations to ascertain whether controls are present and functioning. Monitoring includes both continuous and periodic evaluation activities.',
+        tasks:[
+          {id:'SOC-CC4-01',name:'Enable Continuous EDR Sensor Health Monitoring',ref:'CC4.1',pri:'high',desc:'Configure MDE sensor health dashboard alerts. Create automated report for devices with sensor issues > 24 hours. Review weekly.'},
+          {id:'SOC-CC4-02',name:'Configure Sentinel Analytics Rules (Anomaly Detection)',ref:'CC4.2',pri:'high',desc:'Deploy Sentinel analytics rules for anomaly detection: impossible travel, new admin account, first-time process execution, lateral movement.'},
+          {id:'SOC-CC4-03',name:'Establish Monthly Secure Score Review Process',ref:'CC4.3',pri:'med',desc:'Define monthly Secure Score review cadence with documented outcomes. Track score changes month-over-month as monitoring evidence.'},
+        ]},
+      { id:'CC5', name:'CONTROL ACTIVITIES', emoji:'🎛️', desc:'Actions established through policies and procedures to achieve the entity\'s objectives and respond to risks, including controls over technology.',
+        tasks:[
+          {id:'SOC-CC5-01',name:'Deploy ASR Rules Policy & Document Exceptions',ref:'CC5.1',pri:'high',desc:'Deploy ASR rules via Intune policy. Maintain documented exception register with business justification for any rules not in Block mode.'},
+          {id:'SOC-CC5-02',name:'Configure Device Compliance Policy (Conditional Access)',ref:'CC5.2',pri:'high',desc:'Configure Intune compliance policy with MDE device risk score requirement. Non-compliant devices blocked from corporate resources via CA.'},
+          {id:'SOC-CC5-03',name:'Document Change Management Process for MDE Policies',ref:'CC5.3',pri:'med',desc:'Establish formal change management procedure for MDE policy changes: request, review, approval, testing, and deployment documentation.'},
+        ]},
+      { id:'CC6', name:'LOGICAL & PHYSICAL ACCESS', emoji:'🔑', desc:'Restrict logical access to information assets and implement controls to prevent unauthorized logical access to those assets.',
+        tasks:[
+          {id:'SOC-CC6-01',name:'Enforce MFA for MDE Portal (Conditional Access)',ref:'CC6.1',pri:'high',desc:'Configure Entra CA policy requiring MFA for all MDE portal and M365 Defender portal access. No exceptions without CISO waiver.'},
+          {id:'SOC-CC6-02',name:'Require MDE Device Compliance for Resource Access',ref:'CC6.2',pri:'high',desc:'Conditional Access policy: require device risk ≤ Medium (MDE signal) for access to corporate apps. Block non-compliant devices.'},
+          {id:'SOC-CC6-03',name:'Implement MDE RBAC — Minimum Necessary Access',ref:'CC6.3',pri:'high',desc:'Audit MDE RBAC assignments quarterly. Remove or downgrade roles no longer required. Maintain access review log as SOC 2 evidence.'},
+          {id:'SOC-CC6-04',name:'Enable PIM for Security Administrator Role',ref:'CC6.4',pri:'high',desc:'Configure Entra Privileged Identity Management for Security Administrator role. Require just-in-time activation with approval and reason.'},
+          {id:'SOC-CC6-05',name:'Audit Service Accounts with MDE API Access',ref:'CC6.5',pri:'med',desc:'Document all service principals and app registrations with MDE API permissions. Review quarterly. Rotate secrets every 90 days.'},
+        ]},
+      { id:'CC7', name:'SYSTEM OPERATIONS', emoji:'⚙️', desc:'Manage system operations to detect and respond to security events and ensure the system operates as intended for availability and security objectives.',
+        tasks:[
+          {id:'SOC-CC7-01',name:'Configure AIR Automation & Document Thresholds',ref:'CC7.1',pri:'high',desc:'Set AIR automation levels per device group. Document threshold decisions in operations runbook. Review pending actions dashboard daily.'},
+          {id:'SOC-CC7-02',name:'Establish Incident Response SLAs (Critical 1hr, High 4hr)',ref:'CC7.2',pri:'high',desc:'Formally define and publish incident response SLAs: Critical ≤1hr acknowledgement, High ≤4hr, Medium ≤24hr, Low ≤72hr.'},
+          {id:'SOC-CC7-03',name:'Configure Live Response for Authorized Responders',ref:'CC7.3',pri:'high',desc:'Enable Live Response. Restrict to named Security Admin accounts. Maintain live response session audit log in Sentinel. Test quarterly.'},
+          {id:'SOC-CC7-04',name:'Test & Document Device Isolation Workflow',ref:'CC7.4',pri:'med',desc:'Run quarterly device isolation test (non-production). Document execution steps, approvals, and release checklist. Keep as SOC 2 evidence.'},
+          {id:'SOC-CC7-05',name:'Document Backup & Recovery for MDE Configurations',ref:'CC7.5',pri:'med',desc:'Export MDE configuration (JSON) to secure version-controlled repository monthly. Document recovery procedure for policy and setting restoration.'},
+        ]},
+      { id:'CC8', name:'CHANGE MANAGEMENT', emoji:'🔄', desc:'Manage changes to infrastructure and systems to maintain the integrity and availability of systems throughout the change process.',
+        tasks:[
+          {id:'SOC-CC8-01',name:'Baseline MDE Policy Config in Version Control',ref:'CC8.1',pri:'high',desc:'Store exported MDE JSON config in git repository. Track all policy changes via commits with author, date, and business justification.'},
+          {id:'SOC-CC8-02',name:'Establish Approval Workflow for MDE Policy Changes',ref:'CC8.2',pri:'high',desc:'All changes to production MDE policies require documented change request, peer review, and SOC Manager/CISO approval before deployment.'},
+          {id:'SOC-CC8-03',name:'Review Defender Portal Activity Logs in Sentinel',ref:'CC8.3',pri:'med',desc:'Enable ingestion of Defender portal admin audit logs into Sentinel. Review logs monthly for unauthorized or undocumented changes.'},
+        ]},
+      { id:'CC9', name:'RISK MITIGATION', emoji:'🛡️', desc:'Identify and manage risk to achieve the entity\'s objectives related to third-party and other relevant risk.',
+        tasks:[
+          {id:'SOC-CC9-01',name:'Review Third-Party Risk — Microsoft Cloud Dependencies',ref:'CC9.1',pri:'med',desc:'Document Microsoft cloud service dependencies (Defender portal, Sentinel, Intune). Include in third-party risk register with annual review.'},
+          {id:'SOC-CC9-02',name:'Document Data Residency & DPA for MDE',ref:'CC9.2',pri:'high',desc:'Confirm MDE data residency region. Document Microsoft Data Processing Agreement (DPA). Include in vendor management register.'},
+          {id:'SOC-CC9-03',name:'Configure MDE Integration Scope per Client Boundaries',ref:'CC9.3',pri:'med',desc:'For MSSP multi-tenant deployments, document and enforce MDE workspace boundaries. Prevent cross-tenant data leakage via RBAC scoping.'},
+        ]}
+    ]
+  },
+
+  /* ── NIST 800-53 ── */
+  n53: {
+    id: 'n53', label: 'NIST 800-53', shortName: '800-53', dot: '#ea580c', color: '#ea580c', gradient: 'var(--n53-g)',
+    emoji: '🟠',
+    desc: 'NIST SP 800-53 Rev 5 — security and privacy controls for federal information systems. Maps Microsoft Defender for Endpoint capabilities to key control families: AC, AU, CM, IA, IR, RA, SC, and SI.',
+    cats: [
+      { id:'AC', name:'ACCESS CONTROL', emoji:'🔐', desc:'Limit information system access to authorized users, processes, and devices, and to the types of transactions and functions that authorized users are permitted to exercise.',
+        tasks:[
+          {id:'N53-AC-01',name:'Implement MDE RBAC (AC-2: Account Management)',ref:'AC-2',pri:'high',desc:'Configure MDE RBAC with formal account management process: provisioning, periodic review (quarterly), and deprovisioning workflow documented.'},
+          {id:'N53-AC-02',name:'Conduct Quarterly MDE Access Review (AC-2)',ref:'AC-2 (j)',pri:'high',desc:'Perform quarterly review of all MDE portal RBAC assignments. Remove or update roles that no longer reflect current job function.'},
+          {id:'N53-AC-03',name:'Enforce Conditional Access for Portal (AC-3)',ref:'AC-3',pri:'high',desc:'Configure Entra Conditional Access enforcing access restrictions to Defender portal based on user role, device compliance, and location.'},
+          {id:'N53-AC-04',name:'Configure Remote Access Controls (AC-17)',ref:'AC-17',pri:'med',desc:'Document and configure controls for remote access via Live Response. Enforce MFA, session logging, and time-limited access via PIM.'},
+          {id:'N53-AC-05',name:'Mobile Device Access Control (AC-19)',ref:'AC-19',pri:'med',desc:'Configure Intune MDM compliance policy with MDE risk signal integration for mobile devices. Block non-compliant mobiles from corporate resources.'},
+        ]},
+      { id:'AU', name:'AUDIT & ACCOUNTABILITY', emoji:'📋', desc:'Create and protect system audit logs and ensure audit information is captured, retained, and reviewable.',
+        tasks:[
+          {id:'N53-AU-01',name:'Enable Defender Portal Admin Audit Logs (AU-2)',ref:'AU-2',pri:'high',desc:'Enable Defender portal audit logging and ingest into Sentinel/Log Analytics. Configure retention for minimum 12 months.'},
+          {id:'N53-AU-02',name:'Build KQL Audit Queries (Advanced Hunting)',ref:'AU-2',pri:'high',desc:'Create Advanced Hunting scheduled queries for audit events: admin actions, policy changes, role assignments, and investigation access.'},
+          {id:'N53-AU-03',name:'Establish Weekly Audit Log Review Process (AU-6)',ref:'AU-6',pri:'med',desc:'Define weekly audit log review cadence using Sentinel workbooks. Document review outcomes and escalate anomalies to SOC Manager.'},
+          {id:'N53-AU-04',name:'Configure Log Retention ≥12 Months (AU-9)',ref:'AU-9',pri:'high',desc:'Set Log Analytics workspace retention to minimum 12 months for all MDE telemetry. Configure archive policy for data beyond 90 days.'},
+          {id:'N53-AU-05',name:'Validate EDR Sensor Generates Required Events (AU-12)',ref:'AU-12',pri:'med',desc:'Verify MDE EDR generates required event types: process creation, network connections, file modifications, registry changes. Spot-check via KQL.'},
+        ]},
+      { id:'CM', name:'CONFIGURATION MANAGEMENT', emoji:'🔩', desc:'Establish and maintain baseline configurations and inventories of information systems, and control changes to those baseline configurations.',
+        tasks:[
+          {id:'N53-CM-01',name:'Document Approved MDE Baseline Config (CM-2)',ref:'CM-2',pri:'high',desc:'Export and version-control MDE JSON configuration as official baseline. All deployments must match baseline. Deviations require formal approval.'},
+          {id:'N53-CM-02',name:'Deploy Microsoft Security Baselines (CM-6)',ref:'CM-6',pri:'high',desc:'Apply Microsoft Security Baseline for Windows 10/11 and Server via Intune. Monitor baseline compliance in Intune dashboard. Target >95% compliance.'},
+          {id:'N53-CM-03',name:'Enforce ASR Rules as Configuration Settings (CM-6)',ref:'CM-6',pri:'high',desc:'Deploy ASR rules via Intune configuration profile. Document each rule state (Audit/Block) in baseline config register with justification.'},
+          {id:'N53-CM-04',name:'Apply Least Functionality — Disable Unused Services (CM-7)',ref:'CM-7',pri:'high',desc:'Inventory and disable unnecessary OS services via Intune. Document every disabled service and the least-functionality rationale.'},
+          {id:'N53-CM-05',name:'Monitor for Unauthorized Software via TVM (CM-11)',ref:'CM-11',pri:'med',desc:'Use TVM software inventory to detect unauthorized or unapproved applications. Set alert for new software discovered on endpoints weekly.'},
+        ]},
+      { id:'IA', name:'IDENTIFICATION & AUTHENTICATION', emoji:'🪪', desc:'Identify information system users, processes, or devices, and authenticate the identities of those entities as a prerequisite to allowing access.',
+        tasks:[
+          {id:'N53-IA-01',name:'Enforce MFA for All Portal Access (IA-2)',ref:'IA-2',pri:'high',desc:'Configure Entra CA policy requiring phishing-resistant MFA (FIDO2/Authenticator App) for all MDE portal access. Enforce for all admin roles.'},
+          {id:'N53-IA-02',name:'Configure Entra PIM for Admin Role Activation (IA-2)',ref:'IA-2 (1)',pri:'high',desc:'Require PIM just-in-time activation for Security Administrator. Set max activation time 4 hours. Require justification and approval.'},
+          {id:'N53-IA-03',name:'Enforce Service Account Password Policy (IA-5)',ref:'IA-5',pri:'med',desc:'Configure password policy for MDE API service accounts: minimum 16 chars, rotation every 90 days. Store credentials in Azure Key Vault.'},
+          {id:'N53-IA-04',name:'Certificate-Based Auth for MDE Enrollment (IA-8)',ref:'IA-8',pri:'low',desc:'Configure certificate-based authentication for device MDE enrollment via Intune SCEP/PKCS profile to validate device identity on onboarding.'},
+        ]},
+      { id:'IR', name:'INCIDENT RESPONSE', emoji:'🚨', desc:'Establish an operational incident-handling capability for organizational information systems including preparation, detection, analysis, containment, recovery, and user response activities.',
+        tasks:[
+          {id:'N53-IR-01',name:'Document & Publish MDE Incident Response Plan (IR-1)',ref:'IR-1',pri:'high',desc:'Create formal IR plan covering: preparation, detection via MDE, containment actions, eradication steps, recovery, and post-incident review.'},
+          {id:'N53-IR-02',name:'Configure AIR and Manual Response Workflows (IR-4)',ref:'IR-4',pri:'high',desc:'Configure AIR for automated handling. Document all manual response workflows for scenarios where human intervention is required (IR runbooks).'},
+          {id:'N53-IR-03',name:'Set Up Sentinel IR Dashboard (MTTD/MTTR) (IR-5)',ref:'IR-5',pri:'high',desc:'Deploy Sentinel workbook tracking: MTTD, MTTR, incident count by severity, analyst workload, closure rate. Review weekly in SOC standup.'},
+          {id:'N53-IR-04',name:'Configure Escalation Notification Chain (IR-6)',ref:'IR-6',pri:'high',desc:'Configure automated incident notifications: L1 → L2 → SOC Manager → CISO for Critical incidents. Test escalation chain quarterly.'},
+          {id:'N53-IR-05',name:'Test IR Playbooks (Tabletop + Technical) (IR-8)',ref:'IR-8',pri:'med',desc:'Conduct annual tabletop exercise using top threat scenarios. Run live technical test: simulate attack, validate detection and response chain.'},
+        ]},
+      { id:'RA', name:'RISK ASSESSMENT', emoji:'📊', desc:'Periodically assess the risk to organizational operations, organizational assets, and individuals resulting from the operation of information systems.',
+        tasks:[
+          {id:'N53-RA-01',name:'MDE Secure Score & TVM Baseline Assessment (RA-3)',ref:'RA-3',pri:'high',desc:'Conduct formal risk assessment using MDE Secure Score and TVM Exposure Score. Document findings, risk ratings, and remediation roadmap.'},
+          {id:'N53-RA-02',name:'Continuous Vulnerability Scanning via TVM (RA-5)',ref:'RA-5',pri:'high',desc:'Configure TVM for continuous vulnerability discovery. Enable authenticated scanning for servers. Set discovery frequency to daily.'},
+          {id:'N53-RA-03',name:'Define TVM Risk Response Decisions (RA-7)',ref:'RA-7',pri:'med',desc:'Document risk response decisions for TVM recommendations: Accept, Mitigate, Transfer, or Avoid. Maintain risk register with approval evidence.'},
+        ]},
+      { id:'SC', name:'SYSTEM & COMMS PROTECTION', emoji:'🌐', desc:'Monitor, control, and protect communications at external and internal boundaries, and employ architectural designs, software development techniques, and systems engineering principles promoting security.',
+        tasks:[
+          {id:'N53-SC-01',name:'Enable Network Protection — Block Mode (SC-5)',ref:'SC-5',pri:'high',desc:'Network Protection in Block mode defends against denial-of-service via web-based exploits, malicious URL access, and C2 communications.'},
+          {id:'N53-SC-02',name:'Configure WCF & DNS Filtering (SC-7)',ref:'SC-7',pri:'high',desc:'Configure Web Content Filtering as a boundary protection control. Block malicious, high-risk, and inappropriate content categories at DNS level.'},
+          {id:'N53-SC-03',name:'Enable BitLocker Full-Disk Encryption (SC-28)',ref:'SC-28',pri:'high',desc:'Deploy BitLocker policy via Intune Endpoint Security: XTS-AES 256-bit for OS drive, AES-CBC 256-bit for data drives. Escrow keys to Entra ID.'},
+          {id:'N53-SC-04',name:'Validate Process Isolation via ASR (SC-39)',ref:'SC-39',pri:'med',desc:'Enable ASR rules blocking process injection: "Block process creations originating from PSExec and WMI commands" to enforce process isolation.'},
+        ]},
+      { id:'SI', name:'SYSTEM & INFO INTEGRITY', emoji:'🔏', desc:'Identify, report, and correct information and information system flaws, and protect against malicious code at appropriate locations within the information system.',
+        tasks:[
+          {id:'N53-SI-01',name:'Configure NGAV with Cloud Protection (SI-3)',ref:'SI-3',pri:'high',desc:'Ensure NGAV is configured with cloud-delivered protection High, real-time scanning, and behavioral monitoring enabled across all device groups.'},
+          {id:'N53-SI-02',name:'Establish Patch SLA via TVM & WUfB (SI-2)',ref:'SI-2',pri:'high',desc:'Define and enforce patch SLAs: Critical 7 days, High 14 days, Medium 30 days. Track compliance via TVM and WUfB reporting in Intune.'},
+          {id:'N53-SI-03',name:'Enable Behavioral Monitoring & EDR Block Mode (SI-3)',ref:'SI-3 (1)',pri:'high',desc:'Enable EDR in Block mode and behavioral monitoring to detect and prevent malicious code execution based on behavior, not just signatures.'},
+          {id:'N53-SI-04',name:'Configure Continuous Monitoring (MDE + Sentinel) (SI-4)',ref:'SI-4',pri:'high',desc:'Deploy MDE + Sentinel integration for continuous system monitoring. Configure analytics rules for MITRE ATT&CK technique coverage reporting.'},
+          {id:'N53-SI-05',name:'Enable Tamper Protection & Code Integrity (SI-7)',ref:'SI-7',pri:'high',desc:'Tamper Protection prevents modification of MDE security settings. Enable WDAC (Windows Defender Application Control) policy on high-risk groups.'},
+        ]}
+    ]
+  }
+};
+
+// ════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════
+let STATE = {};
+let activeView = 'overview';
+let activeCat = {};
+
+function initState() {
+  const saved = localStorage.getItem('mde-multi-state-v2');
+  if (saved) { try { STATE = JSON.parse(saved); } catch(e) {} }
+  ['csf','ce','soc2','n53'].forEach(fid => {
+    if (!STATE[fid]) STATE[fid] = {};
+    FW[fid].cats.forEach(cat => {
+      cat.tasks.forEach(t => {
+        if (!STATE[fid][t.id]) STATE[fid][t.id] = { status:'pending', notes:'' };
+      });
+    });
+  });
+}
+function save() { localStorage.setItem('mde-multi-state-v2', JSON.stringify(STATE)); }
+
+// ════════════════════════════════════════════
+//  COMPUTED
+// ════════════════════════════════════════════
+function fwStats(fid) {
+  const fw = FW[fid];
+  const all = fw.cats.flatMap(c => c.tasks);
+  const total = all.length;
+  const complete = all.filter(t => STATE[fid][t.id]?.status === 'complete').length;
+  const progress = all.filter(t => STATE[fid][t.id]?.status === 'progress').length;
+  const blocked  = all.filter(t => STATE[fid][t.id]?.status === 'blocked').length;
+  const pct = total ? Math.round(complete / total * 100) : 0;
+  const hiPri = all.filter(t => t.pri === 'high' && STATE[fid][t.id]?.status !== 'complete').length;
+  return { total, complete, progress, blocked, pending: total-complete-progress-blocked, pct, hiPri };
+}
+function catStats(fid, catId) {
+  const cat = FW[fid].cats.find(c => c.id === catId);
+  if (!cat) return {};
+  const total = cat.tasks.length;
+  const complete = cat.tasks.filter(t => STATE[fid][t.id]?.status === 'complete').length;
+  const pct = total ? Math.round(complete / total * 100) : 0;
+  return { total, complete, pct };
+}
+
+// ════════════════════════════════════════════
+//  THEME
+// ════════════════════════════════════════════
+function toggleTheme() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  document.getElementById('themeBtn').textContent = isDark ? '🌙' : '☀️';
+  localStorage.setItem('mde-theme', isDark ? 'light' : 'dark');
+}
+function initTheme() {
+  const saved = localStorage.getItem('mde-theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
+  document.getElementById('themeBtn').textContent = saved === 'dark' ? '🌙' : '☀️';
+}
+
+// ════════════════════════════════════════════
+//  RENDER
+// ════════════════════════════════════════════
+function setFWColor(color) {
+  document.documentElement.style.setProperty('--fw-color', color || '#0078D4');
+}
+
+function renderSwitcher() {
+  const c = document.getElementById('fwSwitcher');
+  const fwList = ['overview','csf','ce','soc2','n53'];
+  c.innerHTML = fwList.map(fid => {
+    const fw = FW[fid];
+    const isActive = fid === activeView;
+    const dot = fw.dot || '#888';
+    return `<button class="fw-btn${isActive?' active':''}" onclick="switchFW('${fid}')" style="--dot-color:${dot}">
+      ${fid !== 'overview' ? `<span class="fw-dot" style="background:${dot}"></span>` : '📊 '}
+      ${fw.label}
+    </button>`;
+  }).join('');
+}
+
+function switchFW(fid) {
+  activeView = fid;
+  const color = FW[fid]?.color;
+  setFWColor(color || '#0078D4');
+  document.getElementById('jsonBtn').style.background = color || '#0078D4';
+  document.getElementById('jsonBtn').style.borderColor = color || '#0078D4';
+  document.getElementById('logoIcon').style.background = color ? `linear-gradient(135deg,${color},color-mix(in srgb,${color} 60%,#000))` : '';
+  renderSwitcher();
+  renderMain();
+}
+
+function renderMain() {
+  const area = document.getElementById('mainArea');
+  if (activeView === 'overview') { area.innerHTML = renderOverviewPage(); return; }
+  const fw = FW[activeView];
+  if (!fw || !fw.cats) return;
+  const defaultCat = activeCat[activeView] || fw.cats[0].id;
+  activeCat[activeView] = defaultCat;
+  area.innerHTML = renderFWPage(fw);
+}
+
+function renderOverviewPage() {
+  const fwIds = ['csf','ce','soc2','n53'];
+  const cards = fwIds.map(fid => {
+    const fw = FW[fid];
+    const s = fwStats(fid);
+    return `<div class="fw-card" onclick="switchFW('${fid}')" style="--card-color:${fw.color}">
+      <div class="fw-card-header">
+        <div>
+          <div class="fw-card-id">${fw.shortName}</div>
+          <div class="fw-card-name">${fw.label}</div>
+          <div class="fw-card-desc">${fw.desc.slice(0,100)}…</div>
+        </div>
+        <div>
+          <div class="fw-card-pct">${s.pct}%</div>
+          <div class="fw-card-pct-label">complete</div>
+        </div>
+      </div>
+      <div class="fw-prog"><div class="fw-prog-fill" style="width:${s.pct}%"></div></div>
+      <div class="fw-stat-row">
+        <div class="fw-stat"><div class="fw-stat-val" style="color:var(--s-complete)">${s.complete}</div><div class="fw-stat-label">Done</div></div>
+        <div class="fw-stat"><div class="fw-stat-val" style="color:var(--s-progress)">${s.progress}</div><div class="fw-stat-label">Active</div></div>
+        <div class="fw-stat"><div class="fw-stat-val" style="color:var(--s-blocked)">${s.blocked}</div><div class="fw-stat-label">Blocked</div></div>
+        <div class="fw-stat"><div class="fw-stat-val" style="color:var(--t3)">${s.total}</div><div class="fw-stat-label">Total</div></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  const tableRows = fwIds.map(fid => {
+    const fw = FW[fid];
+    const s = fwStats(fid);
+    const barW = s.pct;
+    return `<tr>
+      <td><span class="fw-badge" style="color:${fw.color};background:color-mix(in srgb,${fw.color} 12%,transparent)">${fw.shortName}</span></td>
+      <td style="font-weight:600">${fw.label}</td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:${fw.color}">${s.pct}%</td>
+      <td><div style="width:120px;height:5px;background:var(--border);border-radius:3px;overflow:hidden"><div style="width:${barW}%;height:100%;background:${fw.color};border-radius:3px;transition:width .6s"></div></div></td>
+      <td style="color:var(--s-complete);font-family:'JetBrains Mono',monospace">${s.complete}/${s.total}</td>
+      <td style="color:var(--s-progress);font-family:'JetBrains Mono',monospace">${s.progress}</td>
+      <td style="color:var(--s-blocked);font-family:'JetBrains Mono',monospace">${s.blocked}</td>
+      <td style="color:var(--p-high);font-family:'JetBrains Mono',monospace">${s.hiPri}</td>
+      <td><button class="btn" style="font-size:10.5px;padding:4px 10px" onclick="switchFW('${fid}')">Open →</button></td>
+    </tr>`;
+  }).join('');
+
+  const grandTotal = fwIds.reduce((s,f)=>s+fwStats(f).total,0);
+  const grandDone  = fwIds.reduce((s,f)=>s+fwStats(f).complete,0);
+
+  return `<div class="ov-page">
+    <div class="ov-page-title">🛡️ MDE Multi-Framework Audit Dashboard</div>
+    <div class="ov-page-sub">Microsoft Defender for Endpoint · MSSP Security Operations · ${grandDone} of ${grandTotal} tasks complete across all frameworks</div>
+    <div class="fw-cards">${cards}</div>
+    <div class="cross-table-wrap">
+      <div class="cross-table-hdr">
+        <div class="cross-table-title">Framework Comparison</div>
+        <span style="font-size:11px;color:var(--t3)">${grandDone}/${grandTotal} total tasks · ${Math.round(grandDone/grandTotal*100)}% overall</span>
+      </div>
+      <table class="cross-tbl">
+        <thead><tr><th>ID</th><th>Framework</th><th>Progress</th><th>Bar</th><th>Done</th><th>Active</th><th>Blocked</th><th>High Pri</th><th></th></tr></thead>
+        <tbody>${tableRows}</tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function renderFWPage(fw) {
+  const s = fwStats(fw.id);
+  const defaultCat = activeCat[fw.id] || fw.cats[0].id;
+
+  const tabs = `<div class="cat-tabs" id="catTabs-${fw.id}">
+    <button class="cat-tab${defaultCat==='__all__'?' active':''}" onclick="switchCat('${fw.id}','__all__',this)">
+      All <span class="cat-tab-count">${s.complete}/${s.total}</span>
+    </button>
+    ${fw.cats.map(cat => {
+      const cs = catStats(fw.id, cat.id);
+      return `<button class="cat-tab${defaultCat===cat.id?' active':''}" onclick="switchCat('${fw.id}','${cat.id}',this)">
+        ${cat.emoji} ${cat.id}
+        <span class="cat-tab-count">${cs.complete}/${cs.total}</span>
+      </button>`;
+    }).join('')}
+  </div>`;
+
+  const sections = [`<div class="cat-section${defaultCat==='__all__'?' active':''}" id="cat-${fw.id}-__all__">
+    ${fw.cats.map(cat => renderCatBlock(fw, cat)).join('')}
+  </div>`];
+  fw.cats.forEach(cat => {
+    sections.push(`<div class="cat-section${defaultCat===cat.id?' active':''}" id="cat-${fw.id}-${cat.id}">
+      ${renderCatBlock(fw, cat)}
+    </div>`);
+  });
+
+  return `
+    <div class="fw-view active" id="fwview-${fw.id}" style="--fw-color:${fw.color}">
+      <div class="fw-view-header">
+        <div>
+          <div class="fw-view-tag" style="color:${fw.color};background:color-mix(in srgb,${fw.color} 12%,transparent)">${fw.emoji} ${fw.shortName} · ${fw.label}</div>
+          <div class="fw-view-name">${fw.label}</div>
+          <div class="fw-view-desc">${fw.desc}</div>
+        </div>
+        <div class="fw-view-stats">
+          <div class="fw-stat-pill"><div class="fw-stat-pill-val" style="color:${fw.color}">${s.pct}%</div><div class="fw-stat-pill-label">Complete</div></div>
+          <div class="fw-stat-pill"><div class="fw-stat-pill-val" style="color:var(--s-complete)">${s.complete}</div><div class="fw-stat-pill-label">Done</div></div>
+          <div class="fw-stat-pill"><div class="fw-stat-pill-val" style="color:var(--s-progress)">${s.progress}</div><div class="fw-stat-pill-label">Active</div></div>
+          <div class="fw-stat-pill"><div class="fw-stat-pill-val" style="color:var(--s-blocked)">${s.blocked}</div><div class="fw-stat-pill-label">Blocked</div></div>
+          <div class="fw-stat-pill"><div class="fw-stat-pill-val" style="color:var(--p-high)">${s.hiPri}</div><div class="fw-stat-pill-label">High Pri</div></div>
+          <div class="fw-stat-pill"><div class="fw-stat-pill-val" style="color:var(--t2)">${s.total}</div><div class="fw-stat-pill-label">Total</div></div>
+        </div>
+      </div>
+      ${tabs}
+      <div id="catSections-${fw.id}">${sections.join('')}</div>
+    </div>`;
+}
+
+function renderCatBlock(fw, cat) {
+  const cs = catStats(fw.id, cat.id);
+  return `<div style="--fw-color:${fw.color}">
+    <div class="cat-hdr">
+      <div>
+        <div class="cat-hdr-label" style="color:${fw.color}">${cat.emoji} ${cat.id} · ${cat.name}</div>
+        <div class="cat-hdr-title">${cat.name.charAt(0)+cat.name.slice(1).toLowerCase()}</div>
+        <div class="cat-hdr-desc">${cat.desc}</div>
+      </div>
+      <div class="cat-hdr-pct">
+        <div class="cat-pct-val" style="color:${fw.color}">${cs.pct}%</div>
+        <div class="cat-pct-label">${cs.complete}/${cs.total}</div>
+      </div>
+    </div>
+    <div class="tasks-list" style="--fw-color:${fw.color}">
+      ${cat.tasks.map(t => renderTask(fw.id, t, fw.color)).join('')}
+    </div>
+  </div>`;
+}
+
+function renderTask(fid, t, color) {
+  const s = STATE[fid][t.id] || { status:'pending', notes:'' };
+  const done = s.status === 'complete';
+  return `<div class="task${done?' done':''}" id="tr-${fid}-${t.id}" style="--fw-color:${color}">
+    <input type="checkbox" class="task-cb" ${done?'checked':''} onchange="toggleDone('${fid}','${t.id}',this)"/>
+    <div class="task-body">
+      <div class="task-name">${t.name}</div>
+      <div class="task-tags">
+        <span class="task-ref">${t.ref}</span>
+        <span class="pbadge pb-${t.pri}">${t.pri}</span>
+      </div>
+      <div class="task-desc">${t.desc}</div>
+    </div>
+    <select class="task-status ss-${s.status}" onchange="updateStatus('${fid}','${t.id}',this)">
+      <option value="pending"  ${s.status==='pending' ?'selected':''}>⬜ Not Started</option>
+      <option value="progress" ${s.status==='progress'?'selected':''}>🟡 In Progress</option>
+      <option value="complete" ${s.status==='complete'?'selected':''}>✅ Complete</option>
+      <option value="blocked"  ${s.status==='blocked' ?'selected':''}>🔴 Blocked</option>
+    </select>
+    <span class="pbadge pb-${t.pri}" style="align-self:start">${t.pri.toUpperCase()}</span>
+    <textarea class="task-notes" rows="2" placeholder="Notes / ticket ref…" oninput="updateNotes('${fid}','${t.id}',this)">${s.notes||''}</textarea>
+  </div>`;
+}
+
+// ════════════════════════════════════════════
+//  INTERACTIONS
+// ════════════════════════════════════════════
+function switchCat(fid, catId, el) {
+  activeCat[fid] = catId;
+  document.querySelectorAll(`#catTabs-${fid} .cat-tab`).forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll(`#catSections-${fid} .cat-section`).forEach(s => s.classList.remove('active'));
+  document.getElementById(`cat-${fid}-${catId}`)?.classList.add('active');
+}
+
+function toggleDone(fid, tid, el) {
+  const status = el.checked ? 'complete' : 'pending';
+  STATE[fid][tid].status = status;
+  save();
+  const row = document.getElementById(`tr-${fid}-${tid}`);
+  if (row) {
+    row.classList.toggle('done', status === 'complete');
+    const sel = row.querySelector('.task-status');
+    if (sel) { sel.value = status; sel.className = `task-status ss-${status}`; }
+  }
+  refreshStats(fid);
+}
+
+function updateStatus(fid, tid, sel) {
+  const status = sel.value;
+  STATE[fid][tid].status = status;
+  save();
+  sel.className = `task-status ss-${status}`;
+  const row = document.getElementById(`tr-${fid}-${tid}`);
+  if (row) {
+    row.classList.toggle('done', status === 'complete');
+    const cb = row.querySelector('.task-cb');
+    if (cb) cb.checked = status === 'complete';
+  }
+  refreshStats(fid);
+}
+
+function updateNotes(fid, tid, el) {
+  STATE[fid][tid].notes = el.value;
+  save();
+}
+
+function refreshStats(fid) {
+  const s = fwStats(fid);
+  // Update header stat pills
+  const view = document.getElementById(`fwview-${fid}`);
+  if (view) {
+    const pills = view.querySelectorAll('.fw-stat-pill-val');
+    if (pills[0]) pills[0].textContent = s.pct + '%';
+    if (pills[1]) pills[1].textContent = s.complete;
+    if (pills[2]) pills[2].textContent = s.progress;
+    if (pills[3]) pills[3].textContent = s.blocked;
+    if (pills[4]) pills[4].textContent = s.hiPri;
+  }
+  // Update cat tab counts for this fw
+  FW[fid].cats.forEach(cat => {
+    const cs = catStats(fid, cat.id);
+    const tab = document.querySelector(`#catTabs-${fid} [onclick*="'${cat.id}'"] .cat-tab-count`);
+    if (tab) tab.textContent = `${cs.complete}/${cs.total}`;
+    // Update all-tab count
+    const allTab = document.querySelector(`#catTabs-${fid} [onclick*="__all__"] .cat-tab-count`);
+    if (allTab) allTab.textContent = `${s.complete}/${s.total}`;
+  });
+}
+
+// ════════════════════════════════════════════
+//  EXPORTS
+// ════════════════════════════════════════════
+function buildExportData(fid) {
+  const ids = fid ? [fid] : ['csf','ce','soc2','n53'];
+  return {
+    meta: {
+      tool: 'MDE Multi-Framework Audit Tracker',
+      version: '2.0',
+      exported: new Date().toISOString(),
+      platform: 'Microsoft Defender for Endpoint',
+      frameworks: ids.map(f => FW[f].label)
+    },
+    summary: Object.fromEntries(ids.map(f => [f, fwStats(f)])),
+    frameworks: ids.map(fid => ({
+      id: fid,
+      name: FW[fid].label,
+      color: FW[fid].color,
+      stats: fwStats(fid),
+      categories: FW[fid].cats.map(cat => ({
+        id: cat.id,
+        name: cat.name,
+        tasks: cat.tasks.map(t => ({
+          id: t.id,
+          name: t.name,
+          reference: t.ref,
+          priority: t.pri,
+          description: t.desc,
+          status: STATE[fid][t.id]?.status || 'pending',
+          notes: STATE[fid][t.id]?.notes || ''
+        }))
+      }))
+    }))
+  };
+}
+
+function doExportJSON(fid) {
+  const data = buildExportData(fid);
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url;
+  a.download = fid ? `mde-${fid}-config.json` : 'mde-all-frameworks-config.json';
+  a.click(); URL.revokeObjectURL(url);
+  closeOverlay('exportOverlay'); closeOverlay('jsonOverlay');
+  showToast('✅ JSON downloaded');
+}
+
+function doExportCSV(fid) {
+  const ids = fid ? [fid] : ['csf','ce','soc2','n53'];
+  const rows = [['Framework','Category','Task ID','Task Name','Reference','Priority','Status','Notes']];
+  ids.forEach(fid => {
+    FW[fid].cats.forEach(cat => {
+      cat.tasks.forEach(t => {
+        const s = STATE[fid][t.id] || {};
+        rows.push([FW[fid].shortName, cat.id, t.id, `"${t.name}"`, t.ref, t.pri, s.status||'pending', `"${(s.notes||'').replace(/"/g,'""')}"`]);
+      });
+    });
+  });
+  const csv = rows.map(r => r.join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url;
+  a.download = 'mde-audit-tracker.csv'; a.click(); URL.revokeObjectURL(url);
+  closeOverlay('exportOverlay');
+  showToast('✅ CSV exported');
+}
+
+function doExportHTML(fid) {
+  const ids = fid ? [fid] : ['csf','ce','soc2','n53'];
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const bg = isDark ? '#080c12' : '#f0f4f8';
+  const cardBg = isDark ? '#131c2e' : '#ffffff';
+  const textColor = isDark ? '#e8eef8' : '#0f172a';
+  const borderColor = isDark ? '#243047' : '#d0d9e8';
+  const mutedColor = isDark ? '#4e6280' : '#94a3b8';
+
+  let body = `<!DOCTYPE html><html><head><meta charset="UTF-8"/>
+<title>MDE Multi-Framework Audit Report</title>
+<style>
+  body{font-family:system-ui,sans-serif;background:${bg};color:${textColor};margin:0;padding:32px;font-size:13px}
+  h1{font-size:22px;margin-bottom:4px}
+  .meta{font-size:11px;color:${mutedColor};margin-bottom:24px}
+  .summary{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:28px}
+  .sum-card{background:${cardBg};border:1px solid ${borderColor};border-radius:8px;padding:14px;min-width:110px;border-top:3px solid var(--c)}
+  .sum-label{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:${mutedColor};margin-bottom:5px}
+  .sum-val{font-size:20px;font-weight:700;color:var(--c)}
+  .fw-block{margin-bottom:36px}
+  .fw-title{font-size:15px;font-weight:700;padding:12px 14px;border-radius:6px 6px 0 0;color:#fff;margin:0}
+  table{width:100%;border-collapse:collapse;background:${cardBg};border:1px solid ${borderColor};border-radius:0 0 8px 8px;overflow:hidden;margin-bottom:0}
+  th{text-align:left;padding:8px 12px;font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:${mutedColor};border-bottom:1px solid ${borderColor};background:color-mix(in srgb,${cardBg} 80%,${bg})}
+  td{padding:9px 12px;font-size:11.5px;border-bottom:1px solid ${borderColor};vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  .done td{opacity:.65}
+  .s-complete{color:#10b981;font-weight:600} .s-progress{color:#f59e0b;font-weight:600}
+  .s-blocked{color:#ef4444;font-weight:600} .s-pending{color:${mutedColor}}
+  .p-high{color:#ef4444;font-weight:700} .p-med{color:#f59e0b;font-weight:700} .p-low{color:#10b981;font-weight:700}
+  code{font-family:monospace;font-size:10px;background:${bg};padding:1px 5px;border-radius:3px;border:1px solid ${borderColor}}
+</style></head><body>
+  <h1>🛡️ MDE Multi-Framework Audit Report</h1>
+  <div class="meta">Generated: ${new Date().toLocaleString()} | Platform: Microsoft Defender for Endpoint | MSSP</div>
+  <div class="summary">`;
+
+  ids.forEach(fid => {
+    const s = fwStats(fid);
+    body += `<div class="sum-card" style="--c:${FW[fid].color}"><div class="sum-label">${FW[fid].shortName}</div><div class="sum-val">${s.pct}%</div><div style="font-size:10px;color:${mutedColor}">${s.complete}/${s.total} done</div></div>`;
+  });
+  body += `</div>`;
+
+  ids.forEach(fid => {
+    const fw = FW[fid];
+    body += `<div class="fw-block"><div class="fw-title" style="background:${fw.color}">${fw.emoji} ${fw.shortName} — ${fw.label}</div>
+    <table><tr><th>Category</th><th>Task</th><th>Ref</th><th>Priority</th><th>Status</th><th>Notes</th></tr>`;
+    fw.cats.forEach(cat => {
+      cat.tasks.forEach((t, i) => {
+        const s = STATE[fid][t.id] || {};
+        const st = s.status || 'pending';
+        body += `<tr class="${st==='complete'?'done':''}">
+          ${i===0?`<td rowspan="${cat.tasks.length}" style="font-weight:700;vertical-align:top;padding-top:11px">${cat.emoji} ${cat.id}</td>`:''}
+          <td><strong>${t.name}</strong><br/><span style="font-size:10.5px;color:${mutedColor}">${t.desc}</span></td>
+          <td><code>${t.ref}</code></td>
+          <td class="p-${t.pri}">${t.pri.toUpperCase()}</td>
+          <td class="s-${st}">${st.charAt(0).toUpperCase()+st.slice(1)}</td>
+          <td>${s.notes||'—'}</td>
+        </tr>`;
+      });
+    });
+    body += `</table></div>`;
+  });
+  body += `</body></html>`;
+  const blob = new Blob([body], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url;
+  a.download = 'mde-audit-report.html'; a.click(); URL.revokeObjectURL(url);
+  closeOverlay('exportOverlay');
+  showToast('✅ HTML report exported');
+}
+
+// ════════════════════════════════════════════
+//  MODALS
+// ════════════════════════════════════════════
+function openExport() { document.getElementById('exportOverlay').classList.add('open'); }
+function openJSON() {
+  const fid = activeView !== 'overview' ? activeView : null;
+  const data = buildExportData(fid);
+  document.getElementById('jsonPre').textContent = JSON.stringify(data, null, 2);
+  document.getElementById('jsonOverlay').classList.add('open');
+}
+function copyJSON() {
+  navigator.clipboard.writeText(document.getElementById('jsonPre').textContent)
+    .then(() => showToast('📋 Copied to clipboard'));
+}
+function closeOverlay(id) { document.getElementById(id).classList.remove('open'); }
+document.addEventListener('click', e => {
+  if (e.target.classList.contains('overlay')) e.target.classList.remove('open');
+});
+
+// ════════════════════════════════════════════
+//  TOAST
+// ════════════════════════════════════════════
+let toastT;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastT);
+  toastT = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ════════════════════════════════════════════
+//  BOOT
+// ════════════════════════════════════════════
+initTheme();
+initState();
+setFWColor('#0078D4');
+renderSwitcher();
+renderMain();
+</script>
+</body>
+</html>
