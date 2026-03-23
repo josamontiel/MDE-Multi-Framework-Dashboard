@@ -1375,10 +1375,10 @@ function getPortalBadge(portalKey) {
   return `<span class="portal-badge" style="color:${p.color};background:${p.bg}">${p.label}</span>`;
 }
 
-function toggleComply(taskId) {
-  const btn   = document.getElementById('cb-' + taskId);
-  const panel = document.getElementById('cp-' + taskId);
-  if (!btn || !panel) return;
+function toggleComply(btn) {
+  // Panel is always the immediate next sibling of the button — no ID lookup needed
+  const panel = btn.nextElementSibling;
+  if (!panel || !panel.classList.contains('comply-panel')) return;
   const open = panel.classList.toggle('open');
   btn.classList.toggle('open', open);
   btn.querySelector('.comply-arrow').textContent = open ? '▾' : '▸';
@@ -1627,10 +1627,10 @@ function renderTask(fid, t, color) {
   const done = s.status === 'complete';
   const remedy = REMEDIES[t.id];
   const complyHtml = remedy ? `
-    <button class="comply-toggle" id="cb-${t.id}" onclick="toggleComply('${t.id}')">
+    <button class="comply-toggle" onclick="toggleComply(this)">
       <i class="comply-arrow">▸</i> How to comply
     </button>
-    <div class="comply-panel" id="cp-${t.id}" style="--fw-color:${color}">
+    <div class="comply-panel" style="--fw-color:${color}">
       <div class="comply-panel-inner">
         <div class="comply-portal-row">
           ${getPortalBadge(remedy.portal)}
