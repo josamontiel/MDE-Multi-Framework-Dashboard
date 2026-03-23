@@ -368,6 +368,168 @@ table.cross-tbl tbody tr:hover td{background:var(--bg3)}
 
 /* ── UTIL ── */
 .hidden{display:none!important}
+
+/* ══════════════════════════════════════
+   RESPONSIVE — TABLET  (≤900px)
+══════════════════════════════════════ */
+@media (max-width: 900px) {
+  /* Shrink fw-switcher labels */
+  .fw-btn { padding: 5px 9px; font-size: 11px; }
+  .fw-view-stats { flex-wrap: wrap; }
+  .fw-stat-pill { min-width: 54px; padding: 7px 10px; }
+  .fw-stat-pill-val { font-size: 15px; }
+  /* Cross table scrollable */
+  .cross-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table.cross-tbl { min-width: 640px; }
+}
+
+/* ══════════════════════════════════════
+   RESPONSIVE — MOBILE  (≤768px)
+══════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  /* ── Header: two-row layout ── */
+  .hdr {
+    flex-wrap: wrap;
+    height: auto;
+    padding: 10px 14px 0 14px;
+    gap: 8px;
+    align-items: center;
+  }
+  .hdr-logo { flex: 1; min-width: 0; }
+  .hdr-right { flex-shrink: 0; }
+  /* Hide subtitle on small screens */
+  .hdr-sub { display: none; }
+  /* Switcher fills full width on its own row */
+  .fw-switcher {
+    order: 3;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    flex-shrink: 0;
+  }
+  .fw-switcher::-webkit-scrollbar { display: none; }
+  .fw-btn { padding: 6px 10px; font-size: 11px; flex-shrink: 0; }
+
+  /* ── Main padding ── */
+  .main { padding: 12px 12px 56px; }
+
+  /* ── Overview page ── */
+  .ov-page-title { font-size: 16px; }
+  .fw-cards { grid-template-columns: 1fr; gap: 10px; }
+  .fw-card { padding: 16px; }
+  .fw-card-pct { font-size: 22px; }
+
+  /* Cross-framework comparison table: horizontal scroll */
+  .cross-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table.cross-tbl { min-width: 580px; }
+
+  /* ── Framework view header: stack vertically ── */
+  .fw-view-header {
+    flex-direction: column;
+    gap: 14px;
+    padding: 14px 14px;
+  }
+  .fw-view-name { font-size: 16px; }
+  .fw-view-desc { font-size: 11.5px; }
+  .fw-view-stats {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 7px;
+  }
+  .fw-stat-pill { min-width: 52px; padding: 6px 9px; }
+  .fw-stat-pill-val { font-size: 14px; }
+  .fw-stat-pill-label { font-size: 8px; }
+
+  /* ── Category header: stack on very small ── */
+  .cat-hdr { flex-direction: column; gap: 8px; }
+  .cat-hdr-pct { text-align: left; }
+  .cat-hdr-title { font-size: 13px; }
+
+  /* ── Category tabs: scrollable strip ── */
+  .cat-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 6px;
+  }
+  .cat-tabs::-webkit-scrollbar { display: none; }
+  .cat-tab { padding: 6px 10px; font-size: 11px; flex-shrink: 0; }
+
+  /* ── Task rows: mobile 2-col grid ── */
+  .task {
+    grid-template-columns: 20px 1fr;
+    gap: 8px;
+    padding: 12px 12px;
+  }
+  /* Checkbox: row 1, col 1 */
+  .task-cb { grid-column: 1; grid-row: 1; margin-top: 3px; }
+  /* Task body: row 1, col 2 */
+  .task-body { grid-column: 2; grid-row: 1; }
+  /* Status select: full-width row 2 */
+  .task > select.task-status {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    min-width: 0;
+    width: 100%;
+  }
+  /* Standalone priority badge: hide (already shown inside task-tags) */
+  .task > .pbadge { display: none; }
+  /* Notes textarea: full-width row 3 */
+  .task > textarea.task-notes {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    min-width: 0;
+    max-width: 100%;
+    width: 100%;
+  }
+
+  /* ── Modals: full-width on mobile ── */
+  .modal {
+    width: 96%;
+    padding: 18px 16px;
+    border-radius: 10px;
+  }
+  .modal-title { font-size: 14px; }
+  .exp-grid { grid-template-columns: 1fr; gap: 8px; }
+  .modal-footer { flex-wrap: wrap; gap: 6px; }
+  .modal-footer .btn { flex: 1; justify-content: center; }
+
+  /* ── Toast: full width ── */
+  .toast {
+    left: 12px;
+    right: 12px;
+    bottom: 16px;
+    justify-content: center;
+  }
+
+  /* ── Export/JSON header buttons: compact ── */
+  .btn { padding: 6px 10px; font-size: 11px; }
+  .btn-icon { width: 30px; height: 30px; }
+}
+
+/* ══════════════════════════════════════
+   RESPONSIVE — SMALL MOBILE  (≤480px)
+══════════════════════════════════════ */
+@media (max-width: 480px) {
+  .hdr-brand { font-size: 12px; }
+  .hdr-logo-icon { width: 26px; height: 26px; font-size: 12px; border-radius: 6px; }
+  /* Collapse Export + JSON buttons to icons only */
+  .btn-label { display: none; }
+  .main { padding: 10px 10px 56px; }
+  .fw-view-name { font-size: 15px; }
+  .ov-page-title { font-size: 15px; }
+  .task-name { font-size: 12.5px; }
+  .task-desc { font-size: 11px; }
+  .fw-card-name { font-size: 14px; }
+  /* Tighten stat row on overview cards */
+  .fw-stat-row { gap: 8px; }
+  .fw-stat-val { font-size: 13px; }
+}
 </style>
 </head>
 <body>
@@ -385,8 +547,8 @@ table.cross-tbl tbody tr:hover td{background:var(--bg3)}
     <div class="fw-switcher" id="fwSwitcher"></div>
 
     <div class="hdr-right">
-      <button class="btn" onclick="openExport()">⬆ Export</button>
-      <button class="btn btn-accent" id="jsonBtn" onclick="openJSON()">{ } JSON</button>
+      <button class="btn" onclick="openExport()">⬆ <span class="btn-label">Export</span></button>
+      <button class="btn btn-accent" id="jsonBtn" onclick="openJSON()">{ } <span class="btn-label">JSON</span></button>
       <button class="btn btn-icon" id="themeBtn" onclick="toggleTheme()">🌙</button>
     </div>
   </div>
