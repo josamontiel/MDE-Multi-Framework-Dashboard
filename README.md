@@ -3,6 +3,7 @@
 **A browser-based Microsoft Defender for Endpoint audit tracker for MSSP security engineers, mapping ~160 tasks across four compliance frameworks — NIST CSF 2.0, Cyber Essentials, SOC 2, and NIST 800-53 — with per-task status, notes, live progress metrics, framework switching, dark/light mode, and CSV, HTML, and JSON export.**
 
 ---
+<img width="1439" height="819" alt="Screenshot 2026-03-23 at 14 46 12" src="https://github.com/user-attachments/assets/8e504b0d-4680-44ff-aaaa-d7d4d8cc7abe" />
 
 ## Overview
 
