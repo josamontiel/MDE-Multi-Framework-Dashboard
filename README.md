@@ -3,6 +3,7 @@
 **A browser-based Microsoft Defender for Endpoint audit tracker for MSSP security engineers, mapping ~153 tasks across four compliance frameworks — NIST CSF 2.0, Cyber Essentials, SOC 2, and NIST 800-53 — with per-task compliance guidance, gap analysis, status tracking, notes, live progress metrics, dark/light mode, mobile support, and CSV, HTML, and JSON export.**
 
 ---
+<img width="1440" height="726" alt="Screenshot 2026-03-22 at 20 39 41" src="https://github.com/user-attachments/assets/3cf5c942-e4c0-4344-88ba-41a3a86019dd" />
 
 ## Overview
 
@@ -96,6 +97,9 @@ Every task has a collapsible **"How to comply →"** panel that expands inline w
 **Command / Query block** (59 tasks) — a ready-to-use PowerShell cmdlet or KQL query for verification or automation. Examples include `Get-MpPreference` for AV policy validation, `Get-BitLockerVolume` for encryption status, Advanced Hunting KQL for detection coverage, and Sentinel KQL for audit log queries.
 
 The panel is collapsed by default and operates independently per task — engineers can expand only the controls they are actively working on without affecting others.
+
+<img width="1438" height="820" alt="Screenshot 2026-03-23 at 19 10 29" src="https://github.com/user-attachments/assets/26620b3c-b95a-49ad-889a-69a9ddc0ead0" />
+
 
 ---
 
