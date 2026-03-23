@@ -513,6 +513,78 @@ table.cross-tbl tbody tr:hover td{background:var(--bg3)}
 }
 
 /* ══════════════════════════════════════
+   GAP ANALYSIS
+══════════════════════════════════════ */
+.gap-upload-zone {
+  border: 2px dashed var(--border2);
+  border-radius: 12px;
+  padding: 32px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all .2s;
+  background: var(--bg0);
+  position: relative;
+}
+.gap-upload-zone.drag-over {
+  border-color: var(--fw-color, #0078D4);
+  background: color-mix(in srgb, var(--fw-color, #0078D4) 6%, transparent);
+}
+.gap-upload-zone input[type=file] {
+  position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+}
+.gap-upload-icon { font-size: 32px; margin-bottom: 10px; }
+.gap-upload-title { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: var(--t1); margin-bottom: 4px; }
+.gap-upload-sub { font-size: 11.5px; color: var(--t3); }
+.gap-upload-hint { font-size: 10.5px; color: var(--t3); margin-top: 12px; padding: 8px 14px; background: var(--bg2); border-radius: 6px; border: 1px solid var(--border); }
+
+/* Gap summary pills */
+.gap-summary-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+.gap-pill {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 10px 16px; border-radius: 9px; border: 1px solid var(--border);
+  background: var(--bg2); min-width: 80px; flex: 1;
+}
+.gap-pill-val { font-family: 'JetBrains Mono', monospace; font-size: 22px; font-weight: 700; }
+.gap-pill-label { font-size: 9px; text-transform: uppercase; letter-spacing: .6px; color: var(--t3); margin-top: 3px; }
+
+/* Gap delta badges */
+.delta { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; letter-spacing: .3px; white-space: nowrap; }
+.delta-compliant  { color: #10b981; background: rgba(16,185,129,.1); }
+.delta-gap        { color: #ef4444; background: rgba(239,68,68,.1); }
+.delta-regression { color: #f97316; background: rgba(249,115,22,.1); }
+.delta-improved   { color: #0078D4; background: rgba(0,120,212,.1); }
+.delta-blocked    { color: #f87171; background: rgba(248,113,113,.1); }
+.delta-new        { color: #a78bfa; background: rgba(167,139,250,.1); }
+.delta-progress   { color: #fbbf24; background: rgba(251,191,36,.1); }
+
+/* Gap task row — inherits .task but has delta col */
+.task-gap {
+  grid-template-columns: 1fr auto auto;
+}
+.gap-fw-section { margin-bottom: 28px; }
+.gap-fw-title {
+  font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700;
+  padding: 10px 16px; border-radius: 8px 8px 0 0;
+  border: 1px solid var(--border); border-bottom: none;
+  background: var(--bg2); color: var(--t1);
+  display: flex; align-items: center; gap: 8px; justify-content: space-between;
+}
+.gap-meta-row { font-size: 11px; color: var(--t3); display: flex; gap: 14px; flex-wrap: wrap; margin-top: 14px; padding: 12px 14px; background: var(--bg1); border: 1px solid var(--border); border-radius: 8px; }
+.gap-meta-item { display: flex; align-items: center; gap: 5px; }
+
+/* Filter bar */
+.gap-filter-bar { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.gap-filter-btn {
+  padding: 5px 12px; border-radius: 6px; border: 1px solid var(--border);
+  background: var(--bg2); color: var(--t3);
+  font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 600;
+  cursor: pointer; transition: all .16s; white-space: nowrap;
+}
+.gap-filter-btn:hover { color: var(--t1); border-color: var(--border2); }
+.gap-filter-btn.active { background: var(--bg3); color: var(--t1); border-color: var(--fw-color, #0078D4); }
+.gap-filter-label { font-size: 11px; color: var(--t3); margin-right: 2px; }
+
+/* ══════════════════════════════════════
    RESPONSIVE — SMALL MOBILE  (≤480px)
 ══════════════════════════════════════ */
 @media (max-width: 480px) {
@@ -547,7 +619,8 @@ table.cross-tbl tbody tr:hover td{background:var(--bg3)}
     <div class="fw-switcher" id="fwSwitcher"></div>
 
     <div class="hdr-right">
-      <button class="btn" onclick="openExport()">⬆ <span class="btn-label">Export</span></button>
+      <button class="btn" onclick="openImport()" title="Upload config for gap analysis">⬆ <span class="btn-label">Import</span></button>
+      <button class="btn" onclick="openExport()">⬇ <span class="btn-label">Export</span></button>
       <button class="btn btn-accent" id="jsonBtn" onclick="openJSON()">{ } <span class="btn-label">JSON</span></button>
       <button class="btn btn-icon" id="themeBtn" onclick="toggleTheme()">🌙</button>
     </div>
@@ -580,6 +653,31 @@ table.cross-tbl tbody tr:hover td{background:var(--bg3)}
       <button class="btn" onclick="copyJSON()">📋 Copy</button>
       <button class="btn btn-accent" onclick="doExportJSON()">⬇ Download</button>
       <button class="btn" onclick="closeOverlay('jsonOverlay')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- IMPORT / GAP ANALYSIS MODAL -->
+<div class="overlay" id="importOverlay">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-title">📂 Import Config for Gap Analysis</div>
+    <div class="modal-body">
+      <div class="gap-upload-zone" id="uploadZone"
+           ondragover="e.preventDefault();this.classList.add('drag-over')"
+           ondragleave="this.classList.remove('drag-over')"
+           ondrop="handleFileDrop(event)">
+        <input type="file" accept=".json" onchange="handleFileSelect(event)"/>
+        <div class="gap-upload-icon">📄</div>
+        <div class="gap-upload-title">Drop your JSON config here</div>
+        <div class="gap-upload-sub">or click to browse for a file</div>
+      </div>
+      <div class="gap-upload-hint">
+        ℹ️ Upload a previously exported <strong>JSON config</strong> from this dashboard. The gap analysis will compare every task's status in the uploaded file against your current tracker state and highlight what has changed, what is missing, and what has regressed.
+      </div>
+      <div id="importError" style="display:none;margin-top:12px;padding:10px 14px;border-radius:7px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#ef4444;font-size:12px"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeOverlay('importOverlay')">Cancel</button>
     </div>
   </div>
 </div>
@@ -938,21 +1036,25 @@ function setFWColor(color) {
 
 function renderSwitcher() {
   const c = document.getElementById('fwSwitcher');
-  const fwList = ['overview','csf','ce','soc2','n53'];
+  const fwList = ['overview','csf','ce','soc2','n53','gap'];
   c.innerHTML = fwList.map(fid => {
-    const fw = FW[fid];
+    const isGap = fid === 'gap';
+    const fw = isGap ? { label: 'Gap Analysis', dot: '#7c3aed' } : FW[fid];
     const isActive = fid === activeView;
     const dot = fw.dot || '#888';
+    const hasGap = isGap && GAP_RESULT !== null;
+    const badge = hasGap ? ` <span style="background:#7c3aed;color:#fff;border-radius:4px;padding:1px 5px;font-size:9px;font-weight:700">LIVE</span>` : '';
     return `<button class="fw-btn${isActive?' active':''}" onclick="switchFW('${fid}')" style="--dot-color:${dot}">
-      ${fid !== 'overview' ? `<span class="fw-dot" style="background:${dot}"></span>` : '📊 '}
-      ${fw.label}
+      ${fid === 'overview' ? '📊 ' : fid === 'gap' ? '🔍 ' : `<span class="fw-dot" style="background:${dot}"></span>`}
+      ${fw.label}${badge}
     </button>`;
   }).join('');
 }
 
 function switchFW(fid) {
   activeView = fid;
-  const color = FW[fid]?.color;
+  const colorMap = { gap: '#7c3aed' };
+  const color = colorMap[fid] || FW[fid]?.color;
   setFWColor(color || '#0078D4');
   document.getElementById('jsonBtn').style.background = color || '#0078D4';
   document.getElementById('jsonBtn').style.borderColor = color || '#0078D4';
@@ -964,6 +1066,7 @@ function switchFW(fid) {
 function renderMain() {
   const area = document.getElementById('mainArea');
   if (activeView === 'overview') { area.innerHTML = renderOverviewPage(); return; }
+  if (activeView === 'gap')      { area.innerHTML = renderGapPage();      return; }
   const fw = FW[activeView];
   if (!fw || !fw.cats) return;
   const defaultCat = activeCat[activeView] || fw.cats[0].id;
@@ -1358,6 +1461,366 @@ function showToast(msg) {
   t.textContent = msg; t.classList.add('show');
   clearTimeout(toastT);
   toastT = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ════════════════════════════════════════════
+//  GAP ANALYSIS
+// ════════════════════════════════════════════
+
+let GAP_DATA   = null;  // parsed uploaded config
+let GAP_RESULT = null;  // computed diff
+let GAP_FILTER = 'all'; // active filter
+
+// ── Open import modal ──
+function openImport() {
+  document.getElementById('importError').style.display = 'none';
+  document.getElementById('importOverlay').classList.add('open');
+}
+
+// ── File handling ──
+function handleFileDrop(e) {
+  e.preventDefault();
+  document.getElementById('uploadZone').classList.remove('drag-over');
+  const file = e.dataTransfer?.files?.[0];
+  if (file) processFile(file);
+}
+function handleFileSelect(e) {
+  const file = e.target.files?.[0];
+  if (file) processFile(file);
+}
+function processFile(file) {
+  if (!file.name.endsWith('.json')) {
+    showImportError('Please select a valid .json file exported from this dashboard.');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const parsed = JSON.parse(e.target.result);
+      validateAndRunGap(parsed);
+    } catch(err) {
+      showImportError('Could not parse the file. Make sure it is a valid JSON config exported from this dashboard.');
+    }
+  };
+  reader.readAsText(file);
+}
+function showImportError(msg) {
+  const el = document.getElementById('importError');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+// ── Validate uploaded config ──
+function validateAndRunGap(data) {
+  if (!data.frameworks || !Array.isArray(data.frameworks)) {
+    showImportError('Invalid config: missing "frameworks" array. Export a fresh config from this dashboard and try again.');
+    return;
+  }
+  GAP_DATA = data;
+  GAP_RESULT = computeGap(data);
+  closeOverlay('importOverlay');
+  showToast('✅ Config loaded — Gap Analysis ready');
+  // Switch to gap view
+  activeView = 'gap';
+  setFWColor('#7c3aed');
+  renderSwitcher();
+  renderMain();
+}
+
+// ── Delta classifier ──
+// Returns one of: compliant | gap | regression | improved | blocked | progress | new
+function classifyDelta(uploadedStatus, currentStatus) {
+  if (!uploadedStatus) return 'new';  // task exists in current but not in upload
+  if (uploadedStatus === 'complete' && currentStatus === 'complete') return 'compliant';
+  if (uploadedStatus === 'complete' && currentStatus !== 'complete') return 'regression';
+  if (uploadedStatus !== 'complete' && currentStatus === 'complete') return 'improved';
+  if (currentStatus === 'blocked') return 'blocked';
+  if (currentStatus === 'progress') return 'progress';
+  return 'gap'; // both pending / neither complete
+}
+
+const DELTA_META = {
+  compliant:  { label: '✅ Compliant',   icon: '✅', color: '#10b981', desc: 'Complete in both baseline and current' },
+  improved:   { label: '📈 Improved',    icon: '📈', color: '#0078D4', desc: 'Not complete in baseline, now complete' },
+  regression: { label: '⚠️ Regression',  icon: '⚠️', color: '#f97316', desc: 'Was complete in baseline, no longer complete' },
+  gap:        { label: '🔴 Gap',         icon: '🔴', color: '#ef4444', desc: 'Not complete in baseline or current' },
+  blocked:    { label: '🚫 Blocked',     icon: '🚫', color: '#f87171', desc: 'Currently blocked' },
+  progress:   { label: '🟡 In Progress', icon: '🟡', color: '#fbbf24', desc: 'Work has started but not complete' },
+  new:        { label: '🆕 New Control', icon: '🆕', color: '#a78bfa', desc: 'Not present in uploaded baseline config' },
+};
+
+// ── Compute full diff ──
+function computeGap(uploadedData) {
+  // Build lookup: fid → taskId → status
+  const uploadMap = {};
+  uploadedData.frameworks.forEach(fw => {
+    uploadMap[fw.id] = {};
+    fw.categories.forEach(cat => {
+      cat.tasks.forEach(t => { uploadMap[fw.id][t.id] = t.status; });
+    });
+  });
+
+  const fwIds = ['csf', 'ce', 'soc2', 'n53'];
+  const result = { meta: uploadedData.meta || {}, frameworks: {}, totals: {} };
+  const totals = { compliant:0, improved:0, regression:0, gap:0, blocked:0, progress:0, new:0, total:0 };
+
+  fwIds.forEach(fid => {
+    if (!FW[fid]) return;
+    const fwResult = { cats: {} };
+    FW[fid].cats.forEach(cat => {
+      fwResult.cats[cat.id] = cat.tasks.map(t => {
+        const uploadedStatus = uploadMap[fid]?.[t.id];
+        const currentStatus  = STATE[fid]?.[t.id]?.status || 'pending';
+        const delta = classifyDelta(uploadedStatus, currentStatus);
+        totals[delta] = (totals[delta] || 0) + 1;
+        totals.total++;
+        return { ...t, uploadedStatus: uploadedStatus || 'not-in-baseline', currentStatus, delta };
+      });
+    });
+    result.frameworks[fid] = fwResult;
+  });
+
+  result.totals = totals;
+  return result;
+}
+
+// ── Render gap view ──
+function renderGapPage() {
+  if (!GAP_RESULT) {
+    return `<div class="ov-page">
+      <div class="ov-page-title">🔍 Gap Analysis</div>
+      <div class="ov-page-sub" style="margin-bottom:28px">No config loaded yet. Upload a baseline JSON config to compare against your current tracker state.</div>
+      <div style="text-align:center;padding:40px 20px;background:var(--bg2);border:1px dashed var(--border2);border-radius:12px">
+        <div style="font-size:40px;margin-bottom:12px">📂</div>
+        <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--t1);margin-bottom:6px">No Baseline Loaded</div>
+        <div style="font-size:12.5px;color:var(--t3);margin-bottom:18px">Upload a previously exported JSON config to start the gap analysis.</div>
+        <button class="btn btn-accent" onclick="openImport()">📂 Upload JSON Config</button>
+      </div>
+    </div>`;
+  }
+
+  const t = GAP_RESULT.totals;
+  const uploadedAt = GAP_RESULT.meta.exported
+    ? `Baseline: ${new Date(GAP_RESULT.meta.exported).toLocaleString()}`
+    : 'Baseline: unknown date';
+  const fwLabel = GAP_RESULT.meta.frameworks?.join(', ') || 'Unknown';
+
+  const pillsHtml = Object.entries(DELTA_META).map(([key, m]) => {
+    const count = t[key] || 0;
+    return `<div class="gap-pill" style="border-top:3px solid ${m.color}">
+      <div class="gap-pill-val" style="color:${m.color}">${count}</div>
+      <div class="gap-pill-label">${m.icon} ${key.charAt(0).toUpperCase()+key.slice(1)}</div>
+    </div>`;
+  }).join('');
+
+  const filterBtns = [
+    { key:'all', label:`All (${t.total})` },
+    { key:'gap', label:`🔴 Gaps (${t.gap||0})` },
+    { key:'regression', label:`⚠️ Regressions (${t.regression||0})` },
+    { key:'blocked', label:`🚫 Blocked (${t.blocked||0})` },
+    { key:'improved', label:`📈 Improved (${t.improved||0})` },
+    { key:'compliant', label:`✅ Compliant (${t.compliant||0})` },
+    { key:'progress', label:`🟡 In Progress (${t.progress||0})` },
+    { key:'new', label:`🆕 New (${t.new||0})` },
+  ].map(f => `<button class="gap-filter-btn${GAP_FILTER===f.key?' active':''}" onclick="setGapFilter('${f.key}')">${f.label}</button>`).join('');
+
+  const fwSections = ['csf','ce','soc2','n53'].map(fid => {
+    const fw = FW[fid];
+    const fwTasks = fw.cats.flatMap(cat => GAP_RESULT.frameworks[fid].cats[cat.id]);
+    const filtered = GAP_FILTER === 'all' ? fwTasks : fwTasks.filter(t => t.delta === GAP_FILTER);
+    if (filtered.length === 0) return '';
+
+    const fwGaps     = fwTasks.filter(t => t.delta === 'gap').length;
+    const fwReg      = fwTasks.filter(t => t.delta === 'regression').length;
+    const fwCompliant= fwTasks.filter(t => t.delta === 'compliant').length;
+    const fwImproved = fwTasks.filter(t => t.delta === 'improved').length;
+
+    const taskRows = filtered.map(task => {
+      const m = DELTA_META[task.delta];
+      const uploadLabel = task.uploadedStatus === 'not-in-baseline'
+        ? '<span style="color:var(--t3);font-size:10px">Not in baseline</span>'
+        : `<span style="color:var(--t3);font-size:10px">${task.uploadedStatus.charAt(0).toUpperCase()+task.uploadedStatus.slice(1)}</span>`;
+      const currentLabel = task.currentStatus.charAt(0).toUpperCase() + task.currentStatus.slice(1);
+      return `<div class="task task-gap" style="--fw-color:${fw.color}">
+        <div class="task-body">
+          <div class="task-name">${task.name}</div>
+          <div class="task-tags">
+            <span class="task-ref">${task.ref}</span>
+            <span class="pbadge pb-${task.pri}">${task.pri}</span>
+          </div>
+          <div class="task-desc">${task.desc}</div>
+          <div style="margin-top:7px;display:flex;gap:10px;flex-wrap:wrap;font-size:11px;color:var(--t3);align-items:center">
+            <span>Baseline: ${uploadLabel}</span>
+            <span style="color:var(--t4)">→</span>
+            <span>Current: <strong style="color:var(--t2)">${currentLabel}</strong></span>
+          </div>
+        </div>
+        <span class="delta delta-${task.delta}">${m.icon} ${m.label.replace(/^[^ ]+ /,'')}</span>
+        <span class="pbadge pb-${task.pri}" style="align-self:start">${task.pri.toUpperCase()}</span>
+      </div>`;
+    }).join('');
+
+    return `<div class="gap-fw-section">
+      <div class="gap-fw-title" style="border-color:${fw.color};border-top:3px solid ${fw.color}">
+        <span>${fw.emoji} ${fw.shortName} — ${fw.label}</span>
+        <span style="display:flex;gap:6px;flex-wrap:wrap">
+          ${fwGaps>0?`<span class="delta delta-gap">🔴 ${fwGaps} gap${fwGaps>1?'s':''}</span>`:''}
+          ${fwReg>0?`<span class="delta delta-regression">⚠️ ${fwReg} regression${fwReg>1?'s':''}</span>`:''}
+          ${fwImproved>0?`<span class="delta delta-improved">📈 ${fwImproved} improved</span>`:''}
+          ${fwCompliant>0?`<span class="delta delta-compliant">✅ ${fwCompliant} compliant</span>`:''}
+        </span>
+      </div>
+      <div class="tasks-list" style="border:1px solid ${fw.color}33;border-top:none;border-radius:0 0 8px 8px;padding:10px;background:var(--bg1)">
+        ${taskRows}
+      </div>
+    </div>`;
+  }).join('');
+
+  const overallScore = t.total > 0 ? Math.round((t.compliant + t.improved) / t.total * 100) : 0;
+
+  return `<div class="ov-page">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px">
+      <div>
+        <div class="ov-page-title">🔍 Gap Analysis</div>
+        <div class="ov-page-sub">${uploadedAt} · Frameworks: ${fwLabel}</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" onclick="exportGapCSV()">📄 <span class="btn-label">Export CSV</span></button>
+        <button class="btn" onclick="exportGapHTML()">🌐 <span class="btn-label">Export Report</span></button>
+        <button class="btn" style="color:var(--s-blocked)" onclick="clearGap()">✕ Clear</button>
+      </div>
+    </div>
+
+    <div class="gap-meta-row">
+      <span class="gap-meta-item">📅 <strong>Baseline exported:</strong> ${GAP_RESULT.meta.exported ? new Date(GAP_RESULT.meta.exported).toLocaleDateString() : 'Unknown'}</span>
+      <span class="gap-meta-item">🕒 <strong>Analysis run:</strong> ${new Date().toLocaleString()}</span>
+      <span class="gap-meta-item">📊 <strong>Overall compliance score:</strong> <span style="color:#7c3aed;font-weight:700">${overallScore}%</span></span>
+      <span class="gap-meta-item">📋 <strong>Total controls:</strong> ${t.total}</span>
+    </div>
+
+    <div class="gap-summary-row" style="margin-top:16px">${pillsHtml}</div>
+
+    <div class="gap-filter-bar">
+      <span class="gap-filter-label">Filter:</span>
+      ${filterBtns}
+    </div>
+
+    <div id="gapSections">${fwSections || '<div style="padding:24px;text-align:center;color:var(--t3);background:var(--bg2);border:1px solid var(--border);border-radius:8px">No tasks match this filter.</div>'}</div>
+  </div>`;
+}
+
+function setGapFilter(filter) {
+  GAP_FILTER = filter;
+  renderMain();
+}
+
+function clearGap() {
+  GAP_DATA   = null;
+  GAP_RESULT = null;
+  GAP_FILTER = 'all';
+  showToast('Gap analysis cleared');
+  activeView = 'overview';
+  setFWColor('#0078D4');
+  renderSwitcher();
+  renderMain();
+}
+
+// ── Gap exports ──
+function exportGapCSV() {
+  if (!GAP_RESULT) return;
+  const rows = [['Framework','Category','Task ID','Task Name','Reference','Priority','Baseline Status','Current Status','Delta']];
+  ['csf','ce','soc2','n53'].forEach(fid => {
+    FW[fid].cats.forEach(cat => {
+      GAP_RESULT.frameworks[fid].cats[cat.id].forEach(t => {
+        rows.push([FW[fid].shortName, cat.id, t.id, `"${t.name}"`, t.ref, t.pri, t.uploadedStatus, t.currentStatus, t.delta]);
+      });
+    });
+  });
+  const csv = rows.map(r => r.join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a'); a.href = url;
+  a.download = 'mde-gap-analysis.csv'; a.click(); URL.revokeObjectURL(url);
+  showToast('✅ Gap analysis CSV exported');
+}
+
+function exportGapHTML() {
+  if (!GAP_RESULT) return;
+  const t = GAP_RESULT.totals;
+  const overallScore = t.total > 0 ? Math.round((t.compliant + t.improved) / t.total * 100) : 0;
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const bg = isDark ? '#080c12' : '#f0f4f8';
+  const cardBg = isDark ? '#131c2e' : '#ffffff';
+  const textColor = isDark ? '#e8eef8' : '#0f172a';
+  const borderColor = isDark ? '#243047' : '#d0d9e8';
+  const mutedColor = isDark ? '#4e6280' : '#94a3b8';
+
+  let html = `<!DOCTYPE html><html><head><meta charset="UTF-8"/>
+<title>MDE Gap Analysis Report</title>
+<style>
+  body{font-family:system-ui,sans-serif;background:${bg};color:${textColor};margin:0;padding:32px;font-size:13px}
+  h1{font-size:22px;margin-bottom:4px}
+  .meta{font-size:11px;color:${mutedColor};margin-bottom:20px}
+  .summary{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:24px}
+  .sum-card{background:${cardBg};border:1px solid ${borderColor};border-radius:8px;padding:12px 16px;min-width:90px;border-top:3px solid var(--c)}
+  .sum-label{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:${mutedColor};margin-bottom:4px}
+  .sum-val{font-size:20px;font-weight:700;color:var(--c)}
+  .fw-block{margin-bottom:32px}
+  .fw-title{font-size:14px;font-weight:700;padding:10px 14px;border-radius:6px 6px 0 0;color:#fff;margin:0;display:flex;justify-content:space-between;align-items:center}
+  table{width:100%;border-collapse:collapse;background:${cardBg};border:1px solid ${borderColor};border-radius:0 0 8px 8px;overflow:hidden}
+  th{text-align:left;padding:8px 12px;font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:${mutedColor};border-bottom:1px solid ${borderColor}}
+  td{padding:8px 12px;font-size:11.5px;border-bottom:1px solid ${borderColor};vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  .d-compliant{color:#10b981;font-weight:600} .d-improved{color:#0078D4;font-weight:600}
+  .d-regression{color:#f97316;font-weight:700} .d-gap{color:#ef4444;font-weight:700}
+  .d-blocked{color:#f87171;font-weight:600} .d-progress{color:#fbbf24;font-weight:600}
+  .d-new{color:#a78bfa;font-weight:600}
+  .p-high{color:#ef4444;font-weight:700} .p-med{color:#f59e0b} .p-low{color:#10b981}
+  code{font-family:monospace;font-size:10px;background:${bg};padding:1px 5px;border-radius:3px;border:1px solid ${borderColor}}
+  .score{font-size:28px;font-weight:700;color:#7c3aed}
+</style></head><body>
+  <h1>🔍 MDE Gap Analysis Report</h1>
+  <div class="meta">
+    Generated: ${new Date().toLocaleString()} |
+    Baseline: ${GAP_RESULT.meta.exported ? new Date(GAP_RESULT.meta.exported).toLocaleString() : 'Unknown'} |
+    Platform: Microsoft Defender for Endpoint
+  </div>
+  <div style="margin-bottom:20px;padding:14px 18px;background:${cardBg};border:1px solid ${borderColor};border-radius:8px;display:flex;align-items:center;gap:16px">
+    <div><div style="font-size:11px;color:${mutedColor};text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Overall Compliance Score</div><div class="score">${overallScore}%</div></div>
+    <div style="font-size:11.5px;color:${mutedColor}">${t.compliant+t.improved} of ${t.total} controls are compliant or improved from baseline</div>
+  </div>
+  <div class="summary">`;
+
+  Object.entries(DELTA_META).forEach(([key, m]) => {
+    html += `<div class="sum-card" style="--c:${m.color}"><div class="sum-label">${m.icon} ${key}</div><div class="sum-val">${t[key]||0}</div></div>`;
+  });
+  html += `</div>`;
+
+  ['csf','ce','soc2','n53'].forEach(fid => {
+    const fw = FW[fid];
+    html += `<div class="fw-block"><div class="fw-title" style="background:${fw.color}">${fw.emoji} ${fw.shortName} — ${fw.label}</div>
+    <table><tr><th>Task</th><th>Ref</th><th>Priority</th><th>Baseline</th><th>Current</th><th>Delta</th></tr>`;
+    fw.cats.forEach(cat => {
+      GAP_RESULT.frameworks[fid].cats[cat.id].forEach(t2 => {
+        html += `<tr>
+          <td><strong>${t2.name}</strong></td>
+          <td><code>${t2.ref}</code></td>
+          <td class="p-${t2.pri}">${t2.pri.toUpperCase()}</td>
+          <td style="color:${mutedColor}">${t2.uploadedStatus==='not-in-baseline'?'—':t2.uploadedStatus.charAt(0).toUpperCase()+t2.uploadedStatus.slice(1)}</td>
+          <td style="color:${mutedColor}">${t2.currentStatus.charAt(0).toUpperCase()+t2.currentStatus.slice(1)}</td>
+          <td class="d-${t2.delta}">${DELTA_META[t2.delta].label}</td>
+        </tr>`;
+      });
+    });
+    html += `</table></div>`;
+  });
+  html += `</body></html>`;
+
+  const blob = new Blob([html], { type: 'text/html' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a'); a.href = url;
+  a.download = 'mde-gap-analysis-report.html'; a.click(); URL.revokeObjectURL(url);
+  showToast('✅ Gap analysis report exported');
 }
 
 // ════════════════════════════════════════════
