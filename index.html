@@ -584,6 +584,34 @@ table.cross-tbl tbody tr:hover td{background:var(--bg3)}
 .gap-filter-btn.active { background: var(--bg3); color: var(--t1); border-color: var(--fw-color, #0078D4); }
 .gap-filter-label { font-size: 11px; color: var(--t3); margin-right: 2px; }
 
+/* ── COMPLIANCE ACTION PANEL ── */
+.comply-toggle {
+  display: inline-flex; align-items: center; gap: 5px;
+  margin-top: 8px; padding: 4px 10px; border-radius: 5px;
+  border: 1px solid var(--border); background: var(--bg3);
+  color: var(--t3); font-family: 'DM Sans', sans-serif;
+  font-size: 11px; font-weight: 600; cursor: pointer; transition: all .16s;
+}
+.comply-toggle:hover { border-color: var(--fw-color, #0078D4); color: var(--fw-color, #0078D4); background: color-mix(in srgb, var(--fw-color, #0078D4) 6%, transparent); }
+.comply-toggle.open { border-color: var(--fw-color, #0078D4); color: var(--fw-color, #0078D4); background: color-mix(in srgb, var(--fw-color, #0078D4) 8%, transparent); }
+.comply-arrow { display: inline-block; transition: transform .2s; font-style: normal; }
+.comply-toggle.open .comply-arrow { transform: rotate(90deg); }
+.comply-panel {
+  display: none; margin-top: 8px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--fw-color, #0078D4);
+  border-radius: 0 7px 7px 0; background: var(--bg1); overflow: hidden;
+}
+.comply-panel.open { display: block; }
+.comply-panel-inner { padding: 11px 14px; }
+.comply-portal-row { display: flex; align-items: center; gap: 7px; margin-bottom: 7px; flex-wrap: wrap; }
+.portal-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 5px; font-size: 10px; font-weight: 700; letter-spacing: .3px; white-space: nowrap; }
+.comply-path { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--t2); background: var(--bg0); padding: 3px 8px; border-radius: 5px; border: 1px solid var(--border); word-break: break-all; }
+.comply-action { font-size: 12px; color: var(--t2); line-height: 1.5; margin-bottom: 7px; }
+.comply-cmd-wrap { margin-top: 6px; }
+.comply-cmd-label { font-size: 9px; font-weight: 700; letter-spacing: .7px; text-transform: uppercase; color: var(--t3); margin-bottom: 4px; }
+.comply-cmd { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; background: var(--bg0); border: 1px solid var(--border); border-radius: 6px; padding: 8px 11px; color: #7dd3fc; white-space: pre-wrap; word-break: break-all; }
+
 /* ══════════════════════════════════════
    RESPONSIVE — SMALL MOBILE  (≤480px)
 ══════════════════════════════════════ */
@@ -969,6 +997,394 @@ const FW = {
 };
 
 // ════════════════════════════════════════════
+//  COMPLIANCE REMEDIES  (portal · path · action · cmd?)
+// ════════════════════════════════════════════
+const PORTALS = {
+  defender: { label:'Defender Portal',  color:'#0078D4', bg:'rgba(0,120,212,.12)'  },
+  intune:   { label:'Microsoft Intune', color:'#7c3aed', bg:'rgba(124,58,237,.12)' },
+  entra:    { label:'Entra ID',         color:'#0891b2', bg:'rgba(8,145,178,.12)'  },
+  sentinel: { label:'Sentinel',         color:'#1d4ed8', bg:'rgba(29,78,216,.12)'  },
+  powershell:{ label:'PowerShell',      color:'#16a34a', bg:'rgba(22,163,74,.12)'  },
+  m365:     { label:'M365 Admin',       color:'#ea580c', bg:'rgba(234,88,12,.12)'  },
+  azure:    { label:'Azure Portal',     color:'#0f766e', bg:'rgba(15,118,110,.12)' },
+  internal: { label:'Internal Process', color:'#64748b', bg:'rgba(100,116,139,.12)'},
+};
+
+const REMEDIES = {
+  // ── CSF: GOVERN ──
+  'GV-01':{ portal:'m365',      path:'Billing → Licenses → Assign licenses',
+    action:'Verify Microsoft Defender for Endpoint Plan 2 (or Microsoft 365 E5) licenses are purchased and assigned to all in-scope users. Filter by "Microsoft Defender for Endpoint" in the products column.' },
+  'GV-02':{ portal:'entra',     path:'Roles and administrators → Search "Security"',
+    action:'Assign Security Administrator to SOC leads and Security Reader to analysts. Use group-based role assignment for scalability. Document all assignments in the RBAC register.' },
+  'GV-03':{ portal:'defender',  path:'Settings → Permissions → Roles → Add role',
+    action:'Create custom roles scoped to specific device groups. Define allowed actions (View alerts, Manage investigations) per role. Assign users or Entra groups to each role.' },
+  'GV-04':{ portal:'defender',  path:'Settings → Endpoints → Device groups → Add group',
+    action:'Create device groups using dynamic rules (e.g., device tags, OS, domain). Set automation level per group. Assign RBAC roles scoped to each group.' },
+  'GV-05':{ portal:'internal',  path:'Documentation system (SharePoint / Confluence)',
+    action:'Draft MDE Governance Policy covering: scope of deployment, RBAC assignment process, alert escalation matrix, review cadence, and exception handling. Obtain CISO sign-off and publish internally.' },
+  'GV-06':{ portal:'defender',  path:'Secure Score → Overview → Export',
+    action:'Navigate to Secure Score, record current score and the top 10 improvement actions. Export as baseline snapshot. Store in audit evidence folder with date stamp.' },
+  'GV-07':{ portal:'defender',  path:'Settings → Endpoints → Advanced features',
+    action:'Review and enable: EDR in block mode, Deception capabilities, Share endpoint alerts with Microsoft Compliance Center, and Custom network indicators. Save after each change.' },
+  'GV-08':{ portal:'defender',  path:'Settings → Email notifications → Add notification rule',
+    action:'Create notification rules for High and Critical severity alerts and incidents. Add SOC distribution list as recipient. Test delivery by triggering a test alert.' },
+
+  // ── CSF: IDENTIFY ──
+  'ID-01':{ portal:'defender',  path:'Settings → Endpoints → Onboarding → Windows 10/11 → Group Policy',
+    action:'Download the GPO onboarding package. Import into Group Policy Management, link to the target OU, and force GPUpdate. Verify devices appear in Assets → Devices within 24 hours.',
+    cmd:'# Verify onboarding via PowerShell on endpoint\nGet-Service -Name "Sense" | Select Name, Status' },
+  'ID-02':{ portal:'defender',  path:'Settings → Endpoints → Onboarding → Windows Server',
+    action:'Download the Server onboarding package (modern unified agent for 2019/2022, MMA-based for 2012R2/2016). Run the install script with the onboarding token. Verify sensor reports Active.',
+    cmd:'# Check MDE sensor status on Windows Server\nGet-Service -Name "Sense"\nsc.exe query sense' },
+  'ID-03':{ portal:'defender',  path:'Settings → Endpoints → Onboarding → Linux',
+    action:'Add the Microsoft package repository, install mdatp via package manager, then apply the onboarding JSON. Validate with mdatp health. Configure cron exclusions for I/O-heavy processes.',
+    cmd:'# Check MDE health on Linux\nmdatp health\nmdatp health --field healthy' },
+  'ID-04':{ portal:'intune',    path:'Devices → macOS → Configuration profiles → Create profile',
+    action:'Create an Intune device configuration profile for macOS. Use the MDE onboarding payload (base64 encoded). Deploy System Extension approval and Full Disk Access profile via MDM. Enroll via Company Portal.' },
+  'ID-05':{ portal:'defender',  path:'Assets → Devices → Columns → Customize',
+    action:'Add columns: Risk level, Exposure level, OS platform, Last seen, Onboarding status. Apply filters per device group. Export the inventory CSV monthly for asset register reconciliation.' },
+  'ID-06':{ portal:'defender',  path:'Vulnerability management → Dashboard',
+    action:'Review Exposure Score and top recommendations. Navigate to Security recommendations and sort by Exposure score impact. Configure Network scan schedules under Vulnerability management → Baselines.' },
+  'ID-07':{ portal:'defender',  path:'Settings → Device discovery → Discovery setup',
+    action:'Enable Standard discovery mode. Designate onboarded devices as probes (Settings → Device discovery → Monitored networks). Review discovered unmanaged devices under Assets → Devices → Discovered.' },
+  'ID-08':{ portal:'defender',  path:'Vulnerability management → Software inventory',
+    action:'Filter by "End of support" status to surface EOS software. Export inventory and assign remediation tasks to device owners via Vulnerability management → Security recommendations → Request remediation.' },
+  'ID-09':{ portal:'defender',  path:'Assets → Devices → [Device] → Manage tags',
+    action:'Apply tags manually via portal, or automate via Intune device category policy or MDE API. Use consistent taxonomy: Criticality-High, BU-Finance, Role-Server. Tags flow into device group rules.',
+    cmd:'# Tag device via MDE API (PowerShell)\n$headers = @{ Authorization = "Bearer $token" }\nInvoke-RestMethod -Uri "https://api.securitycenter.microsoft.com/api/machines/$machineId/tags" -Method POST -Headers $headers -Body (@{Action="Add";Value="Criticality-High"} | ConvertTo-Json)' },
+  'ID-10':{ portal:'intune',    path:'Endpoint security → Conditional access → Create policy',
+    action:'Create a compliance policy requiring MDE device risk level "Low" or "Medium". Link to an Entra Conditional Access policy targeting corporate apps. Set non-compliant device action to block access after grace period.' },
+
+  // ── CSF: PROTECT ──
+  'PR-01':{ portal:'intune',    path:'Endpoint security → Antivirus → Create policy → Windows → Microsoft Defender Antivirus',
+    action:'Set Cloud-delivered protection level to High+, enable Real-time protection, Behavior monitoring, MAPS membership (Advanced), and Automatic sample submission. Deploy to All Devices group.',
+    cmd:'# Verify AV settings via PowerShell on endpoint\nGet-MpPreference | Select CloudBlockLevel, MAPSReporting, SubmitSamplesConsent, RealTimeProtectionEnabled' },
+  'PR-02':{ portal:'intune',    path:'Endpoint security → Attack surface reduction → Create policy → Attack surface reduction rules',
+    action:'Set all ASR rules to Audit mode. Assign to a pilot device group first, review hits in Defender Portal → Reports → Attack surface reduction for minimum 14 days before moving to enforcement.' },
+  'PR-03':{ portal:'intune',    path:'Endpoint security → Attack surface reduction → ASR rules → Edit policy',
+    action:'Promote high-confidence rules to Block: "Block credential stealing from LSASS", "Block Office apps from creating child processes", "Block abuse of exploited vulnerable signed drivers", "Block Office macros from the internet".',
+    cmd:'# Check current ASR rule states via PowerShell\nGet-MpPreference | Select-Object -ExpandProperty AttackSurfaceReductionRules_Actions' },
+  'PR-04':{ portal:'intune',    path:'Endpoint security → Attack surface reduction → Create policy → Network protection',
+    action:'Set Network protection to Enabled (Block mode). First deploy in Audit mode (value: 1), review logs for 1 week, then set to Block mode (value: 2). Assign to all device groups.',
+    cmd:'# Verify Network Protection state\nGet-MpPreference | Select EnableNetworkProtection\n# 1=Audit, 2=Block' },
+  'PR-05':{ portal:'defender',  path:'Settings → Endpoints → Web content filtering → Add policy',
+    action:'Create a policy blocking: Adult content, Gambling, Legal liability, Malicious sites. Assign to all device groups. Review the Web content filtering report under Reports → Web protection weekly.' },
+  'PR-06':{ portal:'intune',    path:'Endpoint security → Attack surface reduction → Device control',
+    action:'Create a device control policy. Set default enforcement to Audit or Block for removable storage. Add allow rules for approved device vendor IDs (e.g., corporate-issued USB drives). Test before broad rollout.' },
+  'PR-07':{ portal:'intune',    path:'Endpoint security → Attack surface reduction → Exploit protection → Controlled folder access',
+    action:'Enable CFA in Audit mode via Intune. Review blocked apps in Defender Portal → Reports → Controlled folder access. Add legitimate applications to the allow list, then set to Block mode.',
+    cmd:'# Check CFA status and blocked folders\nGet-MpPreference | Select EnableControlledFolderAccess, ControlledFolderAccessAllowedApplications' },
+  'PR-08':{ portal:'intune',    path:'Endpoint security → Firewall → Create policy → Windows Firewall',
+    action:'Configure: Firewall enabled for Domain/Private/Public profiles, block inbound by default, log dropped packets (enabled, 4096KB), log successful connections. Deploy to all Windows device groups.' },
+  'PR-09':{ portal:'intune',    path:'Endpoint security → Antivirus → [Policy] → Tamper protection',
+    action:'Enable Tamper Protection in the Intune Antivirus policy (TamperProtection = 1). Alternatively, enable tenant-wide from Defender Portal → Settings → Advanced Features → Tamper protection toggle.',
+    cmd:'# Verify Tamper Protection state on endpoint\nGet-MpComputerStatus | Select IsTamperProtected' },
+  'PR-10':{ portal:'intune',    path:'Endpoint security → Security baselines → Create profile',
+    action:'Deploy "Security Baseline for Windows 10 and later" and "Microsoft Defender for Endpoint Baseline" profiles. Assign to All Devices. Review compliance report — target >95% compliant before sign-off.' },
+  'PR-11':{ portal:'intune',    path:'Endpoint security → Disk encryption → Create policy → BitLocker',
+    action:'Configure OS drive: XTS-AES 256-bit, TPM required, require BitLocker at startup. Data drives: AES-CBC 256-bit. Enable recovery key backup to Entra ID. Monitor encryption status in Intune Encryption report.',
+    cmd:'# Check BitLocker status\nmanage-bde -status C:\nGet-BitLockerVolume | Select MountPoint, VolumeStatus, EncryptionPercentage' },
+  'PR-12':{ portal:'entra',     path:'Security → Conditional Access → New policy',
+    action:'Create a CA policy: target All Users, target All Cloud Apps or specific M365 apps, Condition = Device compliance = Require compliant device (Intune). Enable MDE device risk signal via Intune compliance policy first.' },
+
+  // ── CSF: DETECT ──
+  'DE-01':{ portal:'defender',  path:'Assets → Devices → Filter: Sensor health state = Inactive',
+    action:'Review the Sensor health report under Reports → Device health and compliance. Investigate inactive devices and remediate (re-onboard, fix connectivity to *.endpoint.security.microsoft.com). Set up automated email alert for inactive sensors.',
+    cmd:'# KQL: Devices inactive > 7 days\nDeviceInfo\n| where Timestamp > ago(7d)\n| summarize LastSeen=max(Timestamp) by DeviceName\n| where LastSeen < ago(7d)' },
+  'DE-02':{ portal:'defender',  path:'Settings → Endpoints → Alert tuning → Add new tuning rule',
+    action:'Create suppression rules for high-volume, low-fidelity alerts specific to your environment (e.g., known admin tools, approved pen-test activity). Set scope to device group and expiry date. Review monthly.' },
+  'DE-03':{ portal:'defender',  path:'Settings → Endpoints → Advanced features → EDR in block mode',
+    action:'Toggle "EDR in block mode" to On. This applies only to devices where Microsoft Defender AV is not the primary AV solution. Verify via device\'s protection status in Assets → Devices.' },
+  'DE-04':{ portal:'defender',  path:'Hunting → Advanced hunting → Detection rules → Create detection rule',
+    action:'Write a KQL query in Advanced hunting, test for results, then save as a custom detection rule. Set schedule (hourly minimum), impacted entities (Device, User), and response actions (alert, isolate).',
+    cmd:'// KQL: Example — detect PowerShell encoded command execution\nDeviceProcessEvents\n| where FileName =~ "powershell.exe"\n| where ProcessCommandLine has "-EncodedCommand"\n| project Timestamp, DeviceName, ProcessCommandLine, AccountName' },
+  'DE-05':{ portal:'sentinel',  path:'Content hub → Microsoft Defender XDR → Install → Connect',
+    action:'Install the Microsoft Defender XDR solution from Sentinel Content Hub. Enable the data connector and select all incident/alert streams. Configure Analytics rules from the included templates. Enable UEBA under Settings.' },
+  'DE-06':{ portal:'defender',  path:'Settings → Endpoints → Deception → Set up deception',
+    action:'Enable the Deception feature (requires MDE Plan 2). Configure decoy accounts and lures. Defender will automatically deploy honeytoken credentials to in-scope devices. Alerts trigger on any interaction with decoys.' },
+  'DE-07':{ portal:'defender',  path:'Threat intelligence → Threat analytics',
+    action:'Review active threat reports under Threat analytics. Click "Subscribe" on reports relevant to your environment. Configure email digest: Threat analytics → Settings → Email notifications → Add rule for new reports.' },
+  'DE-08':{ portal:'defender',  path:'Vulnerability management → Recommendations → [Recommendation] → Request remediation',
+    action:'Create remediation requests for CVEs with CVSS ≥ 9.0 and exposed devices > 0. Set due date to 14 days. Configure TVM alert rule: Vulnerability management → Event notifications → Add rule → Critical CVE.' },
+  'DE-09':{ portal:'defender',  path:'Settings → Endpoints → Deception → Manage lures',
+    action:'Configure domain-joined fake credential lures and decoy files via the Deception settings. Pair with Defender for Identity to extend lateral movement detection across identity and endpoint layers.' },
+  'DE-10':{ portal:'sentinel',  path:'Workbooks → Add workbook → Import / Gallery',
+    action:'Deploy the "Microsoft Defender for Endpoint" workbook from Sentinel Gallery. Customize to show MTTD, alert count by severity, FP rate, and trend over 30/60/90 days. Schedule PDF export for weekly SOC meeting.' },
+
+  // ── CSF: RESPOND ──
+  'RS-01':{ portal:'defender',  path:'Settings → Endpoints → Automation level',
+    action:'Set per device group: Workstations → Full — remediate threats automatically. Servers → Semi — require approval for remediation. VIP/PAW → No automated response. Review pending actions in Action center daily.' },
+  'RS-02':{ portal:'defender',  path:'Settings → Endpoints → Advanced features → Live Response',
+    action:'Enable Live Response and Advanced Live Response features. Upload pre-approved remediation scripts to the Live Response library (Settings → Endpoints → Live Response → Manage library). Restrict Live Response initiation to Security Admin role only.' },
+  'RS-03':{ portal:'defender',  path:'Assets → Devices → [Device] → Isolate device',
+    action:'Test Full isolation on a non-production device. Document the isolation approval workflow (who can approve, how to notify asset owner). For production servers, use Selective isolation to preserve management connectivity.' },
+  'RS-04':{ portal:'defender',  path:'Settings → Email notifications → Incidents tab',
+    action:'Create incident-level notification rules for High and Critical severity. Add SOC manager and on-call engineer. Define escalation SLAs in the governance document: Critical ≤ 1hr, High ≤ 4hr, Medium ≤ 24hr.' },
+  'RS-05':{ portal:'azure',     path:'Power Automate → Create → Automated cloud flow → Microsoft Sentinel trigger',
+    action:'Create a Power Automate flow triggered on new Sentinel incident (High/Critical). Actions: create ServiceNow/Jira ticket with incident details, post to SOC Teams channel, assign to on-call analyst.' },
+  'RS-06':{ portal:'internal',  path:'Playbook documentation system',
+    action:'Create runbooks for top 5 threat scenarios. Each playbook must include: detection KQL query, triage steps, containment actions (isolation, block IOC), eradication (AIR or Live Response script), evidence collection checklist.' },
+  'RS-07':{ portal:'defender',  path:'Email & collaboration → Attack simulator training → Simulations',
+    action:'Launch 3 simulation types: Credential Harvest (fake O365 login), Malware Attachment (Word macro), Drive-by URL (fake software update). Review detection hits in Defender portal. Document gaps in detection coverage.' },
+  'RS-08':{ portal:'azure',     path:'Power Automate → Create → Automated cloud flow',
+    action:'Build flows for: (1) Isolate device when Critical alert fires on specific rule IDs, (2) Block IP/domain IOC via MDE API on analyst trigger, (3) Post incident summary to SOC Teams channel with severity and device name.',
+    cmd:'# MDE API: Block indicator via PowerShell\n$body = @{ indicatorValue="<ip>"; indicatorType="IpAddress"; action="Block"; title="SOC Block"; severity="High" }\nInvoke-RestMethod -Uri "https://api.securitycenter.microsoft.com/api/indicators" -Method POST -Headers $headers -Body ($body | ConvertTo-Json)' },
+
+  // ── CSF: RECOVER ──
+  'RC-01':{ portal:'defender',  path:'Action center → History tab',
+    action:'Document the device release process: (1) Review AIR investigation evidence, (2) Confirm no active IOCs, (3) Approve remediation in Action center, (4) Release isolation, (5) Monitor device for 24hrs post-release. Require SOC Manager sign-off.' },
+  'RC-02':{ portal:'defender',  path:'Action center → Pending actions',
+    action:'Review and action all pending items daily. Set SLA: approve or reject within 4hrs for Critical, 24hrs for High. Assign a named analyst to own the Action center review each shift. Track outstanding actions as a KPI.' },
+  'RC-03':{ portal:'internal',  path:'Incident management system (ServiceNow / SharePoint)',
+    action:'Create a PIR template with sections: Executive summary, Timeline, Root cause, Attack path, Containment actions, Eradication steps, Recovery steps, IOCs, Affected assets, Secure Score delta, Recommended control improvements.' },
+  'RC-04':{ portal:'defender',  path:'Secure Score → Improvement actions → Filter by product: MDE',
+    action:'Review improvement actions monthly. Assign each action to a responsible team with a target completion date. Track score increase per action in the remediation tracker. Aim for ≥5-point improvement per month.' },
+  'RC-05':{ portal:'defender',  path:'Threat intelligence → Threat analytics → [Report] → Mitigations tab',
+    action:'Open each active threat report and review the Mitigations tab. It shows which recommended mitigations are applied vs. not applied for your devices. Track mitigation % in the post-incident review dashboard.' },
+  'RC-06':{ portal:'defender',  path:'Reports → Device health and compliance',
+    action:'Pull quarterly metrics: total onboarded devices, % Active sensors, % compliant with AV policy, Exposure score trend, top 10 CVEs unpatched. Present in QBR with month-over-month trend data.' },
+  'RC-07':{ portal:'defender',  path:'Settings → Endpoints → Microsoft Defender Experts',
+    action:'If licensed for MDE Plan 2, navigate to Settings and enable Defender Experts for Hunting or Microsoft Defender Experts for XDR. Configure escalation email and Teams channel for Experts notifications.' },
+
+  // ── CE: FIREWALLS ──
+  'CE-FW-01':{ portal:'intune', path:'Endpoint security → Firewall → Windows Firewall → Create policy',
+    action:'Enable Defender Firewall on all profiles (Domain/Private/Public). Set inbound default to Block, outbound to Allow. Enable log of dropped packets (4096 KB). Assign to all Windows device groups.' },
+  'CE-FW-02':{ portal:'intune', path:'Endpoint security → Attack surface reduction → Network protection',
+    action:'Set Network Protection to Block mode. Assign to all device groups. Review Network protection events in Defender portal → Reports → Web protection to validate blocking behavior.',
+    cmd:'Get-MpPreference | Select EnableNetworkProtection\n# 0=Disabled, 1=Audit, 2=Block' },
+  'CE-FW-03':{ portal:'defender', path:'Settings → Endpoints → Web content filtering → Add policy',
+    action:'Create a policy targeting all device groups. Block categories: Malicious sites, Hacking, Illegal activity, Adult content. Monitor hits via Reports → Web protection → Web content filtering.' },
+  'CE-FW-04':{ portal:'intune', path:'Devices → Configuration profiles → Create → Templates → SmartScreen',
+    action:'Enable SmartScreen for Microsoft Edge and Windows apps. Set "Block unverified files" and "Warn about malicious sites". Deploy to all Windows and Edge-managed profiles.' },
+  'CE-FW-05':{ portal:'internal', path:'Firewall policy documentation + Defender portal audit',
+    action:'Enumerate all inbound firewall rules on in-scope devices. Export via PowerShell. Document each approved rule with: port, protocol, source, business justification, and approver. Review quarterly.',
+    cmd:'# Export current firewall rules\nGet-NetFirewallRule | Where-Object {$_.Enabled -eq "True" -and $_.Direction -eq "Inbound"} | Select DisplayName, LocalPort, Protocol | Export-Csv fw-rules.csv' },
+  'CE-FW-06':{ portal:'intune', path:'Endpoint security → Firewall → Create policy (Servers group)',
+    action:'Create a separate, stricter firewall policy scoped to the Servers device group. Allow inbound only on management ports from approved source IPs. Block all other inbound. Log all dropped packets.' },
+
+  // ── CE: SECURE CONFIGURATION ──
+  'CE-SC-01':{ portal:'intune', path:'Endpoint security → Security baselines → Windows 10/11 Baseline',
+    action:'Create and deploy the Microsoft Security Baseline for Windows 10/11. Assign to All Devices. Review the per-setting compliance report. Document any intentional deviations with a risk acceptance sign-off.' },
+  'CE-SC-02':{ portal:'intune', path:'Endpoint security → Security baselines → Windows Server Baseline',
+    action:'Deploy the Windows Server Baseline profile to the Servers device group. Validate compliance rate ≥95% in Intune reports. Investigate non-compliant settings and remediate or document exceptions.' },
+  'CE-SC-03':{ portal:'intune', path:'Endpoint security → Antivirus → Windows Security experience → Tamper protection',
+    action:'Set TamperProtection = Enabled in the Antivirus policy. Confirm via Intune device status report that all devices reflect the tamper-protected state. Alert on any device showing TamperProtected = False.',
+    cmd:'Get-MpComputerStatus | Select IsTamperProtected, AMRunningMode' },
+  'CE-SC-04':{ portal:'intune', path:'Devices → Configuration profiles → Settings catalog → Search "Services"',
+    action:'Disable via Settings Catalog or Administrative Templates: Print Spooler (on non-print servers), Remote Registry, Telnet Client, FTP Client, SNMP Service. Document each with business justification.' },
+  'CE-SC-05':{ portal:'intune', path:'Endpoint security → Attack surface reduction → Exploit protection → Controlled folder access',
+    action:'Enable CFA in Audit mode first. After 2 weeks, review Reports → Controlled folder access in Defender portal. Add whitelisted apps, then enforce Block mode. Monitor for new false positives after enforcement.' },
+  'CE-SC-06':{ portal:'intune', path:'Endpoint security → Attack surface reduction → ASR rules',
+    action:'Enable in Block mode: "Block all Office applications from creating child processes" (D4F940AB) and "Block Office macro code from Win32 API calls" (92E97FA1). Test with pilot group, then deploy broadly.' },
+  'CE-SC-07':{ portal:'intune', path:'Devices → Configuration profiles → Settings catalog → Search "AutoPlay"',
+    action:'Disable AutoPlay for all drives and AutoRun for all media types via Settings Catalog. Apply to All Devices. Verify compliance in Intune device configuration report.' },
+  'CE-SC-08':{ portal:'intune', path:'Devices → Configuration profiles → Settings catalog → Search "Screen timeout"',
+    action:'Set Interactive logon: Machine inactivity limit to 900 seconds (15 minutes) via Settings Catalog. Also configure screensaver timeout and password-on-resume requirement in the same profile.' },
+
+  // ── CE: USER ACCESS CONTROL ──
+  'CE-UAC-01':{ portal:'entra', path:'Security → Conditional Access → New policy',
+    action:'Create a CA policy requiring MFA for All Users accessing All Cloud Apps. Use Authentication strengths to require phishing-resistant MFA (FIDO2 or Authenticator app) for privileged roles. Exclude break-glass accounts.' },
+  'CE-UAC-02':{ portal:'intune', path:'Endpoint security → Account protection → Local admin settings',
+    action:'Use Windows LAPS (Local Administrator Password Solution) via Intune to manage local admin credentials. Set standard user accounts via Intune enrollment to remove local admin rights. Audit via TVM Recommendations.' },
+  'CE-UAC-03':{ portal:'defender', path:'Settings → Permissions → Roles → Add item',
+    action:'Assign only the minimum required role to each analyst. Tier 1: Security Reader. Tier 2: Security Operator. Tier 3: Security Administrator (scoped to specific device groups). Review all assignments quarterly.' },
+  'CE-UAC-04':{ portal:'intune', path:'Endpoint security → Account protection → Credential Guard',
+    action:'Enable Credential Guard via the Account Protection policy (Credential Guard = Enabled with UEFI lock). Deploy to all eligible Windows 10/11 and Server 2016+ devices. Verify via System Information on device.',
+    cmd:'# Check Credential Guard status\nmsinfo32 → System Summary → Check "Virtualization-based security"' },
+  'CE-UAC-05':{ portal:'entra', path:'Users → All users → Filter: Sign-in activity → Last sign-in',
+    action:'Export users with last sign-in > 30 days. Review with HR to confirm active/inactive status. Disable inactive accounts. Set an automated Entra lifecycle workflow to disable accounts after 30 days of inactivity.' },
+  'CE-UAC-06':{ portal:'defender', path:'Settings → Device groups → Add group',
+    action:'Create a PAW (Privileged Access Workstation) device group using a device tag (e.g., tag = PAW). Apply stricter policy: Full automation AIR, max ASR enforcement, enhanced monitoring. Restrict group RBAC to Security Admins only.' },
+
+  // ── CE: MALWARE PROTECTION ──
+  'CE-MP-01':{ portal:'intune', path:'Endpoint security → Antivirus → Microsoft Defender Antivirus',
+    action:'Configure: Cloud-delivered protection = Enabled (High+), Real-time protection = Enabled, Behavior monitoring = Enabled, Submit samples = Automatically send safe samples. Apply to All Devices.',
+    cmd:'Get-MpPreference | Select CloudBlockLevel, RealTimeProtectionEnabled, BehaviorMonitoringEnabled, CloudExtendedTimeout' },
+  'CE-MP-02':{ portal:'intune', path:'Endpoint security → Antivirus → Antivirus → MAPS → Join Microsoft MAPS',
+    action:'Set "Join Microsoft MAPS" to Advanced MAPS in the Antivirus policy. This enables real-time cloud-based lookups for unknown file classification. Pair with automatic sample submission.' },
+  'CE-MP-03':{ portal:'intune', path:'Endpoint security → Antivirus → Microsoft Defender Antivirus → PUA protection',
+    action:'Set PUA Protection = Block in the Antivirus policy. This prevents installation of adware, bundleware, coin miners, and browser hijackers. Review PUA detections in Defender portal Reports → Threat protection.' },
+  'CE-MP-04':{ portal:'intune', path:'Endpoint security → Antivirus → Antivirus → Behavior monitoring',
+    action:'Confirm Behavior Monitoring = Enabled in the Antivirus policy. This is separate from real-time protection and covers suspicious runtime behavior patterns not matched by signatures. Verify with Get-MpPreference.',
+    cmd:'Get-MpPreference | Select DisableBehaviorMonitoring\n# Should return False' },
+  'CE-MP-05':{ portal:'intune', path:'Endpoint security → Antivirus → Scheduled scan settings',
+    action:'Set: Scheduled scan day = 0 (daily for quick scan), Scheduled scan time = off-hours (e.g., 02:00), Run full scan on catch-up = Enabled. Monthly full scan on Sunday 03:00. Monitor scan completion in Defender Reports.' },
+  'CE-MP-06':{ portal:'defender', path:'Reports → Device health and compliance → Sensor health tab',
+    action:'Filter devices by Sensor health = Inactive. Investigate root causes: broken connectivity, uninstalled agent, OS conflicts. Set a 100% Active sensor target and report coverage % in monthly SOC metrics.' },
+
+  // ── CE: PATCH MANAGEMENT ──
+  'CE-PU-01':{ portal:'defender', path:'Vulnerability management → Dashboard → Exposure score',
+    action:'Review Exposure Score and top 25 CVEs by exposed devices. Use the Remediation tab to track open items. Set exposure score reduction as a team KPI. Export weekly trend data to the patch management tracker.' },
+  'CE-PU-02':{ portal:'intune',   path:'Devices → Windows → Update rings for Windows 10 and later',
+    action:'Create an update ring: Quality update deferral = 0 days (security patches deploy immediately), Feature update deferral = 7-14 days. Enable Expedite for critical updates. Target all Windows devices.' },
+  'CE-PU-03':{ portal:'defender', path:'Vulnerability management → Event notifications → Add notification rule',
+    action:'Create a TVM notification rule: trigger on newly discovered CVE with CVSS ≥ 9.0 AND exposed device count ≥ 1. Route to SOC email. Set 14-day remediation SLA in the notification body template.' },
+  'CE-PU-04':{ portal:'defender', path:'Vulnerability management → Software inventory → Filter: End of support',
+    action:'Filter the software inventory by "End of support" status. Export the list and assign each EOS product to an asset owner via the Remediation workflow. Set 30-day upgrade or decommission target per CE requirements.' },
+  'CE-PU-05':{ portal:'internal', path:'Monthly patch review meeting (calendar invite + Defender TVM export)',
+    action:'Schedule a monthly patch review using TVM Recommendations export as the agenda. Track: % CVEs remediated within SLA, new critical CVEs discovered, EOS software count. Record meeting minutes as audit evidence.' },
+
+  // ── SOC2 ──
+  'SOC-CC1-01':{ portal:'defender', path:'Settings → Permissions → Roles → Export',
+    action:'Export RBAC role assignments. Create a formal RACI document listing each role, assigned users/groups, device group scope, and allowed actions. Store in audit evidence folder. Review quarterly.' },
+  'SOC-CC1-02':{ portal:'entra',    path:'Roles and administrators → Security Administrator → Assignments',
+    action:'Designate named individuals as accountable for MDE operations (e.g., CISO = owner, SOC Manager = operator). Document the accountability chain in the governance policy with names and dates of appointment.' },
+  'SOC-CC1-03':{ portal:'internal', path:'Policy management system (SharePoint / GRC platform)',
+    action:'Draft MDE Security Policy document. Sections: Purpose, Scope, Roles, Policy statements (one per control area), Compliance requirements, Review schedule (annual), Exceptions process. Obtain executive sign-off.' },
+  'SOC-CC2-01':{ portal:'defender', path:'Settings → Email notifications → Incidents → Add rule',
+    action:'Create notification rules for High and Critical incidents. Recipients: SOC team DL + on-call engineer. Test by simulating a test incident. Log delivery confirmation as audit evidence.' },
+  'SOC-CC2-02':{ portal:'sentinel', path:'Workbooks → Add workbook → Microsoft Defender for Endpoint',
+    action:'Deploy or customize a Sentinel workbook showing: incident count by severity (30d trend), MTTD, MTTR, analyst closed vs. open ratio, top 10 alert types. Schedule automated export for stakeholder distribution.' },
+  'SOC-CC2-03':{ portal:'internal', path:'Incident Response plan documentation',
+    action:'Define communication procedures in the IR plan: who notifies customers, what the notification SLA is (e.g., 72hrs for data breach), which regulatory bodies to notify, and the escalation chain template.' },
+  'SOC-CC3-01':{ portal:'defender', path:'Vulnerability management → Dashboard → Export + Secure Score → Export',
+    action:'Capture a point-in-time export of TVM Exposure Score, top 10 recommendations, and software vulnerability count. Store as the formal risk assessment baseline with date and analyst signature.' },
+  'SOC-CC3-02':{ portal:'internal', path:'Risk register / GRC platform',
+    action:'Define risk acceptance criteria: what CVSS score, device count, or exposure level triggers mandatory remediation vs. accepted risk. Document each accepted risk with: risk description, residual risk, approver, review date.' },
+  'SOC-CC3-03':{ portal:'defender', path:'Secure Score → History tab + Vulnerability management → Exposure score',
+    action:'Schedule quarterly risk assessment meeting. Use Secure Score trend and TVM Exposure Score as primary risk indicators. Document the meeting agenda, findings, and remediation commitments as SOC 2 evidence.' },
+  'SOC-CC4-01':{ portal:'defender', path:'Reports → Device health and compliance → Sensor health',
+    action:'Set a recurring (weekly) Sensor health report export. Alert on any device with sensor status = Inactive for > 24 hours. Document monitoring cadence and alert response as continuous monitoring evidence.' },
+  'SOC-CC4-02':{ portal:'sentinel', path:'Analytics → Create rule → Scheduled query rule',
+    action:'Create analytics rules for: Impossible travel, New privileged account created, First-time seen binary executed, Lateral movement (Defender Identity + MDE fusion). Set alert severity and owner assignment.' },
+  'SOC-CC4-03':{ portal:'defender', path:'Secure Score → Improvement actions → History',
+    action:'Define a monthly Secure Score review process. Assign a named analyst to own the review. Document score changes, completed actions, and new recommendations each month as monitoring evidence.' },
+  'SOC-CC5-01':{ portal:'intune',   path:'Endpoint security → Attack surface reduction → Policies',
+    action:'Deploy all ASR rules via Intune policy. Maintain a separate exceptions register listing any rules in Audit (not Block) mode, with business justification and CISO approval documented per exception.' },
+  'SOC-CC5-02':{ portal:'intune',   path:'Devices → Compliance policies → Create policy → Windows',
+    action:'Create compliance policy requiring: MDE risk level ≤ Medium, Defender AV = Enabled, Firewall = Enabled. Link to Entra CA policy blocking non-compliant devices from corporate resources.' },
+  'SOC-CC5-03':{ portal:'internal', path:'Change management system (ServiceNow / Jira)',
+    action:'Define a change management procedure: change request form, peer review required, test in staging, CISO or SOC Manager approval for security-impacting changes, post-change validation checklist.' },
+  'SOC-CC6-01':{ portal:'entra',    path:'Security → Conditional Access → New policy → All users, All cloud apps',
+    action:'Require MFA for all users accessing Defender portal and Microsoft 365 apps. Use authentication strength to enforce phishing-resistant MFA for Security Administrator role. Log CA policy changes as audit evidence.' },
+  'SOC-CC6-02':{ portal:'entra',    path:'Security → Conditional Access → Device compliance condition',
+    action:'Add a Device compliance condition to the existing CA policy requiring device risk ≤ Medium (MDE signal via Intune). Test with a report-only policy first. Monitor non-compliant device count in Intune.' },
+  'SOC-CC6-03':{ portal:'defender', path:'Settings → Permissions → Roles',
+    action:'Conduct quarterly access review: export all role assignments, compare against current job roles, remove or downgrade stale assignments. Document the review with analyst name, date, and findings.' },
+  'SOC-CC6-04':{ portal:'entra',    path:'Identity Governance → Privileged Identity Management → Roles → Security Administrator',
+    action:'Configure PIM for Security Administrator: require justification + approval for activation, set max activation time to 4 hours, require MFA on activation, send notifications to SOC Manager on activation.' },
+  'SOC-CC6-05':{ portal:'entra',    path:'App registrations → All applications → Filter by owner / permission',
+    action:'Audit all app registrations with SecurityAlert.Read, Machine.ReadWrite.All, or similar MDE permissions. Document each, rotate client secrets every 90 days, and remove unused registrations. Store secrets in Key Vault.',
+    cmd:'# List app registrations with MDE API permissions\nGet-AzADServicePrincipal | Where-Object {$_.AppId -in $mdeApps} | Select DisplayName, AppId' },
+  'SOC-CC7-01':{ portal:'defender', path:'Settings → Endpoints → Automation level',
+    action:'Configure and document AIR automation levels per device group. Record decisions in the operations runbook: why specific groups use semi-auto vs. full-auto. Review Action center daily and document outcomes.' },
+  'SOC-CC7-02':{ portal:'internal', path:'Incident Response plan / SLA policy document',
+    action:'Define and publish formal SLAs: Critical ≤ 1hr acknowledgement, High ≤ 4hr, Medium ≤ 24hr, Low ≤ 72hr. Track SLA compliance in Sentinel workbook as a SOC 2 monitoring control.' },
+  'SOC-CC7-03':{ portal:'defender', path:'Settings → Endpoints → Advanced features → Live Response',
+    action:'Enable Live Response and restrict initiation to Security Admin role. All Live Response sessions are logged in the MDE audit log. Ingest logs to Sentinel. Conduct quarterly capability test with documented results.' },
+  'SOC-CC7-04':{ portal:'defender', path:'Assets → Devices → [Non-prod test device] → Isolate device',
+    action:'Perform a live device isolation test on a nominated non-production device. Document: time to isolate, isolation verification, communication during isolation, release approval, and post-release monitoring. File as SOC 2 evidence.' },
+  'SOC-CC7-05':{ portal:'internal', path:'Version control repository (GitHub / Azure DevOps)',
+    action:'Export JSON config from this dashboard monthly. Commit to a git repository with meaningful commit message (e.g., "Monthly config snapshot — MM/YYYY"). Document the recovery procedure for restoring MDE settings from config.' },
+  'SOC-CC8-01':{ portal:'internal', path:'Git repository → MDE config baseline branch',
+    action:'Use this dashboard\'s JSON export as the config baseline. Commit to a dedicated git repo. All MDE policy changes must update this config. PR-based approval workflow enforces change control on the baseline.' },
+  'SOC-CC8-02':{ portal:'internal', path:'Change management system / ServiceNow → Security change type',
+    action:'Define a change request template for MDE policy changes. Required fields: requestor, business justification, risk level, test plan, rollback plan, approver (SOC Manager), post-deployment validation steps.' },
+  'SOC-CC8-03':{ portal:'sentinel', path:'Logs → MicrosoftSecurityActivity or OfficeActivity → Query',
+    action:'Ingest Defender portal admin audit logs to Sentinel. Query MicrosoftSecurityActivity table for portal configuration changes. Review monthly for any undocumented changes and raise change management exceptions.',
+    cmd:'// KQL: Admin activity in Defender portal\nMicrosoftSecurityActivity\n| where ActivityType has_any ("PolicyChange","RoleAssignment","SettingsUpdate")\n| project TimeGenerated, AccountDisplayName, ActivityType, Target' },
+  'SOC-CC9-01':{ portal:'internal', path:'Vendor risk register / Third-party risk management system',
+    action:'Add Microsoft Cloud (Defender, Sentinel, Intune, Entra) as a vendor entry. Document: service criticality, data classification, annual review date, Microsoft compliance certifications (ISO 27001, SOC 2 Type II). Review annually.' },
+  'SOC-CC9-02':{ portal:'azure',    path:'Microsoft Trust Center (trust.microsoft.com) → Products → MDE',
+    action:'Download Microsoft\'s Data Processing Agreement (DPA) from the Microsoft Trust Center. Confirm MDE data residency region matches your compliance requirements. Add to vendor register with review date.' },
+  'SOC-CC9-03':{ portal:'defender', path:'Settings → Device groups + Settings → Permissions → Roles',
+    action:'For MSSP multi-tenant deployments, ensure each client\'s device groups are scoped to separate RBAC roles. Verify that no analyst role can access devices outside their assigned client groups. Test cross-group access quarterly.' },
+
+  // ── NIST 800-53 ──
+  'N53-AC-01':{ portal:'defender', path:'Settings → Permissions → Roles → Add item',
+    action:'Implement formal account management: documented provisioning (role + scope + justification), quarterly review process, and deprovisioning workflow (triggered by HR off-boarding). Keep audit evidence for each action.' },
+  'N53-AC-02':{ portal:'entra',    path:'Identity Governance → Access reviews → Create access review',
+    action:'Create a quarterly access review targeting the Security Administrator and Security Operator roles in Defender portal. Assign to Security Manager as reviewer. Auto-apply revocation for accounts not reviewed.' },
+  'N53-AC-03':{ portal:'entra',    path:'Security → Conditional Access → New policy',
+    action:'Enforce role-based access controls at the CA layer: restrict Defender portal access to devices that are compliant and in approved locations. Require MFA for all access. Block access for non-privileged users from unmanaged devices.' },
+  'N53-AC-04':{ portal:'entra',    path:'Identity Governance → Privileged Identity Management + Defender Portal → Live Response',
+    action:'Document remote access procedures for Live Response. Require PIM activation before initiating. Set max session time to 2 hours. All sessions must be logged and reviewed within 48 hours by SOC Manager.' },
+  'N53-AC-05':{ portal:'intune',   path:'Devices → Compliance policies → Create policy → Android / iOS',
+    action:'Create compliance policies for mobile platforms requiring: MDM enrollment, screen lock with PIN, OS version requirements, and MDE risk ≤ Low for mobile. Block non-compliant mobiles from corporate email via CA.' },
+  'N53-AU-01':{ portal:'sentinel', path:'Data connectors → Microsoft Defender XDR → Connect',
+    action:'Enable the Microsoft Defender XDR data connector in Sentinel. Select all incident, alert, and advanced hunting tables. Confirm raw events flow to Log Analytics workspace. Set workspace retention to 12 months minimum.' },
+  'N53-AU-02':{ portal:'defender', path:'Hunting → Advanced hunting → New query',
+    action:'Write scheduled KQL queries for audit event types: admin portal actions, role assignment changes, policy modifications, Live Response sessions, device isolation events. Save as custom detections with weekly schedule.',
+    cmd:'// KQL: Audit portal admin actions\nCloudAppEvents\n| where Application == "Microsoft Defender ATP"\n| where ActionType in ("ConfigurationChange","RoleChange","PolicyUpdate")\n| project Timestamp, AccountDisplayName, ActionType, RawEventData' },
+  'N53-AU-03':{ portal:'sentinel', path:'Workbooks → Add workbook → Create new',
+    action:'Build a Sentinel workbook showing: admin activity timeline, top changed configurations, role assignment history, anomalous admin access (off-hours, new location). Schedule weekly review. Document review as AU-6 evidence.' },
+  'N53-AU-04':{ portal:'sentinel', path:'Settings → Workspace settings → Usage and estimated costs → Data retention',
+    action:'Set Log Analytics workspace retention to 90 days interactive + 9 months archive (total 12 months) at minimum. For AU-11 compliance, retain for duration of system operation. Document retention policy in the system security plan.' },
+  'N53-AU-05':{ portal:'defender', path:'Hunting → Advanced hunting → New query',
+    action:'Validate event generation by running KQL queries for each required audit event type: ProcessCreated, NetworkConnectionInspected, FileCreated, RegistryValueSet. Document which event types are captured as AU-12 evidence.',
+    cmd:'// KQL: Verify event type coverage\nDeviceEvents\n| summarize EventCount=count() by ActionType\n| order by EventCount desc\n| take 20' },
+  'N53-CM-01':{ portal:'internal', path:'Version control repository (git)',
+    action:'Export this dashboard\'s JSON configuration as the CM-2 baseline document. Store in a protected git repository with access limited to Security Engineers. All deviations from baseline require formal change request.' },
+  'N53-CM-02':{ portal:'intune',   path:'Endpoint security → Security baselines → Windows 10/11',
+    action:'Deploy the Microsoft Security Baseline via Intune. Monitor compliance rate under Endpoint security → Security baselines → [Baseline] → Device status. Target ≥95% compliant. Document all deviations as CM-6 exceptions.' },
+  'N53-CM-03':{ portal:'intune',   path:'Endpoint security → Attack surface reduction → Create policy',
+    action:'Deploy ASR rules as a formal configuration management control. Document each rule\'s state (Audit/Block) in the CM-6 settings register. Any rule not in Block mode requires documented risk acceptance.' },
+  'N53-CM-04':{ portal:'intune',   path:'Devices → Configuration profiles → Settings catalog',
+    action:'Create a profile disabling non-essential services (Print Spooler, Remote Registry, Telnet, FTP client). For each disabled service, document the CM-7 least functionality justification in the system security plan.' },
+  'N53-CM-05':{ portal:'defender', path:'Vulnerability management → Software inventory',
+    action:'Review software inventory weekly for unauthorized software. Create a TVM alert rule for newly discovered software outside the approved software list. Track unauthorized software findings as CM-11 violations.' },
+  'N53-IA-01':{ portal:'entra',    path:'Security → Conditional Access → Authentication strengths',
+    action:'Configure Authentication Strengths requiring FIDO2 security keys or Microsoft Authenticator (phishing-resistant) for Security Administrator role. Apply CA policy requiring this strength for Defender portal access.' },
+  'N53-IA-02':{ portal:'entra',    path:'Identity Governance → Privileged Identity Management → Roles',
+    action:'Configure PIM for Security Administrator: max activation 4 hours, require justification, require approval (SOC Manager), require phishing-resistant MFA on activation. Log all activations to Sentinel for IA-2(1) evidence.' },
+  'N53-IA-03':{ portal:'azure',    path:'Key Vault → Secrets → [Service account credential]',
+    action:'Store all MDE API service account credentials in Azure Key Vault. Configure automatic rotation every 90 days using Key Vault rotation policies. Audit secret access logs monthly. Remove unused service accounts.' },
+  'N53-IA-04':{ portal:'intune',   path:'Devices → Configuration profiles → Templates → SCEP certificate',
+    action:'Create a SCEP certificate profile for device identity. Use an internal CA or NDES. Bind the certificate to the MDE enrollment token. This provides certificate-based device authentication during MDE onboarding.' },
+  'N53-IR-01':{ portal:'internal', path:'IR plan document (SharePoint / GRC platform)',
+    action:'Create a formal IR Plan covering: Preparation (tools, contacts, training), Detection (MDE alert sources), Analysis (triage procedure), Containment (isolation workflow), Eradication (AIR + Live Response), Recovery, and PIR.' },
+  'N53-IR-02':{ portal:'defender', path:'Settings → Endpoints → Automation level + Action center',
+    action:'Configure AIR per device group and document automation decisions. Write manual response runbooks for scenarios where AIR is set to Semi-automatic. Store runbooks in a SOC knowledge base accessible during incidents.' },
+  'N53-IR-03':{ portal:'sentinel', path:'Workbooks → Create → Incident tracking dashboard',
+    action:'Build a Sentinel workbook tracking: open incident count by severity, MTTD (alert fire → analyst acknowledge), MTTR (acknowledge → closed), incidents per analyst, SLA breach rate. Review in weekly SOC standup.' },
+  'N53-IR-04':{ portal:'azure',    path:'Power Automate → Create → Automated flow → Sentinel incident trigger',
+    action:'Create escalation flows: High/Critical incident → email SOC Manager + on-call analyst, post to Teams SOC channel, create incident ticket in ServiceNow. Test escalation chain quarterly and document results.' },
+  'N53-IR-05':{ portal:'defender', path:'Email & collaboration → Attack simulator training',
+    action:'Conduct annual tabletop exercise (IR-8 evidence). Also run live technical test: deploy attack simulation via Attack Simulator, validate MDE detection, walk through full response chain, document gaps as plan improvement items.' },
+  'N53-RA-01':{ portal:'defender', path:'Secure Score → Overview + Vulnerability management → Dashboard',
+    action:'Perform formal risk assessment using Secure Score (control posture) and Exposure Score (vulnerability risk) as primary metrics. Document findings in a Risk Assessment Report with risk ratings and remediation roadmap.' },
+  'N53-RA-02':{ portal:'defender', path:'Vulnerability management → Settings → Assessment schedules',
+    action:'Configure continuous scanning: enable network-based device discovery, set authenticated scan schedule for servers, enable automatic software inventory update. Verify daily scan completion in TVM dashboard.' },
+  'N53-RA-03':{ portal:'defender', path:'Vulnerability management → Recommendations → [Recommendation] → Manage exposure',
+    action:'For each TVM recommendation, document the risk response decision: Mitigate (remediation task), Accept (risk acceptance with approver), Transfer (vendor patch dependency), or Avoid (decommission asset). Maintain a risk decision register.' },
+  'N53-SC-01':{ portal:'intune',   path:'Endpoint security → Attack surface reduction → Network protection',
+    action:'Deploy Network Protection in Block mode as an SC-5 denial-of-service defense control. It blocks connections to malicious IPs and exploit kits at kernel level before the connection establishes. Assign to all device groups.' },
+  'N53-SC-02':{ portal:'defender', path:'Settings → Endpoints → Web content filtering + Network protection',
+    action:'Configure WCF to block malicious, high-risk, and illegal categories (SC-7 boundary protection). Network Protection handles DNS-layer filtering for the same categories at kernel level, providing defense-in-depth.' },
+  'N53-SC-03':{ portal:'intune',   path:'Endpoint security → Disk encryption → BitLocker',
+    action:'Configure SC-28 protection at rest: OS drive XTS-AES 256-bit with TPM + PIN, data drives AES-CBC 256-bit. Escrow recovery keys to Entra ID. Monitor full encryption in Intune Encryption report. Target 100% encrypted.',
+    cmd:'# Check BitLocker status\nGet-BitLockerVolume | Select MountPoint, EncryptionMethod, VolumeStatus, ProtectionStatus' },
+  'N53-SC-04':{ portal:'intune',   path:'Endpoint security → Attack surface reduction → ASR rules',
+    action:'Enable ASR rules providing SC-39 process isolation: "Block process creations from PSExec and WMI commands" and "Block untrusted and unsigned processes from USB". These prevent malicious process injection techniques.' },
+  'N53-SI-01':{ portal:'intune',   path:'Endpoint security → Antivirus → Cloud-delivered protection',
+    action:'Configure: Cloud-delivered protection = Enabled (High+), Automatic sample submission = Automatic, Block at first sight = Enabled. This is the SI-3 malicious code protection control for MDE. Verify with Get-MpPreference.',
+    cmd:'Get-MpPreference | Select CloudBlockLevel, CloudExtendedTimeout, SubmitSamplesConsent, EnableNetworkProtection' },
+  'N53-SI-02':{ portal:'intune',   path:'Devices → Windows → Update rings + Vulnerability management',
+    action:'Set update ring: quality updates deferral = 0 days. Define SLA in policy: Critical CVE ≤ 7 days, High ≤ 14 days, Medium ≤ 30 days. Track SLA compliance via TVM Recommendations remediation age report.' },
+  'N53-SI-03':{ portal:'defender', path:'Settings → Endpoints → Advanced features → EDR in block mode',
+    action:'Enable EDR in Block mode to detect and block malicious artifacts based on behavioral EDR signals, even when a third-party AV is the primary solution. This provides SI-3(1) central management of malicious code protection.' },
+  'N53-SI-04':{ portal:'sentinel', path:'Analytics → Create rule → Import from template gallery',
+    action:'Deploy Sentinel analytics rules covering MITRE ATT&CK techniques mapped to MDE telemetry (T1059 Command Scripting, T1078 Valid Accounts, T1021 Remote Services, T1105 Ingress Tool Transfer). Track ATT&CK coverage % as a KPI.',
+    cmd:'// KQL: MITRE ATT&CK technique coverage check\nSecurityAlert\n| extend Techniques=extract_all(@"T[0-9]{4}",tostring(ExtendedProperties))\n| mv-expand Techniques\n| summarize AlertCount=count() by tostring(Techniques)\n| order by AlertCount desc' },
+  'N53-SI-05':{ portal:'intune',   path:'Endpoint security → Antivirus → Tamper protection + App control for business',
+    action:'Enable Tamper Protection (SI-7 for AV/EDR integrity). For high-risk device groups, also deploy Windows Defender Application Control (WDAC) policy via Intune to restrict code execution to signed, approved software only.' },
+};
+
+function getPortalBadge(portalKey) {
+  const p = PORTALS[portalKey] || PORTALS.internal;
+  return `<span class="portal-badge" style="color:${p.color};background:${p.bg}">${p.label}</span>`;
+}
+
+function toggleComply(taskId) {
+  const btn   = document.getElementById('cb-' + taskId);
+  const panel = document.getElementById('cp-' + taskId);
+  if (!btn || !panel) return;
+  const open = panel.classList.toggle('open');
+  btn.classList.toggle('open', open);
+  btn.querySelector('.comply-arrow').textContent = open ? '▾' : '▸';
+}
+
+// ════════════════════════════════════════════
 //  STATE
 // ════════════════════════════════════════════
 let STATE = {};
@@ -1209,6 +1625,21 @@ function renderCatBlock(fw, cat) {
 function renderTask(fid, t, color) {
   const s = STATE[fid][t.id] || { status:'pending', notes:'' };
   const done = s.status === 'complete';
+  const remedy = REMEDIES[t.id];
+  const complyHtml = remedy ? `
+    <button class="comply-toggle" id="cb-${t.id}" onclick="toggleComply('${t.id}')">
+      <i class="comply-arrow">▸</i> How to comply
+    </button>
+    <div class="comply-panel" id="cp-${t.id}" style="--fw-color:${color}">
+      <div class="comply-panel-inner">
+        <div class="comply-portal-row">
+          ${getPortalBadge(remedy.portal)}
+          <span class="comply-path">${remedy.path}</span>
+        </div>
+        <div class="comply-action">${remedy.action}</div>
+        ${remedy.cmd ? `<div class="comply-cmd-wrap"><div class="comply-cmd-label">💻 Command / Query</div><div class="comply-cmd">${remedy.cmd}</div></div>` : ''}
+      </div>
+    </div>` : '';
   return `<div class="task${done?' done':''}" id="tr-${fid}-${t.id}" style="--fw-color:${color}">
     <input type="checkbox" class="task-cb" ${done?'checked':''} onchange="toggleDone('${fid}','${t.id}',this)"/>
     <div class="task-body">
@@ -1218,6 +1649,7 @@ function renderTask(fid, t, color) {
         <span class="pbadge pb-${t.pri}">${t.pri}</span>
       </div>
       <div class="task-desc">${t.desc}</div>
+      ${complyHtml}
     </div>
     <select class="task-status ss-${s.status}" onchange="updateStatus('${fid}','${t.id}',this)">
       <option value="pending"  ${s.status==='pending' ?'selected':''}>⬜ Not Started</option>
