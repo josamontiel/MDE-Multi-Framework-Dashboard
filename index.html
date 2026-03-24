@@ -59,6 +59,7 @@
 :root {
   --csf-c:#0078D4; --csf-g:rgba(0,120,212,.12);
   --ce-c:#16a34a;  --ce-g:rgba(22,163,74,.12);
+  --cep-c:#0d9488; --cep-g:rgba(13,148,136,.12);
   --soc-c:#7c3aed; --soc-g:rgba(124,58,237,.12);
   --n53-c:#ea580c; --n53-g:rgba(234,88,12,.12);
 }
@@ -997,6 +998,68 @@ const FW = {
           {id:'N53-SI-05',name:'Enable Tamper Protection & Code Integrity (SI-7)',ref:'SI-7',pri:'high',desc:'Tamper Protection prevents modification of MDE security settings. Enable WDAC (Windows Defender Application Control) policy on high-risk groups.'},
         ]}
     ]
+  },
+
+  /* ── CYBER ESSENTIALS PLUS ── */
+  ceplus: {
+    id: 'ceplus', label: 'Cyber Essentials+', shortName: 'CE+', dot: '#0d9488', color: '#0d9488', gradient: 'var(--cep-g)',
+    emoji: '🟩',
+    desc: 'Cyber Essentials Plus — the independently verified tier of the UK government-backed CE scheme. Builds on the five CE technical controls with hands-on technical testing, evidence gathering, authenticated vulnerability scanning, and assessor-ready documentation required for certification.',
+    cats: [
+      { id:'VS', name:'VULNERABILITY SCANNING', emoji:'🔬', desc:'CE+ requires authenticated internal vulnerability scanning performed or witnessed by the assessor. All in-scope devices must show no critical or high unpatched CVEs at the point of assessment.',
+        tasks:[
+          {id:'CEP-VS-01',name:'Configure Authenticated Scanning in TVM',ref:'CE+:VulnScan',pri:'high',desc:'Enable authenticated scanning in MDE TVM for all in-scope servers and workstations. Provide credentials scoped to read-only access. Verify scan completion and telemetry in TVM dashboard.'},
+          {id:'CEP-VS-02',name:'Export Internal Vulnerability Scan Report',ref:'CE+:VulnScan',pri:'high',desc:'Run a full TVM scan and export the vulnerability report from Defender Portal. The report must show device name, CVE ID, CVSS score, patch status, and last scan date for every in-scope asset.'},
+          {id:'CEP-VS-03',name:'Verify Zero Critical/High Unpatched CVEs (CVSS ≥7)',ref:'CE+:VulnScan',pri:'high',desc:'Confirm no in-scope device has an unpatched CVE with CVSS ≥7.0 at assessment date. TVM Exposure Score must reflect remediation. Export filtered report as evidence.'},
+          {id:'CEP-VS-04',name:'Document Scan Scope & Asset Inventory for Assessor',ref:'CE+:VulnScan',pri:'high',desc:'Produce a signed asset inventory listing all in-scope devices with OS version, IP address, last scan date, and MDE sensor status. Assessor will cross-reference against scan results.'},
+          {id:'CEP-VS-05',name:'Run Network Discovery Scan — Unmanaged Device Report',ref:'CE+:VulnScan',pri:'med',desc:'Enable MDE Network Discovery and export the unmanaged device report. Any unmanaged device in scope must be onboarded or formally excluded with a documented justification for the assessor.'},
+          {id:'CEP-VS-06',name:'Schedule Recurring Pre-Assessment Scan (Weekly)',ref:'CE+:VulnScan',pri:'med',desc:'Configure a weekly TVM scan schedule to ensure the vulnerability posture is current leading up to assessment. Export the last 4 weeks of scan data as a trend baseline for the assessor evidence pack.'},
+        ]},
+      { id:'MPT', name:'MALWARE PROTECTION TESTING', emoji:'🦠', desc:'CE+ assessors independently verify that malware protection is active and effective by running test files, simulated threats, and malicious content checks on representative endpoints. All detections must be confirmed and logged.',
+        tasks:[
+          {id:'CEP-MPT-01',name:'EICAR Test File Detection Verification',ref:'CE+:MalwareTesting',pri:'high',desc:'Download the EICAR standard antivirus test file on a representative sample of in-scope devices. Confirm Defender AV detects and quarantines it immediately. Export quarantine events from Defender portal as evidence.'},
+          {id:'CEP-MPT-02',name:'Simulate Malicious Script Execution — Behavioral Block',ref:'CE+:MalwareTesting',pri:'high',desc:'Run the MDE Attack Simulator credential harvest or malware attachment simulation. Confirm behavioral detection fires and blocks the simulated threat. Export alert and action timeline as assessor evidence.'},
+          {id:'CEP-MPT-03',name:'PUA Protection Block Test',ref:'CE+:MalwareTesting',pri:'med',desc:'Attempt to download a known PUA (Potentially Unwanted Application) test sample on a representative device. Confirm PUA protection blocks the download. Export the PUA detection event from Defender portal Reports.'},
+          {id:'CEP-MPT-04',name:'Malicious Email Attachment Block Test (Attack Simulator)',ref:'CE+:MalwareTesting',pri:'high',desc:'Run a Malware Attachment simulation via Microsoft Defender Attack Simulator targeting a representative user group. Confirm Defender for Office 365 or endpoint AV blocks the attachment. Document detection rate.'},
+          {id:'CEP-MPT-05',name:'Compile AV Detection Test Results Evidence Pack',ref:'CE+:MalwareTesting',pri:'high',desc:'Compile all malware protection test results into a single evidence document: EICAR result, behavioral block result, PUA result, simulation result. Include timestamps, device names, detection method, and action taken.'},
+        ]},
+      { id:'NBT', name:'NETWORK BOUNDARY TESTING', emoji:'🌐', desc:'CE+ assessors verify that boundary firewalls and internet gateways are correctly configured by testing inbound access, web filtering, and network protection effectiveness from outside and inside the network boundary.',
+        tasks:[
+          {id:'CEP-NBT-01',name:'Web Content Filtering Block Verification Test',ref:'CE+:BoundaryTesting',pri:'high',desc:'Attempt to access known malicious and blocked-category URLs from representative in-scope devices. Confirm WCF blocks the request and logs the attempt. Export the WCF block report from Defender portal as assessor evidence.'},
+          {id:'CEP-NBT-02',name:'Network Protection C2 Block Test',ref:'CE+:BoundaryTesting',pri:'high',desc:'Attempt a connection to a known threat intelligence-listed IP or malicious domain from an in-scope endpoint. Confirm Network Protection blocks the connection at kernel level. Export the network protection event as evidence.'},
+          {id:'CEP-NBT-03',name:'Firewall Rule Audit & Boundary Evidence Export',ref:'CE+:BoundaryTesting',pri:'high',desc:'Export the current inbound firewall rule set from all device groups via PowerShell. Confirm only explicitly approved ports are open. Provide the rule export alongside the approved services register as assessor evidence.'},
+          {id:'CEP-NBT-04',name:'External Port Scan — Confirm No Unnecessary Exposure',ref:'CE+:BoundaryTesting',pri:'high',desc:'Coordinate or request an external port scan against the internet-facing boundary (or assessor will perform this). Confirm no ports are exposed beyond those documented in the approved services register. Remediate any gaps found.'},
+          {id:'CEP-NBT-05',name:'SmartScreen Block Evidence (Malicious URL / Download)',ref:'CE+:BoundaryTesting',pri:'med',desc:'Attempt to navigate to a SmartScreen-blocked URL or download a flagged file via Microsoft Edge on a representative device. Confirm SmartScreen blocks the action. Screenshot or export the block event as evidence.'},
+          {id:'CEP-NBT-06',name:'DNS Filtering Block Log Export',ref:'CE+:BoundaryTesting',pri:'med',desc:'Export the DNS filtering / Network Protection block log from Defender portal covering the 30 days prior to assessment. Confirm malicious and high-risk category DNS queries are being blocked across in-scope devices.'},
+        ]},
+      { id:'ACV', name:'ACCESS CONTROL VERIFICATION', emoji:'🔑', desc:'CE+ assessors verify that user access controls are technically enforced — not just policy-defined. MFA, admin account separation, and least privilege must be demonstrably in place across all in-scope systems.',
+        tasks:[
+          {id:'CEP-ACV-01',name:'MFA Enforcement Live Test',ref:'CE+:AccessControl',pri:'high',desc:'Demonstrate MFA enforcement live during assessment: attempt to sign in to a corporate app without MFA and confirm access is blocked by Conditional Access. Show the CA policy configuration and sign-in logs as evidence.'},
+          {id:'CEP-ACV-02',name:'Admin/User Account Separation Verification',ref:'CE+:AccessControl',pri:'high',desc:'Pull a report of all user accounts with local administrator rights on in-scope devices via Intune LAPS report or PowerShell. Confirm no standard user accounts have admin rights. Export as assessor evidence.'},
+          {id:'CEP-ACV-03',name:'MDE RBAC Scope Isolation Test',ref:'CE+:AccessControl',pri:'high',desc:'Log in as a Tier 1 analyst account and attempt to view devices outside the assigned device group scope. Confirm access is denied. Document the RBAC role configuration and the failed cross-group access attempt as evidence.'},
+          {id:'CEP-ACV-04',name:'Privileged Account MFA & PIM Verification',ref:'CE+:AccessControl',pri:'high',desc:'Demonstrate PIM just-in-time activation for Security Administrator role during assessment: show activation requires MFA, justification, and approval. Export PIM audit log for the 30 days prior as evidence.'},
+          {id:'CEP-ACV-05',name:'Inactive Account Audit Export (30-day threshold)',ref:'CE+:AccessControl',pri:'med',desc:'Export a report of all Entra ID accounts with last sign-in > 30 days. Confirm all are either disabled or have a documented exception. Provide the export with account status column as assessor evidence.'},
+          {id:'CEP-ACV-06',name:'Service Account & App Registration Access Review',ref:'CE+:AccessControl',pri:'med',desc:'Export all app registrations and service principals with MDE or M365 API permissions. Confirm all are documented, in use, and have rotated secrets within 90 days. Provide the inventory with last-used and secret-expiry dates.'},
+        ]},
+      { id:'PCE', name:'PATCH COMPLIANCE EVIDENCE', emoji:'📦', desc:'CE+ requires demonstrable patch currency — all software must be patched within 14 days of a critical or high patch release. Assessors will verify patch dates against release dates on a sample of in-scope devices.',
+        tasks:[
+          {id:'CEP-PCE-01',name:'OS Patch Currency Report — All Devices Within 14 Days',ref:'CE+:Patching',pri:'high',desc:'Export a Windows Update compliance report from Intune showing the last installed patch date for all in-scope devices. Confirm all devices have received security updates released within the past 14 days. No exceptions without documented risk acceptance.'},
+          {id:'CEP-PCE-02',name:'Application Patch Currency Export (TVM)',ref:'CE+:Patching',pri:'high',desc:'Export the TVM software vulnerability inventory filtered to High and Critical CVEs (CVSS ≥7). Confirm every vulnerable application has a remediation applied or a documented plan within 14 days of patch availability.'},
+          {id:'CEP-PCE-03',name:'Confirm Zero End-of-Support Software on In-Scope Devices',ref:'CE+:Patching',pri:'high',desc:'Export TVM software inventory filtered by "End of support" status. Confirm zero EOS products are installed on in-scope devices at assessment date. Any EOS software found must be removed or formally excluded before assessment.'},
+          {id:'CEP-PCE-04',name:'WUfB Compliance Report — Patch Deployment Timeline',ref:'CE+:Patching',pri:'high',desc:'Export the Windows Update for Business compliance report from Intune showing patch deployment dates vs. release dates. Assessor will verify the 14-day SLA is met. Export the last 3 months of patch history.'},
+          {id:'CEP-PCE-05',name:'Third-Party Software Patch Evidence (Browser, Office, Java)',ref:'CE+:Patching',pri:'high',desc:'Export TVM software inventory showing current version vs. latest available for key third-party apps (Chrome, Edge, Firefox, Office, Acrobat). Confirm all are within 14 days of latest patch release. Document version evidence per device.'},
+          {id:'CEP-PCE-06',name:'Mobile Device Patch Currency Verification',ref:'CE+:Patching',pri:'med',desc:'If mobile devices are in scope, export the Intune device compliance report showing OS version and last check-in for all enrolled iOS and Android devices. Confirm OS versions meet the minimum CE+ patch currency requirement.'},
+        ]},
+      { id:'AR', name:'ASSESSOR READINESS', emoji:'📋', desc:'CE+ involves an independent assessor conducting on-site or remote technical verification. Assessor readiness tasks ensure the organisation can demonstrate controls live, provide complete evidence packs, and respond to assessor queries promptly.',
+        tasks:[
+          {id:'CEP-AR-01',name:'Compile CE+ Evidence Pack',ref:'CE+:Readiness',pri:'high',desc:'Compile the full assessor evidence pack: asset inventory, scan reports, test results, firewall rule exports, patch reports, account reports, MFA CA policy screenshots, RBAC configuration exports. Index and date-stamp all documents.'},
+          {id:'CEP-AR-02',name:'Pre-Assessment Internal Readiness Review',ref:'CE+:Readiness',pri:'high',desc:'Conduct an internal walkthrough of all CE+ controls 2 weeks before assessment. Use the five CE control areas as the agenda. Identify and remediate any gaps found. Document the walkthrough outcomes and remediation actions taken.'},
+          {id:'CEP-AR-03',name:'Assessor Remote Access or On-Site Setup',ref:'CE+:Readiness',pri:'high',desc:'Configure assessor remote access (VPN or jump host) or prepare on-site access for the assessment day. Confirm the assessor can reach all in-scope devices and portals. Test connectivity before assessment date with a pre-assessment check call.'},
+          {id:'CEP-AR-04',name:'Scope Document & Asset Register Sign-Off',ref:'CE+:Readiness',pri:'high',desc:'Finalise and obtain sign-off on the CE+ scope document listing all in-scope IP ranges, devices, users, and cloud services. Submit to assessor at least 5 business days before assessment date for review.'},
+          {id:'CEP-AR-05',name:'Outstanding Risk Acceptance Sign-Off',ref:'CE+:Readiness',pri:'med',desc:'For any CE+ control that cannot be fully met by assessment date, obtain formal risk acceptance signed by the CISO or equivalent. Document the residual risk, compensating control, and remediation target date. Provide to assessor.'},
+          {id:'CEP-AR-06',name:'Post-Assessment Finding Remediation Tracker',ref:'CE+:Readiness',pri:'med',desc:'After assessment, log all assessor findings into a remediation tracker with: finding ID, description, affected asset, remediation action, owner, and target date. Track to closure. Re-test and document remediation evidence for each finding.'},
+        ]}
+    ]
   }
 };
 
@@ -1228,6 +1291,102 @@ const REMEDIES = {
   'CE-PU-05':{ portal:'internal', path:'Monthly patch review meeting (calendar invite + Defender TVM export)',
     action:'Schedule a monthly patch review using TVM Recommendations export as the agenda. Track: % CVEs remediated within SLA, new critical CVEs discovered, EOS software count. Record meeting minutes as audit evidence.' },
 
+  // ── CE+ : VULNERABILITY SCANNING ──
+  'CEP-VS-01':{ portal:'defender', path:'Vulnerability management → Settings → Assessment schedules → Add schedule',
+    action:'Navigate to TVM Settings and create an authenticated scan schedule. Select target device groups, set credentials (read-only domain account), choose scan frequency (weekly minimum). Confirm scan runs and telemetry appears in TVM Dashboard within 24 hours.',
+    cmd:'# Verify TVM scan results via Advanced Hunting\nDeviceTvmSoftwareVulnerabilities\n| summarize CVECount=dcount(CveId) by DeviceName, VulnerabilitySeverityLevel\n| order by CVECount desc' },
+  'CEP-VS-02':{ portal:'defender', path:'Vulnerability management → Weaknesses → Export',
+    action:'Filter the Weaknesses view to show all in-scope devices. Set columns: Device name, CVE ID, CVSS score, Severity, Published date, Patch available, Last seen. Click Export to download as CSV. This is the primary scan evidence document for the assessor.' },
+  'CEP-VS-03':{ portal:'defender', path:'Vulnerability management → Weaknesses → Filter: Severity = Critical, High',
+    action:'Filter TVM Weaknesses to Critical and High severity with Patch available = Yes. Target zero results on in-scope devices at assessment date. Export the filtered view — a zero-row export is positive evidence. Remediate any remaining findings before exporting.',
+    cmd:'// KQL: Count critical/high CVEs per device\nDeviceTvmSoftwareVulnerabilities\n| where VulnerabilitySeverityLevel in ("Critical","High")\n| summarize Count=dcount(CveId) by DeviceName\n| order by Count desc' },
+  'CEP-VS-04':{ portal:'defender', path:'Assets → Devices → Export + Reports → Device health and compliance → Export',
+    action:'Export the device inventory from Defender portal. Add columns: Device name, OS, IP address, MDE sensor status, Last seen, Device group, Tags. Sign and date the export. This becomes the scope-of-assessment asset register for the assessor to cross-reference against scan results.' },
+  'CEP-VS-05':{ portal:'defender', path:'Assets → Devices → Filter: Onboarding status = Can be onboarded',
+    action:'Review the network discovery unmanaged device list. For each unmanaged device in the IP scope, either onboard to MDE or produce a formal written exclusion justification signed by the asset owner. Zero unmanaged in-scope devices = clean state. Export the discovery report as evidence.' },
+  'CEP-VS-06':{ portal:'defender', path:'Vulnerability management → Dashboard → Exposure score trend',
+    action:'Review Exposure Score trend graph. Export the trend data for the past 4 weeks. A declining or stable low score ahead of assessment is positive evidence of ongoing vulnerability management. Include in the assessor evidence pack with a narrative explaining any score changes.' },
+
+  // ── CE+ : MALWARE PROTECTION TESTING ──
+  'CEP-MPT-01':{ portal:'defender', path:'Reports → Threat protection → Quarantine events',
+    action:'On a representative sample of in-scope devices (minimum 10% or 5 devices), download the EICAR test file from https://www.eicar.org/download-anti-malware-testfile/ . Confirm Defender AV detects and quarantines immediately. Export the quarantine event from Defender portal with device name, detection time, and action taken.',
+    cmd:'# After EICAR test - verify quarantine via PowerShell\nGet-MpThreatDetection | Where-Object {$_.ThreatName -like "*EICAR*"} | Select ThreatName, DetectionTime, Resources' },
+  'CEP-MPT-02':{ portal:'defender', path:'Email & collaboration → Attack simulator training → Simulations → Launch',
+    action:'Launch a Malware Attachment simulation from Attack Simulator. Select a representative user group. After the simulation runs, navigate to Defender portal → Incidents & alerts to confirm the endpoint behavioral detection fired and remediated. Export the incident timeline as assessor evidence.' },
+  'CEP-MPT-03':{ portal:'defender', path:'Reports → Web protection → PUA detection events',
+    action:'On a test device, attempt to download a known PUA sample (use an AMTSO PUA test file from https://www.amtso.org/check-eicar-antivirus-test-files/ ). Confirm PUA protection blocks the download. Navigate to Reports → Threat protection and export the PUA detection event with timestamp and device name.',
+    cmd:'# Verify PUA protection is active\nGet-MpPreference | Select PUAProtection\n# 0=Disabled, 1=Enabled, 2=Audit' },
+  'CEP-MPT-04':{ portal:'defender', path:'Email & collaboration → Attack simulator training → Simulations',
+    action:'Launch a credential harvest or malware attachment simulation targeting in-scope users. Review the simulation report for click rate and MDE endpoint detection rate. Export the simulation report summary and Defender incident alerts generated as dual-layer evidence (email + endpoint detection).' },
+  'CEP-MPT-05':{ portal:'internal', path:'Evidence compilation document',
+    action:'Create a single dated document titled "CE+ Malware Protection Test Results". Include for each test: test name, test date, devices tested, test method, expected result, actual result, detection event ID or screenshot. All four tests must show "Detected and blocked" outcomes before submitting to assessor.' },
+
+  // ── CE+ : NETWORK BOUNDARY TESTING ──
+  'CEP-NBT-01':{ portal:'defender', path:'Reports → Web protection → Web content filtering',
+    action:'On representative in-scope devices, attempt to navigate to a URL in a blocked category (use an NCSC or vendor-provided test URL, not a live malicious site). Confirm the browser shows the WCF block page. Export the WCF block event from Reports → Web protection with URL, category, device name, and timestamp.',
+    cmd:'// KQL: WCF block events in last 7 days\nDeviceEvents\n| where ActionType == "SmartScreenUrlWarning" or ActionType == "NetworkProtectionUserBypassEvent"\n| project Timestamp, DeviceName, RemoteUrl, ActionType\n| order by Timestamp desc' },
+  'CEP-NBT-02':{ portal:'defender', path:'Reports → Network protection',
+    action:'On a test device, use curl or a browser to attempt connection to a known threat-intelligence-listed test IP or domain (use vendor-provided test indicators only — never live C2). Confirm Network Protection blocks it at the OS level with a block notification. Export the network protection block event as evidence.',
+    cmd:'# Verify Network Protection block via PowerShell (after test)\nGet-WinEvent -LogName "Microsoft-Windows-Windows Defender/Operational" | Where-Object {$_.Message -like "*network protection*blocked*"} | Select -First 10 TimeCreated, Message' },
+  'CEP-NBT-03':{ portal:'intune', path:'Endpoint security → Firewall → [Policy] → Device status',
+    action:'Export the current Intune Firewall policy and device compliance status. Additionally export the firewall rule set from representative devices via PowerShell. Compare active inbound rules against the approved services register. Any unapproved open port is a finding. Export and remediate before assessment.',
+    cmd:'# Export inbound firewall rules from a device\nGet-NetFirewallRule -Direction Inbound -Enabled True | Select DisplayName, LocalPort, Protocol, Action | Export-Csv -Path C:\\fw-inbound-rules.csv' },
+  'CEP-NBT-04':{ portal:'internal', path:'Coordinated with assessor — external scan from outside boundary',
+    action:'Coordinate with the CE+ assessor to conduct an external port scan of the internet-facing boundary (assessors typically use tools such as Nmap or Qualys from outside your network). Review results. Any port open beyond the approved services register is a finding. Remediate and request a re-scan before the formal assessment.' },
+  'CEP-NBT-05':{ portal:'defender', path:'Reports → Web protection → SmartScreen events',
+    action:'On a representative device using Microsoft Edge, navigate to a SmartScreen test URL (https://demo.smartscreen.msft.net/). Confirm SmartScreen displays a block warning page. Screenshot the block page with the URL visible. Export the SmartScreen event from Defender portal with device name and timestamp as evidence.' },
+  'CEP-NBT-06':{ portal:'defender', path:'Reports → Web protection → Network protection events',
+    action:'Export the Network Protection event log from Defender portal for the 30 days prior to assessment. Filter to Action = Blocked. The export should show DNS and IP-level blocks across all in-scope devices. A populated block log demonstrates active DNS filtering. Include in the assessor evidence pack.',
+    cmd:'// KQL: DNS/network block events past 30 days\nDeviceNetworkEvents\n| where ActionType == "ConnectionFailed" and RemoteIPType == "Public"\n| where Timestamp > ago(30d)\n| summarize Count=count() by RemoteUrl, RemoteIP, DeviceName\n| order by Count desc' },
+
+  // ── CE+ : ACCESS CONTROL VERIFICATION ──
+  'CEP-ACV-01':{ portal:'entra', path:'Security → Sign-in logs → Filter: Conditional Access = Failure',
+    action:'During assessment, sign in with a test account to a corporate app on an unregistered device without MFA. Confirm Conditional Access blocks the sign-in. Navigate to Entra ID Sign-in logs and export the blocked sign-in event as evidence. Show the CA policy configuration that enforced the block.' },
+  'CEP-ACV-02':{ portal:'intune', path:'Endpoint security → Account protection → LAPS report + Local administrators report',
+    action:'Export the Intune local administrator report showing accounts with admin rights per device. Confirm no standard user accounts have local admin rights on any in-scope device. Export LAPS deployment status to show managed local admin credentials. Both exports form the assessor evidence.',
+    cmd:'# List local admins on a device via PowerShell\nGet-LocalGroupMember -Group "Administrators" | Select Name, ObjectClass, PrincipalSource' },
+  'CEP-ACV-03':{ portal:'defender', path:'Settings → Permissions → Roles → [Tier 1 Analyst Role]',
+    action:'Log in as a Tier 1 analyst account scoped to a specific device group. Attempt to view or action a device in a different device group. Confirm access is denied with a permissions error. Screenshot the denial and export the RBAC role configuration as evidence of least-privilege enforcement.' },
+  'CEP-ACV-04':{ portal:'entra', path:'Identity Governance → Privileged Identity Management → Roles → Audit log',
+    action:'Navigate to PIM Audit log. Export activations for the Security Administrator role for the past 30 days. Each activation entry shows: who activated, when, justification, duration, and approval. This is direct evidence of time-limited privileged access in operation. Export as PDF or CSV for assessor.' },
+  'CEP-ACV-05':{ portal:'entra', path:'Users → All users → Add filter: Sign-in activity → Last sign-in before [30 days ago]',
+    action:'Export Entra ID users filtered by last sign-in > 30 days. Confirm all are disabled or have a formal exception. A clean export (all accounts active = all signed in within 30 days, or disabled) is the assessor evidence. Include account status column in the export.',
+    cmd:'# Pull inactive accounts via Microsoft Graph PowerShell\nGet-MgUser -All -Property DisplayName,SignInActivity,AccountEnabled | Where-Object {$_.SignInActivity.LastSignInDateTime -lt (Get-Date).AddDays(-30)} | Select DisplayName, AccountEnabled, @{N="LastSignIn";E={$_.SignInActivity.LastSignInDateTime}}' },
+  'CEP-ACV-06':{ portal:'entra', path:'App registrations → All applications → API permissions',
+    action:'Export all app registrations. Filter to those with SecurityAlert, Machine, or ThreatIndicator API permissions. For each, confirm: active business use, secret expiry within 90 days, and owner documented. Provide the inventory with permission column to the assessor. Remove or disable any unused registrations before assessment.' },
+
+  // ── CE+ : PATCH COMPLIANCE EVIDENCE ──
+  'CEP-PCE-01':{ portal:'intune', path:'Devices → Monitor → Windows update compliance',
+    action:'Export the Windows Update compliance report from Intune showing: device name, OS version, last update installed, update date, compliance status. Filter to in-scope devices. Every device must show a security update installed within 14 days of the latest Microsoft Patch Tuesday release. Export as assessor evidence.',
+    cmd:'// KQL: OS patch currency check via MDE\nDeviceTvmSoftwareInventory\n| where SoftwareName == "windows_10" or SoftwareName == "windows_11"\n| project DeviceName, SoftwareVersion, LastSeenTimestamp\n| order by LastSeenTimestamp asc' },
+  'CEP-PCE-02':{ portal:'defender', path:'Vulnerability management → Weaknesses → Filter: Severity = High, Critical → Export',
+    action:'Export TVM software vulnerabilities filtered to CVSS ≥7.0 with "Patch available = Yes". Every line in this export is a CE+ finding if not remediated within 14 days of patch release. Remediate all findings and re-export to show a clean (zero-row) result. The clean export is the assessor evidence.',
+    cmd:'// KQL: Applications with available patches overdue > 14 days\nDeviceTvmSoftwareVulnerabilities\n| where VulnerabilitySeverityLevel in ("Critical","High")\n| extend DaysSincePatch = datetime_diff("day", now(), PublishedDate)\n| where DaysSincePatch > 14\n| summarize count() by DeviceName, SoftwareName, CveId, DaysSincePatch' },
+  'CEP-PCE-03':{ portal:'defender', path:'Vulnerability management → Software inventory → Filter: End of support = Yes',
+    action:'Filter TVM Software inventory by "End of support" and export. Any in-scope device showing EOS software is an immediate CE+ failure. Remove all EOS software before assessment. If removal is not possible by assessment date, this must be formally excluded from scope — discuss with the assessor before submission.' },
+  'CEP-PCE-04':{ portal:'intune', path:'Devices → Monitor → Windows update compliance → Feature updates + Quality updates',
+    action:'Export both the Quality Update and Feature Update compliance reports. Show the full update history for the past 90 days. Assessors will spot-check patch dates against Microsoft Update Catalog release dates to verify 14-day compliance. Ensure the export includes the "Install date" column.',
+    cmd:'# Check Windows Update install history on a device\nGet-HotFix | Sort-Object InstalledOn -Descending | Select -First 20 HotFixID, Description, InstalledOn' },
+  'CEP-PCE-05':{ portal:'defender', path:'Vulnerability management → Software inventory → Filter by Software name',
+    action:'For each key third-party application (Chrome, Edge, Firefox, Office, Adobe Acrobat, Java), export the TVM software inventory showing installed version vs. latest available version. Confirm all are within 14 days of the latest stable release. Patch any that are out of date before assessment.',
+    cmd:'// KQL: Third-party app version currency\nDeviceTvmSoftwareInventory\n| where SoftwareName in~ ("google_chrome","microsoft_edge","firefox","office_365","adobe_acrobat_reader")\n| project DeviceName, SoftwareName, SoftwareVersion, LastSeenTimestamp\n| order by SoftwareName, SoftwareVersion asc' },
+  'CEP-PCE-06':{ portal:'intune', path:'Devices → Monitor → Noncompliant devices → Filter: Platform = iOS, Android',
+    action:'Export Intune compliance report for all enrolled mobile devices. Check OS version against current iOS and Android release versions. Devices running OS versions more than 14 days behind the latest security patch release are CE+ findings. Remediate or formally exclude mobile devices from scope before assessment.' },
+
+  // ── CE+ : ASSESSOR READINESS ──
+  'CEP-AR-01':{ portal:'internal', path:'Evidence pack folder (SharePoint / Teams / Secure file share)',
+    action:'Create a dated folder structure: 1-Asset-Inventory, 2-Vulnerability-Scans, 3-Malware-Test-Results, 4-Boundary-Test-Results, 5-Access-Control-Evidence, 6-Patch-Reports, 7-Policies-and-Configs. Place all evidence exports in the correct folder. Create an index document listing each file with date, content description, and control reference.' },
+  'CEP-AR-02':{ portal:'internal', path:'Internal pre-assessment walkthrough meeting',
+    action:'Schedule an internal walkthrough 2 weeks before assessment. Walk through each of the five CE control areas against the evidence pack. Identify gaps and assign remediation owners with deadlines at least 5 business days before assessment. Document the walkthrough in meeting minutes and file in the evidence pack.' },
+  'CEP-AR-03':{ portal:'internal', path:'VPN or jump host provisioned for assessor + Defender portal guest access',
+    action:'Provision assessor remote access: a named VPN account or jump host with access to representative in-scope devices, Intune portal (read-only), and Defender portal (Security Reader role). Test connectivity end-to-end before assessment day. Revoke access within 5 business days of assessment completion.' },
+  'CEP-AR-04':{ portal:'internal', path:'Scope document template (IASME / NCSC CE+ scope template)',
+    action:'Complete the official IASME CE+ scope document template. List all in-scope IP ranges, subnets, device types, cloud services, and user populations. Exclude items with a written justification. Obtain CISO sign-off. Submit to the assessor at least 5 business days before assessment for review and pre-approval of scope.' },
+  'CEP-AR-05':{ portal:'internal', path:'Risk register / Exception log document',
+    action:'For any CE+ control not fully met at assessment date, document: control reference, gap description, current risk level, compensating control (if any), CISO approval signature, and target remediation date. Provide this to the assessor upfront — undisclosed gaps found during assessment carry higher risk of certification failure.' },
+  'CEP-AR-06':{ portal:'internal', path:'Post-assessment remediation tracker (Excel / Jira / ServiceNow)',
+    action:'After receiving the assessor report, log every finding in a remediation tracker. Fields: Finding ID, Control area, Description, Affected asset(s), Root cause, Remediation action, Owner, Target date, Status, Re-test date, Re-test evidence. Track to closure. Share the closed tracker with the assessor to confirm sign-off on each finding.' },
+
   // ── SOC2 ──
   'SOC-CC1-01':{ portal:'defender', path:'Settings → Permissions → Roles → Export',
     action:'Export RBAC role assignments. Create a formal RACI document listing each role, assigned users/groups, device group scope, and allowed actions. Store in audit evidence folder. Review quarterly.' },
@@ -1398,7 +1557,7 @@ let activeCat = {};
 function initState() {
   const saved = localStorage.getItem('mde-multi-state-v2');
   if (saved) { try { STATE = JSON.parse(saved); } catch(e) {} }
-  ['csf','ce','soc2','n53'].forEach(fid => {
+  ['csf','ce','ceplus','soc2','n53'].forEach(fid => {
     if (!STATE[fid]) STATE[fid] = {};
     FW[fid].cats.forEach(cat => {
       cat.tasks.forEach(t => {
@@ -1456,7 +1615,7 @@ function setFWColor(color) {
 
 function renderSwitcher() {
   const c = document.getElementById('fwSwitcher');
-  const fwList = ['overview','csf','ce','soc2','n53','gap'];
+  const fwList = ['overview','csf','ce','ceplus','soc2','n53','gap'];
   c.innerHTML = fwList.map(fid => {
     const isGap = fid === 'gap';
     const fw = isGap ? { label: 'Gap Analysis', dot: '#7c3aed' } : FW[fid];
@@ -1495,7 +1654,7 @@ function renderMain() {
 }
 
 function renderOverviewPage() {
-  const fwIds = ['csf','ce','soc2','n53'];
+  const fwIds = ['csf','ce','ceplus','soc2','n53'];
   const cards = fwIds.map(fid => {
     const fw = FW[fid];
     const s = fwStats(fid);
@@ -1736,7 +1895,7 @@ function refreshStats(fid) {
 //  EXPORTS
 // ════════════════════════════════════════════
 function buildExportData(fid) {
-  const ids = fid ? [fid] : ['csf','ce','soc2','n53'];
+  const ids = fid ? [fid] : ['csf','ce','ceplus','soc2','n53'];
   return {
     meta: {
       tool: 'MDE Multi-Framework Audit Tracker',
@@ -1780,7 +1939,7 @@ function doExportJSON(fid) {
 }
 
 function doExportCSV(fid) {
-  const ids = fid ? [fid] : ['csf','ce','soc2','n53'];
+  const ids = fid ? [fid] : ['csf','ce','ceplus','soc2','n53'];
   const rows = [['Framework','Category','Task ID','Task Name','Reference','Priority','Status','Notes']];
   ids.forEach(fid => {
     FW[fid].cats.forEach(cat => {
@@ -1800,7 +1959,7 @@ function doExportCSV(fid) {
 }
 
 function doExportHTML(fid) {
-  const ids = fid ? [fid] : ['csf','ce','soc2','n53'];
+  const ids = fid ? [fid] : ['csf','ce','ceplus','soc2','n53'];
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
   const bg = isDark ? '#080c12' : '#f0f4f8';
   const cardBg = isDark ? '#131c2e' : '#ffffff';
@@ -1996,7 +2155,7 @@ function computeGap(uploadedData) {
     });
   });
 
-  const fwIds = ['csf', 'ce', 'soc2', 'n53'];
+  const fwIds = ['csf', 'ce', 'ceplus', 'soc2', 'n53'];
   const result = { meta: uploadedData.meta || {}, frameworks: {}, totals: {} };
   const totals = { compliant:0, improved:0, regression:0, gap:0, blocked:0, progress:0, new:0, total:0 };
 
@@ -2060,7 +2219,7 @@ function renderGapPage() {
     { key:'new', label:`🆕 New (${t.new||0})` },
   ].map(f => `<button class="gap-filter-btn${GAP_FILTER===f.key?' active':''}" onclick="setGapFilter('${f.key}')">${f.label}</button>`).join('');
 
-  const fwSections = ['csf','ce','soc2','n53'].map(fid => {
+  const fwSections = ['csf','ce','ceplus','soc2','n53'].map(fid => {
     const fw = FW[fid];
     const fwTasks = fw.cats.flatMap(cat => GAP_RESULT.frameworks[fid].cats[cat.id]);
     const filtered = GAP_FILTER === 'all' ? fwTasks : fwTasks.filter(t => t.delta === GAP_FILTER);
@@ -2165,7 +2324,7 @@ function clearGap() {
 function exportGapCSV() {
   if (!GAP_RESULT) return;
   const rows = [['Framework','Category','Task ID','Task Name','Reference','Priority','Baseline Status','Current Status','Delta']];
-  ['csf','ce','soc2','n53'].forEach(fid => {
+  ['csf','ce','ceplus','soc2','n53'].forEach(fid => {
     FW[fid].cats.forEach(cat => {
       GAP_RESULT.frameworks[fid].cats[cat.id].forEach(t => {
         rows.push([FW[fid].shortName, cat.id, t.id, `"${t.name}"`, t.ref, t.pri, t.uploadedStatus, t.currentStatus, t.delta]);
@@ -2232,7 +2391,7 @@ function exportGapHTML() {
   });
   html += `</div>`;
 
-  ['csf','ce','soc2','n53'].forEach(fid => {
+  ['csf','ce','ceplus','soc2','n53'].forEach(fid => {
     const fw = FW[fid];
     html += `<div class="fw-block"><div class="fw-title" style="background:${fw.color}">${fw.emoji} ${fw.shortName} — ${fw.label}</div>
     <table><tr><th>Task</th><th>Ref</th><th>Priority</th><th>Baseline</th><th>Current</th><th>Delta</th></tr>`;
