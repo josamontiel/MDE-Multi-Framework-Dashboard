@@ -60,6 +60,10 @@
   --csf-c:#0078D4; --csf-g:rgba(0,120,212,.12);
   --ce-c:#16a34a;  --ce-g:rgba(22,163,74,.12);
   --cep-c:#0d9488; --cep-g:rgba(13,148,136,.12);
+  --pci-c:#dc2626; --pci-g:rgba(220,38,38,.12);
+  --zt-c:#6d28d9;  --zt-g:rgba(109,40,217,.12);
+  --rmf-c:#b45309; --rmf-g:rgba(180,83,9,.12);
+  --ai-c:#0891b2;  --ai-g:rgba(8,145,178,.12);
   --soc-c:#7c3aed; --soc-g:rgba(124,58,237,.12);
   --n53-c:#ea580c; --n53-g:rgba(234,88,12,.12);
 }
@@ -1060,6 +1064,243 @@ const FW = {
           {id:'CEP-AR-06',name:'Post-Assessment Finding Remediation Tracker',ref:'CE+:Readiness',pri:'med',desc:'After assessment, log all assessor findings into a remediation tracker with: finding ID, description, affected asset, remediation action, owner, and target date. Track to closure. Re-test and document remediation evidence for each finding.'},
         ]}
     ]
+  },
+
+  /* ── PCI DSS v4.0 ── */
+  pci: {
+    id:'pci', label:'PCI DSS v4.0', shortName:'PCI DSS', dot:'#dc2626', color:'#dc2626', gradient:'var(--pci-g)',
+    emoji:'🔴',
+    desc:'Payment Card Industry Data Security Standard v4.0 — maps Microsoft Defender for Endpoint controls to PCI DSS requirements covering network security, secure configuration, malware protection, vulnerability management, access control, audit logging, security testing, and incident response for cardholder data environments.',
+    cats:[
+      { id:'REQ1', name:'NETWORK SECURITY CONTROLS', emoji:'🔥', desc:'Requirement 1 — install and maintain network security controls. MDE enforces host-based firewall, network protection, and web content filtering at the OS layer for all CDE-scoped devices.',
+        tasks:[
+          {id:'PCI-R1-01',name:'Configure Host-Based Firewall on CDE Devices',ref:'PCI 1.3',pri:'high',desc:'Deploy Windows Defender Firewall policy via Intune scoped to the CDE device group. Block all inbound by default. Allow only approved services. Log dropped packets. This is the host-level NSC for PCI Req 1.'},
+          {id:'PCI-R1-02',name:'Enable Network Protection for CDE Traffic',ref:'PCI 1.3.2',pri:'high',desc:'Set Network Protection to Block mode on all CDE-scoped device groups. Prevents connections to malicious IPs, C2 infrastructure, and exploit kit domains at kernel level. Review block events weekly.'},
+          {id:'PCI-R1-03',name:'Configure Web Content Filtering for CDE Systems',ref:'PCI 1.3.3',pri:'high',desc:'Create a WCF policy scoped to the CDE device group blocking Malicious, High Risk, and Illegal categories. Log all block events. Export WCF block reports as PCI Req 1 evidence.'},
+          {id:'PCI-R1-04',name:'Document Approved Inbound Services Register',ref:'PCI 1.2.1',pri:'high',desc:'Document all approved inbound network services for CDE devices: port, protocol, source, business justification, and approver. Review quarterly. Any undocumented open port is a PCI finding.'},
+          {id:'PCI-R1-05',name:'Confirm CDE Device Group Network Segmentation',ref:'PCI 1.3.1',pri:'high',desc:'Verify CDE device group policies are stricter than general device groups. MDE device group RBAC ensures analyst access is scoped. Confirm no policy inheritance from lower-trust groups. Document the segmentation approach.'},
+          {id:'PCI-R1-06',name:'Review & Export Firewall Rule Set (Quarterly)',ref:'PCI 1.2.7',pri:'med',desc:'Export the Intune Firewall policy and per-device rule set quarterly. Review for rules no longer needed. Remove any rules not matching the approved services register. File the export and review notes as quarterly evidence.'},
+        ]},
+      { id:'REQ2', name:'SECURE CONFIGURATIONS', emoji:'🔧', desc:'Requirement 2 — apply secure configurations to all system components. Covers security baselines, disabling default credentials, removing unnecessary functionality, and tamper protection for CDE endpoints.',
+        tasks:[
+          {id:'PCI-R2-01',name:'Deploy PCI-Scoped Security Baseline (Intune)',ref:'PCI 2.2.1',pri:'high',desc:'Apply the Microsoft Security Baseline profile to the CDE device group via Intune. Document all deviations with business justification. Baseline compliance report must show ≥95% for CDE devices. Export report as PCI evidence.'},
+          {id:'PCI-R2-02',name:'Disable Unnecessary Services on CDE Systems',ref:'PCI 2.2.4',pri:'high',desc:'Via Intune Settings Catalog, disable non-essential services on CDE devices: Print Spooler (non-print servers), Remote Registry, Telnet, FTP client. Document each disabled service and its PCI 2.2.4 justification.'},
+          {id:'PCI-R2-03',name:'Enable Tamper Protection on CDE Device Group',ref:'PCI 2.2.1',pri:'high',desc:'Enable Tamper Protection via Intune Antivirus policy for the CDE device group. This prevents disabling or reconfiguring MDE security controls. Verify all CDE devices show IsTamperProtected = True.'},
+          {id:'PCI-R2-04',name:'Deploy ASR Rules — CDE Device Group',ref:'PCI 2.2.7',pri:'high',desc:'Apply all mature ASR rules in Block mode to the CDE device group. For rules still in Audit mode, document the risk acceptance with a target date for Block promotion. Maintain the ASR exception register as PCI evidence.'},
+          {id:'PCI-R2-05',name:'Inventory & Document All CDE System Components',ref:'PCI 2.1.1',pri:'high',desc:'Export the MDE device inventory filtered to the CDE device group. Include: device name, OS, IP, onboarding status, last seen, device tags. Sign and date the export. This is the system component inventory for PCI Req 2.'},
+        ]},
+      { id:'REQ5', name:'MALWARE PROTECTION', emoji:'🦠', desc:'Requirement 5 — protect all systems and networks from malicious software. MDE NGAV, behavioral monitoring, EDR, and attack surface reduction rules are the primary PCI Req 5 controls.',
+        tasks:[
+          {id:'PCI-R5-01',name:'Configure NGAV — Cloud Protection & Behavioral Monitoring',ref:'PCI 5.2.1',pri:'high',desc:'Set cloud-delivered protection to High+, enable real-time protection and behavior monitoring. Confirm automatic sample submission and MAPS membership (Advanced). All CDE devices must show compliant AV status in Defender portal.'},
+          {id:'PCI-R5-02',name:'Enable EDR in Block Mode on CDE Devices',ref:'PCI 5.2.3',pri:'high',desc:'Enable EDR in Block mode for the CDE device group. Provides behavioral threat blocking independent of AV signature coverage. Required for PCI 5.2.3 protection against evolving malware.'},
+          {id:'PCI-R5-03',name:'Validate 100% AV Sensor Coverage on CDE Devices',ref:'PCI 5.3.4',pri:'high',desc:'Filter the Device health report to the CDE device group. Target 100% Active sensor status. Any inactive device is a PCI Req 5 gap. Investigate and remediate within 24 hours. Export the coverage report monthly as evidence.'},
+          {id:'PCI-R5-04',name:'Protect Anti-Malware from Modification (Tamper Protection)',ref:'PCI 5.3.3',pri:'high',desc:'Tamper Protection is the PCI 5.3.3 control preventing authorised personnel from disabling AV/EDR. Confirm enabled at tenant level and enforced via Intune for all CDE devices. Export compliance report as evidence.'},
+          {id:'PCI-R5-05',name:'Review AV Detection Reports & Periodic Evaluations',ref:'PCI 5.3.2',pri:'med',desc:'Configure periodic AV evaluation reviews: export threat detection reports from Defender portal monthly. Review detection types, remediation outcomes, and any manual interventions. File as PCI 5.3.2 periodic evaluation evidence.'},
+        ]},
+      { id:'REQ6', name:'VULNERABILITY MANAGEMENT', emoji:'📦', desc:'Requirement 6 — protect all system components and software from vulnerabilities. TVM, Windows Update for Business, and the patch SLA process map to PCI Req 6.',
+        tasks:[
+          {id:'PCI-R6-01',name:'Enable TVM Continuous Vulnerability Scanning',ref:'PCI 6.3.3',pri:'high',desc:'Activate TVM with authenticated scanning for all CDE devices. Review the Exposure Score and top CVEs weekly. Critical patches must be deployed within 30 days of release per PCI 6.3.3. Track remediation in the TVM Remediation tab.'},
+          {id:'PCI-R6-02',name:'Patch Critical Vulnerabilities Within 30 Days',ref:'PCI 6.3.3',pri:'high',desc:'Configure TVM alert rule for CVEs with CVSS ≥ 7.0 on CDE devices. Set 30-day remediation SLA per PCI. Track via TVM Recommendations remediation age. Export the remediation closure report quarterly as PCI evidence.'},
+          {id:'PCI-R6-03',name:'Configure Authenticated Scanning for CDE Assets',ref:'PCI 6.3.1',pri:'high',desc:'Set up TVM authenticated scan schedule targeting CDE device group with a read-only domain credential. Confirm scan completion and telemetry ingestion. Export the last scan date per device as PCI 6.3.1 scan evidence.'},
+          {id:'PCI-R6-04',name:'Track & Remove End-of-Support Software on CDE Devices',ref:'PCI 6.2.4',pri:'high',desc:'Review TVM Software inventory filtered by End of Support status for CDE devices. Any EOS software on a CDE device is an immediate PCI finding. Remediate within 30 days or formally exclude with risk acceptance.'},
+          {id:'PCI-R6-05',name:'Document Patch Management Process & Change Control',ref:'PCI 6.5.1',pri:'med',desc:'Document the patch management process: how patches are tested, approved, deployed, and verified for CDE systems. Include change management integration (ServiceNow/Jira). All CDE patches must follow the change control process.'},
+        ]},
+      { id:'REQ78', name:'ACCESS CONTROL & AUTHENTICATION', emoji:'🔑', desc:'Requirements 7 & 8 — restrict access to system components and authenticate access. MDE RBAC, Conditional Access, PIM, and MFA enforcement are the primary controls.',
+        tasks:[
+          {id:'PCI-R78-01',name:'Enforce MFA for All CDE System Access',ref:'PCI 8.4.1',pri:'high',desc:'Configure Entra Conditional Access requiring MFA for all users accessing CDE-classified apps and systems. Use phishing-resistant MFA (FIDO2 or Authenticator) for admin accounts. No exceptions without documented CISO waiver.'},
+          {id:'PCI-R78-02',name:'Implement Least Privilege Access via MDE RBAC',ref:'PCI 7.2.2',pri:'high',desc:'Assign MDE roles using least privilege: Security Reader for Tier 1, Security Operator for Tier 2, Security Administrator (scoped) for Tier 3. Document each assignment with business need. Review quarterly.'},
+          {id:'PCI-R78-03',name:'Configure PIM for Privileged CDE Access',ref:'PCI 7.2.4',pri:'high',desc:'Configure Entra PIM for Security Administrator role. Require just-in-time activation with justification, MFA, and approval. Set max 4-hour activation. All PIM activations logged to Sentinel. Export activation log as PCI evidence.'},
+          {id:'PCI-R78-04',name:'Quarterly Access Review — CDE Systems',ref:'PCI 7.2.4',pri:'high',desc:'Conduct quarterly access review of all accounts with access to CDE device groups in MDE. Remove or downgrade stale roles. Document the review outcomes with analyst name, date, and changes made. File as PCI Req 7 evidence.'},
+          {id:'PCI-R78-05',name:'Disable Inactive Accounts Within 90 Days',ref:'PCI 8.2.6',pri:'high',desc:'Configure Entra Lifecycle Workflow to disable accounts with no activity for 90 days. For CDE systems, apply a stricter 30-day threshold. Export inactive account audit as PCI 8.2.6 evidence monthly.'},
+          {id:'PCI-R78-06',name:'Enforce Account Lockout Policy (6 Attempts)',ref:'PCI 8.3.4',pri:'med',desc:'Configure account lockout via Intune Security Baseline: lockout after 6 failed attempts, lockout duration 30 minutes. Confirm this applies to all CDE-scoped device group accounts. Export baseline compliance as evidence.'},
+        ]},
+      { id:'REQ10', name:'AUDIT LOGGING & MONITORING', emoji:'📋', desc:'Requirement 10 — log and monitor all access to system components and cardholder data. MDE audit logs, Sentinel ingestion, 12-month retention, and daily review are the primary PCI Req 10 controls.',
+        tasks:[
+          {id:'PCI-R10-01',name:'Enable & Ingest MDE Audit Logs to Sentinel',ref:'PCI 10.2.1',pri:'high',desc:'Enable MDE audit logging and ingest all event types to Sentinel via the Microsoft Defender XDR connector. Confirm all required event categories are captured: user access, admin actions, failed logins, privilege use, and system changes.'},
+          {id:'PCI-R10-02',name:'Configure 12-Month Log Retention',ref:'PCI 10.5.1',pri:'high',desc:'Set Log Analytics workspace retention to minimum 12 months (3 months interactive + 9 months archive). Configure immutable retention policy to prevent log modification or deletion. Document the retention policy as PCI 10.5 evidence.'},
+          {id:'PCI-R10-03',name:'Implement Daily Audit Log Review Process',ref:'PCI 10.4.1',pri:'high',desc:'Define a daily audit log review process for CDE events. Use Sentinel workbook or scheduled KQL query. Assign named reviewer. Document review outcomes (normal / anomaly found / escalated) daily as PCI 10.4.1 evidence.'},
+          {id:'PCI-R10-04',name:'Alert on Suspicious CDE Activity',ref:'PCI 10.4.2',pri:'high',desc:'Configure Sentinel analytics rules for CDE-relevant events: admin account creation, off-hours access, failed auth spikes, lateral movement, and privilege escalation. Alert routes to SOC on-call within defined SLA.'},
+          {id:'PCI-R10-05',name:'Protect Audit Logs from Modification or Deletion',ref:'PCI 10.3.2',pri:'high',desc:'Enable Log Analytics workspace immutability (data cannot be deleted or modified). Restrict Log Analytics contributor role to named service accounts only. Configure alert for any attempt to purge or modify log data.'},
+        ]},
+      { id:'REQ11', name:'SECURITY TESTING', emoji:'🔬', desc:'Requirement 11 — test security of systems and networks regularly. Quarterly vulnerability scans, continuous IDS via EDR, and penetration testing support are mapped here.',
+        tasks:[
+          {id:'PCI-R11-01',name:'Run Quarterly Internal Vulnerability Scans',ref:'PCI 11.3.1',pri:'high',desc:'Run a TVM authenticated scan of all CDE devices each quarter. Export the scan report showing all vulnerabilities with severity, device name, and patch status. All high/critical findings must be remediated before quarterly scan passes.'},
+          {id:'PCI-R11-02',name:'Configure Continuous IDS via MDE EDR',ref:'PCI 11.5.1',pri:'high',desc:'MDE EDR provides continuous intrusion detection for PCI 11.5.1. Verify EDR sensor Active status on all CDE devices. Configure custom detection rules in Advanced Hunting for PCI-relevant attack patterns. Review detection coverage quarterly.'},
+          {id:'PCI-R11-03',name:'Run Simulated Attack Tests (Attack Simulator)',ref:'PCI 11.4.1',pri:'med',desc:'Run at least annual attack simulation via Microsoft Defender Attack Simulator against CDE user population. Document: attack type, detection result, response time, gaps identified. File simulation report as PCI 11.4 penetration testing support evidence.'},
+          {id:'PCI-R11-04',name:'File Change Detection Monitoring Evidence',ref:'PCI 11.5.2',pri:'med',desc:'MDE file integrity monitoring captures file modification events via EDR telemetry. Create an Advanced Hunting scheduled query for critical system file changes on CDE devices. Review weekly and document outcomes as PCI 11.5.2 FIM evidence.'},
+        ]},
+      { id:'REQ12', name:'INCIDENT RESPONSE', emoji:'⚡', desc:'Requirement 12.10 — implement an incident response plan. MDE AIR, Live Response, isolation workflows, escalation procedures, and annual IR testing satisfy PCI Req 12.10.',
+        tasks:[
+          {id:'PCI-R12-01',name:'Document PCI Incident Response Plan',ref:'PCI 12.10.1',pri:'high',desc:'Create a PCI IR plan covering: roles & responsibilities, response procedures for card data breach, containment steps using MDE device isolation, eradication via AIR + Live Response, notification to acquiring bank and card brands within required timeframes.'},
+          {id:'PCI-R12-02',name:'Configure AIR for CDE Device Group',ref:'PCI 12.10.2',pri:'high',desc:'Set AIR automation for the CDE device group. Document the automation level decision in the IR plan. Ensure Action center is reviewed daily. Configure email alerts for pending CDE device remediation actions requiring manual approval.'},
+          {id:'PCI-R12-03',name:'Define CDE Incident Escalation & Notification Procedures',ref:'PCI 12.10.3',pri:'high',desc:'Document the escalation procedure for suspected CDE compromise: L1 → L2 → SOC Manager → CISO → Legal → Acquirer notification. Define the 72-hour notification SLA. Include MDE incident severity mapping to escalation tier.'},
+          {id:'PCI-R12-04',name:'Test IR Plan Annually — Tabletop & Technical',ref:'PCI 12.10.6',pri:'med',desc:'Conduct annual PCI IR plan test: tabletop exercise simulating a CDE breach scenario, followed by a technical test using MDE Attack Simulator. Document test outcomes, gaps identified, and plan updates made. File as PCI 12.10.6 evidence.'},
+        ]}
+    ]
+  },
+
+  /* ── NIST Zero Trust (SP 800-207) ── */
+  zt: {
+    id:'zt', label:'NIST Zero Trust', shortName:'ZT 800-207', dot:'#6d28d9', color:'#6d28d9', gradient:'var(--zt-g)',
+    emoji:'🟣',
+    desc:'NIST SP 800-207 Zero Trust Architecture — maps Microsoft Defender for Endpoint and the broader Microsoft Security stack to the seven zero trust pillars: Identity, Devices, Network, Applications, Data, Visibility & Analytics, and Automation & Orchestration.',
+    cats:[
+      { id:'ZT-ID', name:'IDENTITY', emoji:'🪪', desc:'Never trust, always verify — every user and service must be strongly authenticated and continuously evaluated. Entra ID, Conditional Access, PIM, and Defender for Identity enforce identity-centric zero trust.',
+        tasks:[
+          {id:'ZT-ID-01',name:'Enforce Phishing-Resistant MFA via Conditional Access',ref:'ZT:Identity',pri:'high',desc:'Configure Entra CA requiring phishing-resistant MFA (FIDO2 or Authenticator) for all users. No persistent sessions. Require re-authentication on risk elevation. This is the foundational ZT identity verification control.'},
+          {id:'ZT-ID-02',name:'Implement JIT Privileged Access via Entra PIM',ref:'ZT:Identity',pri:'high',desc:'Configure PIM for all privileged roles. No standing admin access — all elevated access is just-in-time, time-limited, and approval-gated. Log all activations to Sentinel. This enforces ZT least-privilege access for identity.'},
+          {id:'ZT-ID-03',name:'Configure Identity Risk-Based Conditional Access',ref:'ZT:Identity',pri:'high',desc:'Create Entra CA policies that respond to identity risk signals: block or require step-up MFA when user risk = High. Integrate with Defender for Identity signals for anomalous behaviour. Review sign-in risk reports weekly.'},
+          {id:'ZT-ID-04',name:'Integrate MDE Device Risk with Identity Posture',ref:'ZT:Identity',pri:'high',desc:'Link MDE device risk score to Entra Conditional Access via Intune device compliance. A compromised device immediately affects the user\'s identity-based access. Non-compliant device = restricted or blocked access.'},
+          {id:'ZT-ID-05',name:'Enable Continuous Access Evaluation (CAE)',ref:'ZT:Identity',pri:'med',desc:'Enable CAE in Entra ID to revoke access tokens in near real-time when a critical event occurs (password change, account disable, risk elevation). This replaces static token lifetimes with continuous evaluation.'},
+          {id:'ZT-ID-06',name:'Deploy Defender for Identity for Identity Threat Detection',ref:'ZT:Identity',pri:'high',desc:'Deploy Microsoft Defender for Identity to monitor on-premises AD and Entra for lateral movement, pass-the-hash, pass-the-ticket, and privilege escalation. Integrate with Defender XDR for unified identity + endpoint correlation.'},
+        ]},
+      { id:'ZT-DEV', name:'DEVICES', emoji:'💻', desc:'All devices must be enrolled, managed, healthy, and continuously evaluated before being granted access to any resource. MDE provides device health, EDR telemetry, and risk scoring as the device trust signal.',
+        tasks:[
+          {id:'ZT-DEV-01',name:'Enroll All Endpoints in MDE — Full EDR Coverage',ref:'ZT:Devices',pri:'high',desc:'Achieve 100% MDE EDR coverage across all managed devices. Unmanaged or unenrolled devices must not access corporate resources. Use MDE Device Discovery to identify unmanaged devices and remediate. Target 0 unmanaged in-scope devices.'},
+          {id:'ZT-DEV-02',name:'Enforce Device Health as Access Condition',ref:'ZT:Devices',pri:'high',desc:'Create Intune compliance policy requiring MDE sensor Active status, AV enabled, and firewall enabled. Link to Entra CA. Any device failing compliance is blocked from corporate resources until health is restored — the ZT device trust gate.'},
+          {id:'ZT-DEV-03',name:'Set Device Risk Score Threshold for Conditional Access',ref:'ZT:Devices',pri:'high',desc:'Configure Intune compliance to require MDE device risk ≤ Medium. High-risk devices are immediately blocked from accessing corporate apps. This ensures device health is continuously evaluated, not just checked at enrollment.'},
+          {id:'ZT-DEV-04',name:'Enable Real-Time Device Posture Evaluation',ref:'ZT:Devices',pri:'high',desc:'Confirm MDE telemetry provides continuous device posture signals (sensor Active, AV status, TVM exposure). Any change in device posture immediately updates the Intune compliance state and flows to Conditional Access within minutes.'},
+          {id:'ZT-DEV-05',name:'Tag & Group Devices by Trust Level',ref:'ZT:Devices',pri:'med',desc:'Apply device tags reflecting trust level: PAW (highest trust), Managed-Standard, BYOD-Limited. Use tags to drive device group membership, apply stricter policies to lower-trust devices, and enforce appropriate MDE automation levels.'},
+          {id:'ZT-DEV-06',name:'Automate Non-Compliant Device Isolation & Remediation',ref:'ZT:Devices',pri:'med',desc:'Configure Power Automate flow: when a device changes to High risk in MDE, trigger Selective isolation and notify the device owner and SOC. This automates the ZT principle of removing untrusted devices from network access automatically.'},
+        ]},
+      { id:'ZT-NET', name:'NETWORK', emoji:'🌐', desc:'Assume the network is hostile. All traffic — east-west and north-south — is untrusted. MDE Network Protection, WCF, firewall enforcement, and lateral movement blocking via ASR are the network zero trust controls.',
+        tasks:[
+          {id:'ZT-NET-01',name:'Enable Network Protection — Block All Untrusted Connections',ref:'ZT:Network',pri:'high',desc:'Set Network Protection to Block mode on all device groups. All connections to unknown or reputation-negative destinations are blocked at kernel level without requiring a proxy. This is the foundational ZT network control in MDE.'},
+          {id:'ZT-NET-02',name:'Implement Micro-Segmentation via MDE Device Groups',ref:'ZT:Network',pri:'high',desc:'Define device groups that act as micro-segmentation boundaries: Servers, Workstations, PAW, CDE, Guest. Apply different firewall, ASR, and automation policies per group. RBAC scoping ensures analysts can only see their assigned segment.'},
+          {id:'ZT-NET-03',name:'Deploy Web Content Filtering as Network Policy Enforcement',ref:'ZT:Network',pri:'high',desc:'Configure WCF policies per device group. High-trust PAW group gets most restrictive policy. Standard workstations get standard policy. Servers get server-specific policy. WCF acts as the ZT network policy enforcement point.'},
+          {id:'ZT-NET-04',name:'Block Lateral Movement via ASR Rules',ref:'ZT:Network',pri:'high',desc:'Enable ASR rules targeting lateral movement: Block PSExec/WMI process creation, Block credential stealing from LSASS, Block untrusted processes from USB. These enforce ZT east-west traffic restriction at the process layer.'},
+          {id:'ZT-NET-05',name:'Monitor East-West Traffic via Advanced Hunting',ref:'ZT:Network',pri:'high',desc:'Create KQL custom detections for east-west lateral movement: RDP from workstation to workstation, SMB connections to non-standard targets, WMI remote execution. Schedule hourly. Alert on any detection.'},
+          {id:'ZT-NET-06',name:'Enable DNS Filtering for All Device Groups',ref:'ZT:Network',pri:'med',desc:'Network Protection provides DNS-layer filtering as part of its block mode operation. Confirm DNS filtering is active on all device groups by reviewing Network Protection events for DNS block events. Export monthly DNS block report.'},
+        ]},
+      { id:'ZT-APP', name:'APPLICATIONS', emoji:'📱', desc:'Verify and authorise every application request. Applications should not be implicitly trusted based on network location. Defender for Cloud Apps, Conditional Access app controls, and application allowlisting enforce app-level zero trust.',
+        tasks:[
+          {id:'ZT-APP-01',name:'Require Device Compliance for Application Access',ref:'ZT:Applications',pri:'high',desc:'Configure Entra CA to require Intune device compliance (backed by MDE risk) for access to all corporate apps. Applications cannot be accessed from non-compliant or unmanaged devices. This is the core ZT application access gate.'},
+          {id:'ZT-APP-02',name:'Integrate Defender for Cloud Apps with MDE',ref:'ZT:Applications',pri:'high',desc:'Enable the Defender for Cloud Apps integration in MDE (Settings → Advanced features → Cloud discovery). MDE enriches CASB visibility with endpoint context. Review shadow IT discovery report monthly. Block unsanctioned apps via CA.'},
+          {id:'ZT-APP-03',name:'Monitor Application Anomalies via Advanced Hunting',ref:'ZT:Applications',pri:'med',desc:'Create Advanced Hunting KQL detections for application-layer anomalies: first-time process execution, unsigned binary launch, process injection patterns, macro execution from unexpected paths. Schedule hourly custom detections.'},
+          {id:'ZT-APP-04',name:'Restrict Unapproved Software via WDAC/App Control',ref:'ZT:Applications',pri:'med',desc:'Deploy Windows Defender Application Control (WDAC) policy via Intune for high-trust device groups (PAW, CDE). Only signed, approved software may execute. This enforces ZT application allowlisting at kernel level.'},
+        ]},
+      { id:'ZT-DATA', name:'DATA', emoji:'🗄️', desc:'Protect data regardless of where it resides or travels. BitLocker, device control, Controlled Folder Access, and Microsoft Purview integration enforce data-centric zero trust.',
+        tasks:[
+          {id:'ZT-DATA-01',name:'Enforce BitLocker Encryption on All Endpoints',ref:'ZT:Data',pri:'high',desc:'Configure BitLocker via Intune Endpoint Security for all device groups: XTS-AES 256-bit OS drive, AES-CBC 256-bit data drives. Escrow recovery keys to Entra ID. This ensures data is protected at rest regardless of device trust state.'},
+          {id:'ZT-DATA-02',name:'Block Unauthorised Data Exfiltration via Device Control',ref:'ZT:Data',pri:'high',desc:'Deploy device control policy blocking unapproved removable storage, portable devices, and mobile phone sync. Allow only approved, inventoried USB drives (by device ID). ZT data principle: data should not move via untrusted channels.'},
+          {id:'ZT-DATA-03',name:'Enable Controlled Folder Access for Data Protection',ref:'ZT:Data',pri:'high',desc:'Enable CFA in Block mode to protect critical data folders from unauthorised write access. Only explicitly approved applications can modify protected folders. This enforces ZT data access control at the OS level.'},
+          {id:'ZT-DATA-04',name:'Integrate MDE with Microsoft Purview (DLP)',ref:'ZT:Data',pri:'med',desc:'Enable the Microsoft Purview integration in MDE (Settings → Advanced features → Microsoft Purview data loss prevention). MDE enforces Purview DLP policies at the endpoint — blocking sensitive data from being copied to USB, email, or cloud.'},
+        ]},
+      { id:'ZT-VIS', name:'VISIBILITY & ANALYTICS', emoji:'📡', desc:'Capture and analyse all available data to improve security posture. MDE + Sentinel provide the unified telemetry, threat intelligence, and behavioural analytics required for Zero Trust continuous monitoring.',
+        tasks:[
+          {id:'ZT-VIS-01',name:'Deploy MDE + Sentinel for Unified ZT Visibility',ref:'ZT:Visibility',pri:'high',desc:'Connect MDE to Sentinel via the Microsoft Defender XDR connector. All MDE incidents, alerts, and raw telemetry are available for cross-pillar ZT correlation — identity + device + network + app + data signals in a single workspace.'},
+          {id:'ZT-VIS-02',name:'Build Zero Trust Posture Workbook in Sentinel',ref:'ZT:Visibility',pri:'med',desc:'Create a Sentinel workbook tracking ZT posture metrics: % devices compliant, % users MFA-enrolled, device risk distribution, Network Protection block rate, WDAC coverage %, Secure Score trend. Review monthly with security leadership.'},
+          {id:'ZT-VIS-03',name:'Enable Threat Intelligence & Threat Analytics Integration',ref:'ZT:Visibility',pri:'high',desc:'Enable threat intelligence feeds in Sentinel (MDTI integration) and subscribe to Defender Threat Analytics reports. ZT requires continuous threat intelligence to inform trust decisions. Review active threat reports weekly.'},
+          {id:'ZT-VIS-04',name:'Configure Automated ZT Response Playbooks',ref:'ZT:Visibility',pri:'med',desc:'Build Sentinel playbooks (Logic Apps) for automated ZT responses: isolate device on Critical alert, revoke user session on identity risk spike, block IP/domain IOC via MDE API. Document each playbook as ZT automation evidence.'},
+          {id:'ZT-VIS-05',name:'Track Zero Trust Maturity via Secure Score',ref:'ZT:Visibility',pri:'med',desc:'Use Microsoft Secure Score as the primary ZT maturity metric. Map Secure Score improvement actions to ZT pillars. Set monthly improvement targets. Export Secure Score history as longitudinal ZT posture evidence.'},
+        ]}
+    ]
+  },
+
+  /* ── NIST RMF (SP 800-37 Rev 2) ── */
+  rmf: {
+    id:'rmf', label:'NIST RMF', shortName:'RMF 800-37', dot:'#b45309', color:'#b45309', gradient:'var(--rmf-g)',
+    emoji:'🟠',
+    desc:'NIST Risk Management Framework SP 800-37 Rev 2 — a structured seven-step lifecycle for managing security and privacy risk. Maps Microsoft Defender for Endpoint controls and documentation requirements across all RMF steps: Prepare, Categorize, Select, Implement, Assess, Authorize, and Monitor.',
+    cats:[
+      { id:'PR', name:'PREPARE', emoji:'🏗️', desc:'Establish risk management roles, organisational risk tolerance, and the MDE system context before beginning the RMF lifecycle. Preparation ensures the system boundary, stakeholders, and strategy are defined upfront.',
+        tasks:[
+          {id:'RMF-PR-01',name:'Establish MDE Risk Management Strategy & Policy',ref:'RMF:Prepare (2.1)',pri:'high',desc:'Define the organisational risk management strategy for MDE: acceptable risk levels, risk tolerance thresholds, and the policy governing how MDE security controls are selected and maintained. Obtain executive sign-off.'},
+          {id:'RMF-PR-02',name:'Assign RMF Roles — AO, ISSO, ISSM',ref:'RMF:Prepare (2.4)',pri:'high',desc:'Formally designate the Authorizing Official (AO), Information System Security Officer (ISSO), and Information System Security Manager (ISSM) for the MDE deployment. Document roles, responsibilities, and contact information.'},
+          {id:'RMF-PR-03',name:'Define MDE System Boundary & Authorisation Scope',ref:'RMF:Prepare (2.2)',pri:'high',desc:'Document the MDE system boundary: which devices, users, data types, and cloud services are in scope. Define the authorisation boundary for the System Security Plan. Obtain AO agreement on scope before proceeding.'},
+          {id:'RMF-PR-04',name:'Identify Common Controls & Inherited MDE Capabilities',ref:'RMF:Prepare (2.5)',pri:'med',desc:'Identify security controls provided by Microsoft (as the cloud/software provider) that the organisation inherits. Document Microsoft\'s FedRAMP/ISO authorisations as inherited control evidence. Reduces the number of controls the org must implement directly.'},
+          {id:'RMF-PR-05',name:'Establish Continuous Monitoring Strategy',ref:'RMF:Prepare (2.7)',pri:'high',desc:'Define the continuous monitoring strategy: which controls will be monitored continuously (via MDE/Sentinel), which will be assessed periodically, and at what frequency. Document monitoring approach in the System Security Plan.'},
+        ]},
+      { id:'CAT', name:'CATEGORIZE', emoji:'🗂️', desc:'Determine the security categorisation of the information system based on the types of information processed, stored, or transmitted. FIPS 199 impact levels drive the control baseline selection for the MDE deployment.',
+        tasks:[
+          {id:'RMF-CAT-01',name:'Identify Information Types Processed by MDE',ref:'RMF:Categorize (2.1)',pri:'high',desc:'Identify and document all information types handled by MDE telemetry: security event data, device health data, user identity data, vulnerability data. Map each to NIST SP 800-60 information type taxonomy.'},
+          {id:'RMF-CAT-02',name:'Determine Security Categorisation (FIPS 199)',ref:'RMF:Categorize (2.2)',pri:'high',desc:'Apply FIPS 199 to assign Confidentiality/Integrity/Availability impact levels (Low/Moderate/High) to the MDE system based on the information types identified. Document the categorisation decision with rationale in the Security Categorisation document.'},
+          {id:'RMF-CAT-03',name:'Document MDE Telemetry Data Flows',ref:'RMF:Categorize (2.3)',pri:'med',desc:'Map all MDE data flows: endpoint → MDE cloud → Sentinel → SIEM. Document data types, transmission method, encryption in transit (TLS 1.2+), and storage locations. Include in the System Security Plan data flow diagram.'},
+          {id:'RMF-CAT-04',name:'Register MDE System in Risk Management Programme',ref:'RMF:Categorize (2.4)',pri:'med',desc:'Register the MDE deployment as a formal information system in the organisation\'s risk management programme (GRC tool). Assign a system identifier, AO, and ISSO. Link to the System Security Plan in the risk register.'},
+        ]},
+      { id:'SEL', name:'SELECT', emoji:'🎯', desc:'Select an initial set of security controls based on the security categorisation. The selected controls form the baseline for the MDE System Security Plan and guide which Defender capabilities must be implemented.',
+        tasks:[
+          {id:'RMF-SEL-01',name:'Select Security Control Baseline (Low/Moderate/High)',ref:'RMF:Select (2.1)',pri:'high',desc:'Based on the FIPS 199 categorisation, select the appropriate NIST 800-53 control baseline (Low/Moderate/High). For most MDE deployments handling sensitive security data, Moderate baseline is the minimum. Document the selection decision.'},
+          {id:'RMF-SEL-02',name:'Tailor Controls to MDE Deployment Context',ref:'RMF:Select (2.2)',pri:'high',desc:'Review each baseline control and tailor: add organisation-specific controls, apply scoping considerations (cloud vs. on-premises), and document overlays for the Microsoft cloud environment. Record all tailoring decisions with rationale.'},
+          {id:'RMF-SEL-03',name:'Document Control Selection in System Security Plan',ref:'RMF:Select (2.3)',pri:'high',desc:'Populate the SSP control table with all selected controls. For each control: implementation status (Implemented/Planned/Not Applicable), responsible party (Microsoft/Organisation/Shared), and implementation description. Begin SSP control narrative.'},
+          {id:'RMF-SEL-04',name:'Review MDE Continuous Monitoring Controls',ref:'RMF:Select (2.4)',pri:'med',desc:'Review the continuous monitoring strategy controls selected (CA-7, SI-4, AU-6). Confirm MDE and Sentinel satisfy these controls. Map each control to the specific MDE feature or policy that implements it. Document in the SSP.'},
+        ]},
+      { id:'IMP', name:'IMPLEMENT', emoji:'⚙️', desc:'Implement the selected security controls and document how each control is configured and deployed. MDE technical controls are implemented via Intune policies, Defender settings, and Sentinel rules documented against each SSP control.',
+        tasks:[
+          {id:'RMF-IMP-01',name:'Implement Technical Controls via MDE & Intune',ref:'RMF:Implement (2.1)',pri:'high',desc:'Deploy all technical security controls selected in the SSP: NGAV, ASR, Network Protection, BitLocker, Conditional Access, MDE RBAC, Sentinel analytics rules. Each deployment is an implementation evidence artefact.'},
+          {id:'RMF-IMP-02',name:'Document Control Implementation in SSP Narratives',ref:'RMF:Implement (2.2)',pri:'high',desc:'For each implemented control, write the SSP implementation narrative: how the control is implemented, which MDE/Intune/Entra feature satisfies it, configuration parameters applied, and any residual gaps. This is the core SSP documentation artefact.'},
+          {id:'RMF-IMP-03',name:'Implement Operational Controls — Policies & Procedures',ref:'RMF:Implement (2.3)',pri:'high',desc:'Implement operational controls: Incident Response Plan, Change Management Procedure, User Access Review Process, Security Awareness Training records. These supplement MDE technical controls and must be documented in the SSP.'},
+          {id:'RMF-IMP-04',name:'Configure MDE Baseline per Selected Control Requirements',ref:'RMF:Implement (2.4)',pri:'high',desc:'Map each selected 800-53 control to its MDE implementation and configure accordingly. Use the NIST 800-53 framework tab in this dashboard to track implementation status. Export JSON config as implementation evidence.'},
+          {id:'RMF-IMP-05',name:'Implement Management Controls — Governance & Oversight',ref:'RMF:Implement (2.5)',pri:'med',desc:'Establish governance controls: security governance committee charter, risk acceptance authority, control review cadence, and reporting structure. Document in the SSP management controls section. Obtain AO acknowledgement.'},
+        ]},
+      { id:'ASS', name:'ASSESS', emoji:'🔍', desc:'Assess the implemented security controls to determine if they are implemented correctly, operating as intended, and producing the desired outcome. MDE configuration exports, test results, and Secure Score data feed into the Security Assessment Report.',
+        tasks:[
+          {id:'RMF-ASS-01',name:'Develop Security Assessment Plan (SAP)',ref:'RMF:Assess (2.1)',pri:'high',desc:'Write the Security Assessment Plan: scope, assessment objectives, assessment methods (examine/interview/test) for each selected control, assessment schedule, and assessor credentials. AO must approve the SAP before assessment begins.'},
+          {id:'RMF-ASS-02',name:'Conduct MDE Control Assessment',ref:'RMF:Assess (2.2)',pri:'high',desc:'Execute the SAP: examine MDE policy configurations, interview security team on operational procedures, and test controls (EICAR test, MFA enforcement test, firewall rule verification, RBAC isolation test). Document findings per control.'},
+          {id:'RMF-ASS-03',name:'Produce Security Assessment Report (SAR)',ref:'RMF:Assess (2.3)',pri:'high',desc:'Document assessment findings in the SAR: for each control — satisfied (S), other than satisfied (OTS), or not applicable (NA). OTS findings must include description, risk impact, and recommended remediation. Submit to AO with raw evidence.'},
+          {id:'RMF-ASS-04',name:'Remediate Assessment Findings & Update SSP',ref:'RMF:Assess (2.4)',pri:'high',desc:'Remediate all OTS findings from the SAR. For findings that cannot be immediately remediated, enter into the Plan of Action & Milestones (POA&M) with target date and risk owner. Update the SSP to reflect remediated controls.'},
+        ]},
+      { id:'AUT', name:'AUTHORIZE', emoji:'✅', desc:'Authorise the MDE system to operate by presenting the authorisation package to the Authorizing Official. The AO makes a formal risk-based decision to issue an ATO, Interim ATO, or Denial of ATO.',
+        tasks:[
+          {id:'RMF-AUT-01',name:'Compile Authorisation Package (SSP + SAR + POA&M)',ref:'RMF:Authorize (2.1)',pri:'high',desc:'Assemble the complete authorisation package: System Security Plan, Security Assessment Report, Plan of Action & Milestones, and Executive Summary. All documents must be consistent and cross-referenced. Submit to the AO for review.'},
+          {id:'RMF-AUT-02',name:'Conduct Risk Determination',ref:'RMF:Authorize (2.2)',pri:'high',desc:'The AO reviews the authorisation package and determines the overall risk level: is the residual risk from open POA&M items and known control weaknesses acceptable? Risk determination is documented in the authorisation decision memo.'},
+          {id:'RMF-AUT-03',name:'Obtain Authorisation to Operate (ATO)',ref:'RMF:Authorize (2.3)',pri:'high',desc:'Receive the signed ATO memo from the AO including: authorisation decision (Authorised/Interim/Denied), conditions (e.g., complete POA&M items by date), and ATO expiry date (typically 3 years for federal systems). Store in the risk management system.'},
+          {id:'RMF-AUT-04',name:'Document Authorisation Decision & Notify Stakeholders',ref:'RMF:Authorize (2.4)',pri:'med',desc:'Distribute the ATO decision to relevant stakeholders. Update the GRC/risk management system with ATO status, expiry date, and conditions. Schedule ATO renewal activities 6 months before expiry. Communicate conditions and POA&M milestones to responsible parties.'},
+        ]},
+      { id:'MON', name:'MONITOR', emoji:'👁️', desc:'Continuously monitor the MDE security controls to maintain situational awareness of the system\'s security posture. Ongoing monitoring feeds back into the RMF lifecycle and informs ATO renewal decisions.',
+        tasks:[
+          {id:'RMF-MON-01',name:'Implement Ongoing MDE Control Monitoring',ref:'RMF:Monitor (2.1)',pri:'high',desc:'Deploy continuous monitoring per the strategy defined in Prepare step: MDE Secure Score monthly, Sentinel analytics rules continuously, device health weekly, TVM vulnerability scan weekly. Document monitoring outcomes in the monthly security status report.'},
+          {id:'RMF-MON-02',name:'Assess Control Effectiveness via Secure Score & TVM',ref:'RMF:Monitor (2.2)',pri:'high',desc:'Use Defender Secure Score and TVM Exposure Score as primary control effectiveness metrics. Track month-over-month trends. Any score degradation triggers a control review to identify which control weakened and why.'},
+          {id:'RMF-MON-03',name:'Report Security Status to Authorising Official',ref:'RMF:Monitor (2.3)',pri:'high',desc:'Produce monthly security status reports for the AO covering: Secure Score, open POA&M items, new risks identified, control changes, and significant incidents. The AO uses these reports to make ongoing risk acceptance decisions.'},
+          {id:'RMF-MON-04',name:'Manage Changes to MDE System & Environment',ref:'RMF:Monitor (2.4)',pri:'high',desc:'All changes to MDE configuration, Intune policies, or Sentinel rules must go through change management. Assess each change\'s impact on the authorisation boundary. Significant changes may require re-assessment and AO notification.'},
+          {id:'RMF-MON-05',name:'Update POA&M Based on Monitoring Findings',ref:'RMF:Monitor (2.5)',pri:'med',desc:'Review and update the POA&M monthly. Close completed items with evidence. Add new items for newly identified control weaknesses. Escalate overdue items to the AO. The living POA&M is the primary risk tracking artefact throughout the ATO lifecycle.'},
+        ]}
+    ]
+  },
+
+  /* ── NIST AI RMF (AI 100-1) ── */
+  airmf: {
+    id:'airmf', label:'NIST AI RMF', shortName:'AI RMF', dot:'#0891b2', color:'#0891b2', gradient:'var(--ai-g)',
+    emoji:'🤖',
+    desc:'NIST AI Risk Management Framework AI 100-1 — maps the AI-powered capabilities within Microsoft Defender for Endpoint and Microsoft Security Copilot to the four AI RMF core functions: Govern, Map, Measure, and Manage. Addresses risks from automated detection, AI-driven investigation, and ML-based threat scoring.',
+    cats:[
+      { id:'AI-GV', name:'GOVERN', emoji:'⚙️', desc:'Establish organisational policies, roles, and accountability structures for AI risk in MDE. Covers AI use policy, human oversight requirements, transparency of AI-driven decisions, and responsible AI governance for automated security capabilities.',
+        tasks:[
+          {id:'AI-GV-01',name:'Establish AI Risk Governance Policy for MDE',ref:'AI RMF:Govern 1.1',pri:'high',desc:'Define an organisational AI risk governance policy covering MDE AI features: Automated Investigation & Remediation, ML-based threat scoring, Security Copilot, and behavioural analytics. Policy must address oversight, escalation, and human review requirements.'},
+          {id:'AI-GV-02',name:'Assign AI Risk Roles — AI Risk Owner, Oversight Lead',ref:'AI RMF:Govern 1.2',pri:'high',desc:'Formally designate an AI Risk Owner (accountable for MDE AI outcomes) and an AI Oversight Lead (responsible for monitoring AI behaviour). Document in the governance policy. Typically the CISO owns AI risk; the SOC Manager leads oversight.'},
+          {id:'AI-GV-03',name:'Document AI Use Policy for MDE Automated Features',ref:'AI RMF:Govern 1.3',pri:'high',desc:'Create an AI Use Policy specifically for MDE automated capabilities: which automation levels are permitted per device group, when human approval is required before AIR takes action, and how AI-generated recommendations are reviewed before implementation.'},
+          {id:'AI-GV-04',name:'Establish Human Oversight for AI-Driven Remediation',ref:'AI RMF:Govern 1.4',pri:'high',desc:'Configure MDE AIR to Semi-automatic for critical and server device groups — requiring human approval for remediation actions. Full automation only applies to low-risk device groups. Document the oversight thresholds in the AI Use Policy.'},
+          {id:'AI-GV-05',name:'Review Microsoft Responsible AI Commitments for MDE',ref:'AI RMF:Govern 1.6',pri:'med',desc:'Review Microsoft\'s Responsible AI principles and MDE-specific AI transparency documentation from the Microsoft Trust Center. Document the review findings and any gaps between Microsoft\'s AI commitments and your organisational AI risk policy.'},
+          {id:'AI-GV-06',name:'Configure Security Copilot Access & Usage Governance',ref:'AI RMF:Govern 1.5',pri:'med',desc:'If Microsoft Security Copilot is licensed, define the governance policy: who can use it, what prompt types are permitted, how Copilot outputs are validated before acting on them, and how Copilot interactions are logged for audit.'},
+        ]},
+      { id:'AI-MAP', name:'MAP', emoji:'🗺️', desc:'Identify and categorise AI risks specific to MDE\'s automated capabilities. Understand where AI is used, what can go wrong, and how AI risk maps to business impact. Covers false positive risk, automated action risk, and third-party AI model dependencies.',
+        tasks:[
+          {id:'AI-MAP-01',name:'Inventory All AI-Powered MDE Features',ref:'AI RMF:Map 1.1',pri:'high',desc:'Produce a complete inventory of AI/ML-powered features in your MDE deployment: Automated Investigation & Remediation, ML-based alert prioritisation, anomaly detection, behavioural threat scoring, Security Copilot, and TVM risk scoring. Document each feature\'s automation level.'},
+          {id:'AI-MAP-02',name:'Map AI Risk to Business Impact for Automated Response',ref:'AI RMF:Map 2.1',pri:'high',desc:'For each automated AI action (device isolation, file quarantine, process kill), map the potential impact of an incorrect action: business disruption, data loss, user impact. Use this risk map to set appropriate automation thresholds and override capabilities.'},
+          {id:'AI-MAP-03',name:'Assess False Positive Risk of ML-Based Detections',ref:'AI RMF:Map 2.2',pri:'high',desc:'Analyse MDE alert false positive rates by detection type. Identify which ML-based alert categories have the highest FP rate. Document the risk of acting on false positives for each category. Use this to tune suppression rules and set manual review thresholds.'},
+          {id:'AI-MAP-04',name:'Document Third-Party AI Dependencies (Microsoft ML Models)',ref:'AI RMF:Map 3.1',pri:'med',desc:'Document the dependency on Microsoft\'s AI/ML models underlying MDE detections. Include: model update frequency, model transparency documentation from Microsoft, data inputs to models (endpoint telemetry), and the risk of model changes introducing unexpected behaviour.'},
+          {id:'AI-MAP-05',name:'Identify Bias Risks in Behavioural Detection Models',ref:'AI RMF:Map 2.3',pri:'med',desc:'Review whether MDE behavioural ML models could exhibit bias: over-alerting on specific device types, user groups, or software stacks. Analyse alert distribution by device group and OS type. Document any identified bias patterns and mitigation approach.'},
+        ]},
+      { id:'AI-MEA', name:'MEASURE', emoji:'📊', desc:'Quantify AI risks using metrics, testing, and evaluation. Track AI detection accuracy, automated action outcomes, and model performance over time. Metrics provide the evidence base for AI risk management decisions.',
+        tasks:[
+          {id:'AI-MEA-01',name:'Track AI Detection Accuracy — FP/FN Rate',ref:'AI RMF:Measure 2.1',pri:'high',desc:'Establish KPIs for MDE AI detection accuracy: false positive rate (alerts closed as benign / total alerts), false negative rate (incidents missed by automated detection vs. manual discovery). Review monthly. Target FP rate <15% for ML-based alerts.',
+            cmd:'// KQL: Alert classification outcomes\nAlertInfo\n| where Timestamp > ago(30d)\n| where DetectionSource has "MDE"\n| summarize Total=count(), FP=countif(Classification == "FalsePositive"), TruePos=countif(Classification == "TruePositive") by DetectionSource\n| extend FPRate=round(100.0*FP/Total,1)' },
+          {id:'AI-MEA-02',name:'Measure AIR Automation Accuracy & Incorrect Actions',ref:'AI RMF:Measure 2.2',pri:'high',desc:'Review the AIR Action Center history monthly. Count remediation actions classified as incorrect (false positive isolations, incorrectly quarantined files). Track the incorrect action rate as an AI risk metric. Any rate above 5% should trigger an AIR tuning review.',
+            cmd:'// KQL: AIR automated action outcomes\nDeviceEvents\n| where ActionType == "AntivirusActionTaken" or ActionType == "BehaviorPrevented"\n| summarize Count=count() by ActionType, ThreatName\n| order by Count desc' },
+          {id:'AI-MEA-03',name:'Monitor ML Model Drift via Alert Pattern Analysis',ref:'AI RMF:Measure 2.5',pri:'med',desc:'Track week-over-week alert volume by detection source and alert type. A sudden spike or drop in ML-generated alerts may indicate model drift, a major threat landscape change, or a configuration issue. Build a Sentinel workbook to visualise alert pattern trends.',
+            cmd:'// KQL: Alert volume trend by detection source\nAlertInfo\n| where Timestamp > ago(90d)\n| summarize AlertCount=count() by bin(Timestamp, 7d), DetectionSource\n| render timechart' },
+          {id:'AI-MEA-04',name:'Measure Security Copilot Response Quality',ref:'AI RMF:Measure 2.3',pri:'med',desc:'If Security Copilot is deployed, establish a quality rating process: SOC analysts rate Copilot outputs on accuracy and usefulness (1-5 scale) for a sample of sessions monthly. Track average rating and log specific incorrect outputs. Use to calibrate Copilot usage guidance.'},
+          {id:'AI-MEA-05',name:'Establish AI Performance KPIs Dashboard',ref:'AI RMF:Measure 2.6',pri:'med',desc:'Build a Sentinel workbook or Power BI dashboard showing AI risk KPIs: MTTD (AI vs. manual), FP rate trend, AIR accuracy rate, Secure Score (AI recommendations closed), Copilot quality score. Review in monthly security governance meeting.'},
+        ]},
+      { id:'AI-MAN', name:'MANAGE', emoji:'🛠️', desc:'Treat, respond to, and recover from AI risks. Implement human-in-the-loop controls, tuning processes, feedback loops, and AI incident handling procedures for MDE\'s automated capabilities.',
+        tasks:[
+          {id:'AI-MAN-01',name:'Configure Human-in-the-Loop for High-Risk AI Actions',ref:'AI RMF:Manage 1.1',pri:'high',desc:'For production server and critical asset device groups, configure AIR to Semi-automatic — all remediation actions require analyst approval before execution. Document the approval workflow and SLA (approve/reject within 2 hours for High severity AIR actions).'},
+          {id:'AI-MAN-02',name:'Define Escalation Path for Contested AI Decisions',ref:'AI RMF:Manage 1.3',pri:'high',desc:'Define a formal process for an analyst to contest or override an AI-generated decision: how to reject an AIR action, how to report a suspected false positive to the security engineering team, and how escalations are tracked and resolved.'},
+          {id:'AI-MAN-03',name:'Implement Feedback Loop for AI Detection Tuning',ref:'AI RMF:Manage 2.1',pri:'high',desc:'Establish a monthly detection tuning review: analyse false positives by rule/detection source, create suppression rules for confirmed FPs, tune custom KQL detection thresholds. Document each tuning decision with rationale. This is the AI risk treatment feedback loop.'},
+          {id:'AI-MAN-04',name:'Respond to AI-Introduced False Positives Systematically',ref:'AI RMF:Manage 3.1',pri:'med',desc:'When a false positive causes a business impact (legitimate process blocked, device incorrectly isolated), document as an AI incident: root cause, AI feature involved, business impact, remediation taken, and control improvement. Track AI incidents separately from security incidents.'},
+          {id:'AI-MAN-05',name:'Document AI Incident Handling Procedures',ref:'AI RMF:Manage 4.1',pri:'med',desc:'Create an AI-specific incident handling procedure covering: incorrect automated isolation, false positive malware quarantine that disrupts a business process, Security Copilot providing incorrect guidance acted upon. Include rollback steps and post-incident review requirements.'},
+        ]}
+    ]
   }
 };
 
@@ -1531,6 +1772,280 @@ const REMEDIES = {
     cmd:'// KQL: MITRE ATT&CK technique coverage check\nSecurityAlert\n| extend Techniques=extract_all(@"T[0-9]{4}",tostring(ExtendedProperties))\n| mv-expand Techniques\n| summarize AlertCount=count() by tostring(Techniques)\n| order by AlertCount desc' },
   'N53-SI-05':{ portal:'intune',   path:'Endpoint security → Antivirus → Tamper protection + App control for business',
     action:'Enable Tamper Protection (SI-7 for AV/EDR integrity). For high-risk device groups, also deploy Windows Defender Application Control (WDAC) policy via Intune to restrict code execution to signed, approved software only.' },
+
+  // ── PCI DSS ──
+  'PCI-R1-01':{ portal:'intune', path:'Endpoint security → Firewall → Windows Firewall → Create policy',
+    action:'Create a Firewall policy scoped to the CDE device group. Block all inbound by default, log dropped packets (4096KB). Keep outbound permissive but log connections. Assign strictly to CDE device group — do not inherit from the general firewall policy.' },
+  'PCI-R1-02':{ portal:'intune', path:'Endpoint security → Attack surface reduction → Network protection',
+    action:'Set Network Protection to Block mode for the CDE device group. Review the Network Protection events in Defender Reports weekly. Export block log monthly as PCI Req 1 network security control evidence.',
+    cmd:'Get-MpPreference | Select EnableNetworkProtection\n# 2 = Block mode' },
+  'PCI-R1-03':{ portal:'defender', path:'Settings → Endpoints → Web content filtering → Add policy',
+    action:'Create a WCF policy scoped to the CDE device group. Block: Malicious sites, Illegal activity, High Risk, Adult content. Export the WCF block report from Reports → Web protection monthly as PCI Req 1.3.3 evidence.' },
+  'PCI-R1-04':{ portal:'internal', path:'Network services register document (SharePoint / GRC)',
+    action:'Document every approved inbound service for CDE devices: port, protocol, source IP range, business justification, approval date, and approver. Review and re-approve quarterly. Provide the signed register to PCI assessors as Req 1.2.1 evidence.' },
+  'PCI-R1-05':{ portal:'defender', path:'Settings → Device groups + Settings → Permissions → Roles',
+    action:'Confirm the CDE device group has a dedicated Intune Firewall policy not shared with lower-trust groups. RBAC roles scoped to CDE must be separate from general analyst roles. Document the segmentation architecture as PCI Req 1.3.1 evidence.' },
+  'PCI-R1-06':{ portal:'intune', path:'Endpoint security → Firewall → [CDE Policy] → Device status → Export',
+    action:'Export the CDE Firewall policy compliance report quarterly. Also export per-device firewall rules via PowerShell. Compare against the approved services register. Remove any rules not in the register. File exports with review notes.',
+    cmd:'Get-NetFirewallRule -Direction Inbound -Enabled True | Select DisplayName,LocalPort,Protocol,Action | Export-Csv pci-fw-rules.csv' },
+  'PCI-R2-01':{ portal:'intune', path:'Endpoint security → Security baselines → Create profile → Windows baseline',
+    action:'Deploy the Microsoft Security Baseline scoped to the CDE device group. Review the per-setting compliance report. Achieve ≥95% compliance. Document all deviations with business justification and CISO sign-off. Export compliance report as PCI Req 2 evidence.' },
+  'PCI-R2-02':{ portal:'intune', path:'Devices → Configuration profiles → Settings catalog → Search "Services"',
+    action:'Disable non-essential services on CDE devices: Print Spooler (non-print servers), Remote Registry, Telnet Client, FTP Client. For each disabled service, document the PCI 2.2.4 justification. Export the Settings Catalog policy as configuration evidence.' },
+  'PCI-R2-03':{ portal:'intune', path:'Endpoint security → Antivirus → [CDE Policy] → Tamper protection',
+    action:'Set TamperProtection = Enabled in the Intune Antivirus policy for the CDE device group. Verify all CDE devices show IsTamperProtected = True. Export the Intune device status report filtered to CDE group as PCI 2.2.1 evidence.',
+    cmd:'Get-MpComputerStatus | Select IsTamperProtected, AMRunningMode' },
+  'PCI-R2-04':{ portal:'intune', path:'Endpoint security → Attack surface reduction → CDE ASR policy',
+    action:'Ensure all mature ASR rules are in Block mode for CDE device group. For any rule still in Audit, document risk acceptance with target Block date. Maintain the ASR exception register. Export the Intune ASR policy as PCI 2.2.7 configuration evidence.' },
+  'PCI-R2-05':{ portal:'defender', path:'Assets → Devices → Filter: Device group = CDE → Export',
+    action:'Export the MDE device inventory filtered to the CDE device group with columns: Device name, OS version, IP address, Onboarding status, Last seen, Sensor health, Device tags. Sign and date. This is the PCI Req 2.1.1 system component inventory.' },
+  'PCI-R5-01':{ portal:'intune', path:'Endpoint security → Antivirus → CDE Antivirus policy',
+    action:'Configure for CDE devices: Cloud-delivered protection = High+, Real-time protection = Enabled, Behavior monitoring = Enabled, MAPS = Advanced, Auto-sample submission = Enabled. Export the policy and compliance status report as PCI Req 5.2.1 evidence.',
+    cmd:'Get-MpPreference | Select CloudBlockLevel, RealTimeProtectionEnabled, BehaviorMonitoringEnabled, MAPSReporting' },
+  'PCI-R5-02':{ portal:'defender', path:'Settings → Endpoints → Advanced features → EDR in block mode',
+    action:'Enable EDR in Block mode. Verify the CDE device group shows EDR in block mode active in the device detail view. Export the Advanced Features settings screenshot as PCI 5.2.3 supplementary protection evidence.' },
+  'PCI-R5-03':{ portal:'defender', path:'Reports → Device health and compliance → Sensor health → Filter: CDE group',
+    action:'Filter the Device health report to the CDE device group. All devices must show Sensor health = Active. Export the report monthly. Any inactive CDE device is a PCI Req 5.3.4 gap — escalate and remediate within 24 hours.' },
+  'PCI-R5-04':{ portal:'intune', path:'Endpoint security → Antivirus → [CDE Policy] → Tamper protection',
+    action:'Tamper Protection is the PCI 5.3.3 control. All CDE devices must show TamperProtected = True. Export the Intune device compliance report filtered to CDE group monthly as evidence. Any non-tamper-protected CDE device is an immediate PCI finding.' },
+  'PCI-R5-05':{ portal:'defender', path:'Reports → Threat protection → Threat detections export',
+    action:'Export the threat detection report from Defender portal monthly, filtered to CDE device group. Review: detection types, actions taken, and any manual interventions. File the export with a brief analyst review note as PCI 5.3.2 periodic evaluation evidence.' },
+  'PCI-R6-01':{ portal:'defender', path:'Vulnerability management → Dashboard → Filter to CDE device group',
+    action:'Enable TVM and create a device group-scoped view for CDE assets. Review Exposure Score and critical CVEs weekly. Configure TVM notification for CVSS ≥ 7.0 CVEs affecting CDE devices. Target 30-day remediation SLA per PCI 6.3.3.',
+    cmd:'// KQL: CVEs on CDE devices overdue 30 days\nDeviceTvmSoftwareVulnerabilities\n| where DeviceId in (cde_device_ids)\n| where VulnerabilitySeverityLevel in ("Critical","High")\n| extend DaysOpen = datetime_diff("day",now(),PublishedDate)\n| where DaysOpen > 30' },
+  'PCI-R6-02':{ portal:'defender', path:'Vulnerability management → Recommendations → Request remediation',
+    action:'Create remediation requests for all CVEs with CVSS ≥ 7.0 on CDE devices. Set 30-day due date. Assign to device owner. Track closure in the TVM Remediation tab. Export the remediation closure report quarterly as PCI 6.3.3 evidence.' },
+  'PCI-R6-03':{ portal:'defender', path:'Vulnerability management → Settings → Assessment schedules → CDE group',
+    action:'Create an authenticated scan schedule scoped to the CDE device group. Use a read-only domain account. Set scan frequency to weekly. Export the last scan completion status per CDE device as PCI 6.3.1 scan evidence.' },
+  'PCI-R6-04':{ portal:'defender', path:'Vulnerability management → Software inventory → Filter: End of support = Yes, CDE devices',
+    action:'Filter TVM software inventory to EOS products on CDE devices. Any EOS software on a CDE device is an immediate PCI 6.2.4 finding. Remediate (upgrade/remove/replace) within 30 days or formally document the risk acceptance with the AO.' },
+  'PCI-R6-05':{ portal:'internal', path:'Patch management procedure document + Change management system',
+    action:'Document the patch management process for CDE systems: how patches are evaluated, tested in non-production, change-approved, deployed to CDE, and verified. Include the 30-day critical patch SLA. PCI assessors will review this as Req 6.5.1 change control evidence.' },
+  'PCI-R78-01':{ portal:'entra', path:'Security → Conditional Access → New policy → All users → CDE apps',
+    action:'Create a Conditional Access policy requiring phishing-resistant MFA for all users accessing CDE-classified applications. Use Authentication Strengths to enforce FIDO2 or Authenticator. Document the policy and sign-in log samples as PCI 8.4.1 evidence.' },
+  'PCI-R78-02':{ portal:'defender', path:'Settings → Permissions → Roles → Roles scoped to CDE device group',
+    action:'Assign only minimum required roles for CDE access: Security Reader for view-only, Security Operator for investigation, Security Admin (CDE-scoped) for response. Document each assignment with business justification as PCI 7.2.2 least privilege evidence.' },
+  'PCI-R78-03':{ portal:'entra', path:'Identity Governance → Privileged Identity Management → Roles',
+    action:'Configure PIM for Security Administrator with CDE scope: JIT activation, MFA required, 4-hour max, SOC Manager approval. Export PIM activation log quarterly as PCI 7.2.4 privileged access evidence.' },
+  'PCI-R78-04':{ portal:'defender', path:'Settings → Permissions → Roles → Export all assignments',
+    action:'Export all MDE role assignments quarterly. Review each assignment against current job functions. Remove stale roles. Document review outcomes with analyst name, date, and changes made. File as PCI Req 7.2.4 quarterly access review evidence.' },
+  'PCI-R78-05':{ portal:'entra', path:'Users → All users → Sign-in activity → Filter: Last sign-in > 90 days',
+    action:'Export Entra users inactive for 90+ days. Disable all accounts with no business justification for inactivity. For CDE system accounts, apply a 30-day threshold. Export the inactive account audit with remediation actions as PCI 8.2.6 evidence.',
+    cmd:'# Find inactive accounts\nGet-MgUser -All -Property DisplayName,SignInActivity,AccountEnabled | Where-Object {$_.SignInActivity.LastSignInDateTime -lt (Get-Date).AddDays(-90)} | Select DisplayName,AccountEnabled' },
+  'PCI-R78-06':{ portal:'intune', path:'Devices → Configuration profiles → Settings catalog → Account lockout policy',
+    action:'Set account lockout threshold to 6 failed attempts, lockout duration 30 minutes, via Intune Settings Catalog. Assign to CDE device group. Export the profile compliance status as PCI 8.3.4 authentication policy evidence.' },
+  'PCI-R10-01':{ portal:'sentinel', path:'Data connectors → Microsoft Defender XDR → Connect',
+    action:'Enable the Defender XDR connector in Sentinel with all tables selected. Confirm all required PCI 10.2.1 event types are flowing: user access, failed logins, admin actions, privilege use. Run a KQL test query for each event type. Document as PCI 10.2 evidence.',
+    cmd:'// KQL: Verify required PCI 10.2 event categories are present\nSecurityEvent\n| where TimeGenerated > ago(7d)\n| summarize Count=count() by EventID\n| where EventID in (4624,4625,4648,4672,4720,4726)\n| order by Count desc' },
+  'PCI-R10-02':{ portal:'azure', path:'Log Analytics → [Workspace] → Usage and estimated costs → Data retention',
+    action:'Set workspace retention to 12 months minimum (90 days interactive, 9 months archive). Enable immutable retention to prevent deletion. Document the retention policy configuration as PCI 10.5.1 log protection evidence.' },
+  'PCI-R10-03':{ portal:'sentinel', path:'Workbooks → [PCI Log Review Workbook] → Schedule',
+    action:'Create or deploy a Sentinel workbook showing daily CDE event summaries. Assign a named analyst to review daily. Document review outcomes (Normal / Anomaly / Escalated) in a shared log. Daily review records are PCI 10.4.1 evidence — keep for the full audit period.' },
+  'PCI-R10-04':{ portal:'sentinel', path:'Analytics → Create rule → Scheduled query rule',
+    action:'Create Sentinel analytics rules for PCI 10.4.2 events on CDE devices: off-hours admin access, new admin account created, failed auth spike (>10 in 5 min), lateral movement from CDE device, privilege escalation. All alerts route to SOC on-call.' },
+  'PCI-R10-05':{ portal:'azure', path:'Log Analytics → [Workspace] → Tables → Set immutability',
+    action:'Configure Log Analytics workspace with data immutability enabled. Restrict the Log Analytics Contributor role to named service accounts only — no analyst-level access to modify logs. Alert on any log purge attempt. Document as PCI 10.3.2 log integrity evidence.' },
+  'PCI-R11-01':{ portal:'defender', path:'Vulnerability management → Dashboard → Run scan → CDE device group',
+    action:'Run a TVM authenticated scan of all CDE devices each quarter. Export the vulnerability report showing all findings with severity, device name, CVE, and patch status. All Critical/High findings must be remediated and a re-scan run to confirm clear before the quarterly scan passes.',
+    cmd:'// KQL: Quarterly scan results summary\nDeviceTvmSoftwareVulnerabilities\n| summarize CriticalCVEs=countif(VulnerabilitySeverityLevel=="Critical"), HighCVEs=countif(VulnerabilitySeverityLevel=="High") by DeviceName\n| order by CriticalCVEs desc' },
+  'PCI-R11-02':{ portal:'defender', path:'Assets → Devices → CDE group → Sensor health = Active',
+    action:'MDE EDR is the continuous IDS for PCI 11.5.1. Verify all CDE devices show Active sensor. Create Advanced Hunting detections for CDE-specific attack patterns: RDP brute force, cardholder data access from unusual process, lateral movement within CDE segment. Review coverage quarterly.' },
+  'PCI-R11-03':{ portal:'defender', path:'Email & collaboration → Attack simulator training → Simulations',
+    action:'Run at least annual attack simulation targeting CDE users. Recommended: Credential Harvest (phishing) + Malware Attachment. Document: simulation date, attack type, detection result, analyst response time, gaps found, and IR plan updates made. File as PCI 11.4.1 penetration testing evidence.' },
+  'PCI-R11-04':{ portal:'defender', path:'Hunting → Advanced hunting → New query',
+    action:'Create scheduled Advanced Hunting queries for critical file changes on CDE devices: system32, SAM, registry run keys, security policy files. Alert on any unexpected changes. Export weekly FIM event log as PCI 11.5.2 file integrity monitoring evidence.',
+    cmd:'// KQL: Critical file modification events on CDE devices\nDeviceFileEvents\n| where FolderPath has_any (@"\\System32\\", @"\\SAM")\n| where ActionType == "FileModified"\n| project Timestamp, DeviceName, FileName, FolderPath, InitiatingProcessAccountName' },
+  'PCI-R12-01':{ portal:'internal', path:'IR Plan document (SharePoint / GRC platform)',
+    action:'Create PCI IR plan sections: CDE breach response procedures, MDE device isolation steps for compromised CDE devices, evidence preservation via Live Response, notification procedures to acquiring bank and card brands (within required timeframes), and post-incident forensic requirements.' },
+  'PCI-R12-02':{ portal:'defender', path:'Settings → Endpoints → Automation level → CDE device group',
+    action:'Set CDE device group AIR to Semi-automatic — all remediation actions require analyst approval. Review Action center for CDE devices daily. Configure email alert for pending CDE AIR actions. Document the automation level decision in the PCI IR plan.' },
+  'PCI-R12-03':{ portal:'internal', path:'Incident escalation matrix document',
+    action:'Document CDE incident escalation: L1 detects via MDE → L2 confirms and isolates device → SOC Manager notified → CISO → Legal → Acquirer notification per card brand rules. Include MDE severity-to-escalation-tier mapping. Include the 72-hour breach notification SLA clock start trigger.' },
+  'PCI-R12-04':{ portal:'defender', path:'Email & collaboration → Attack simulator training + Internal tabletop exercise',
+    action:'Annually: (1) Run tabletop exercise with CDE breach scenario using the PCI IR plan, (2) Technical test via Attack Simulator. Document: test date, scenario, participants, outcomes, IR plan gaps found, and plan updates made. File as PCI 12.10.6 IR plan test evidence.' },
+
+  // ── NIST Zero Trust ──
+  'ZT-ID-01':{ portal:'entra', path:'Security → Conditional Access → Authentication strengths → New strength',
+    action:'Create an Authentication Strength requiring FIDO2 or Microsoft Authenticator (phishing-resistant). Apply to a CA policy targeting All Users and All Cloud Apps. Enable Sign-in frequency to require re-auth every 8 hours. This is the ZT identity verification foundation.' },
+  'ZT-ID-02':{ portal:'entra', path:'Identity Governance → Privileged Identity Management → Azure AD roles',
+    action:'Enable PIM for all privileged roles. Remove all permanent admin assignments. Configure JIT activation: max 4 hours, MFA required, justification mandatory, SOC Manager approval for Security Admin. Log all activations to Sentinel for continuous identity monitoring.' },
+  'ZT-ID-03':{ portal:'entra', path:'Security → Conditional Access → New policy → User risk condition',
+    action:'Create a risk-based CA policy: if User risk = High → Block access. If User risk = Medium → require MFA + compliant device. Enable Continuous Access Evaluation. Import Defender for Identity signals to Entra for enhanced identity risk scoring.' },
+  'ZT-ID-04':{ portal:'intune', path:'Devices → Compliance policies → Create policy → Device risk condition',
+    action:'Create an Intune compliance policy requiring MDE device risk ≤ Medium. Link to a CA policy blocking non-compliant devices from all cloud apps. A compromised device immediately raises risk score and revokes access — this is the ZT device-identity link.' },
+  'ZT-ID-05':{ portal:'entra', path:'Identity → Continuous access evaluation → Settings',
+    action:'Enable CAE for all supported apps (Exchange Online, SharePoint, Teams). CAE enables near-real-time session revocation when a critical event occurs: password change, risky sign-in detected, account disabled. Verify CAE is enforced in the CA policy for CDE apps.' },
+  'ZT-ID-06':{ portal:'defender', path:'Settings → Identities → Defender for Identity',
+    action:'Enable the Defender for Identity integration in MDE. Deploy identity sensors on domain controllers. Review identity alerts (lateral movement, pass-the-hash, Kerberoasting) in Defender XDR portal. Configure Sentinel analytics rules for identity-based attack patterns.' },
+  'ZT-DEV-01':{ portal:'defender', path:'Assets → Devices → Filter: Onboarding status = Not onboarded',
+    action:'Run network discovery to identify all unmanaged devices. Any device not enrolled in MDE cannot receive a device trust signal. Prioritise onboarding all unmanaged devices. Until onboarded, block from corporate resource access via Conditional Access (require compliant device).',
+    cmd:'// KQL: Unmanaged devices discovered\nDeviceInfo\n| where OnboardingStatus != "Onboarded"\n| summarize count() by OSPlatform, OnboardingStatus' },
+  'ZT-DEV-02':{ portal:'intune', path:'Devices → Compliance policies → Create policy → Windows → MDE risk',
+    action:'Create a compliance policy: MDE Threat level ≤ Medium, Defender AV = Enabled and updated, Firewall = Enabled. Any device failing compliance immediately loses access to corporate resources via CA. Review compliance dashboard daily. This is the ZT device trust gate.' },
+  'ZT-DEV-03':{ portal:'intune', path:'Devices → Compliance policies → [Policy] → Properties → Device health',
+    action:'In the Intune compliance policy, set "Require the device to be at or under the machine risk score" to Medium or Low. High-risk devices (MDE score = High) are immediately non-compliant and lose corporate resource access. Review MDE risk score distribution monthly.' },
+  'ZT-DEV-04':{ portal:'defender', path:'Assets → Devices → [Device] → Overview → Risk level',
+    action:'MDE continuously evaluates device posture and updates the risk score in near real-time. Verify this signal flows to Intune compliance within minutes of a risk change. Test: run a simulated threat on a test device and confirm the compliance status updates and CA blocks access.' },
+  'ZT-DEV-05':{ portal:'defender', path:'Assets → Devices → [Device] → Manage tags',
+    action:'Apply device tags for trust level: PAW, Managed-Standard, BYOD-Limited, CDE. Use tags to drive device group membership rules. Apply stricter policies (Full ASR, strict firewall, higher WCF coverage) to lower-trust device groups. Document the trust taxonomy.' },
+  'ZT-DEV-06':{ portal:'azure', path:'Power Automate → Create → Automated flow → Defender for Endpoint trigger',
+    action:'Build a Power Automate flow triggered when a device risk changes to High in MDE: (1) Trigger Selective isolation, (2) Notify device owner and SOC channel, (3) Create incident ticket. This automates the ZT principle of removing untrusted devices from the network immediately.' },
+  'ZT-NET-01':{ portal:'intune', path:'Endpoint security → Attack surface reduction → Network protection → Block',
+    action:'Deploy Network Protection in Block mode on all device groups. All outbound connections are evaluated against threat intelligence before being allowed. Review block events in Defender Reports weekly. This is the foundational ZT network control: deny by default at the network layer.',
+    cmd:'Set-MpPreference -EnableNetworkProtection Enabled\n# Confirm: Get-MpPreference | Select EnableNetworkProtection' },
+  'ZT-NET-02':{ portal:'defender', path:'Settings → Device groups → Group hierarchy',
+    action:'Define device groups as ZT micro-segments. Each group has its own firewall policy, ASR profile, WCF policy, and automation level. Verify no policy inheritance creates lateral policy bleed between groups. Document the segmentation architecture as the ZT network control design.' },
+  'ZT-NET-03':{ portal:'defender', path:'Settings → Endpoints → Web content filtering → Add policy per group',
+    action:'Create WCF policies scoped per device group: PAW gets most restrictive (only business-approved categories), standard workstations get standard policy, servers get server-specific policy with broader block scope. Review and tune WCF policies monthly.' },
+  'ZT-NET-04':{ portal:'intune', path:'Endpoint security → Attack surface reduction → ASR rules',
+    action:'Enable lateral-movement-blocking ASR rules in Block mode: "Block process creations from PSExec/WMI" (D1E49AAC), "Block credential stealing from LSASS" (9E6C4E1F), "Block persistence through WMI" (E6DB77E5). These are the ZT east-west traffic controls at process layer.',
+    cmd:'// KQL: Lateral movement attempts blocked by ASR\nDeviceEvents\n| where ActionType == "AsrLsassCredentialTheftAudited" or ActionType == "AsrPsexecWmiChildProcessAudited"\n| project Timestamp, DeviceName, ActionType, InitiatingProcessCommandLine' },
+  'ZT-NET-05':{ portal:'defender', path:'Hunting → Advanced hunting → New detection rule',
+    action:'Create scheduled Advanced Hunting detections for east-west lateral movement: RDP from workstation to workstation, SMB connections to non-standard servers, WMI remote execution from non-admin processes. Set hourly schedule. Alert on any match.',
+    cmd:'// KQL: East-west RDP lateral movement\nDeviceNetworkEvents\n| where RemotePort == 3389\n| where LocalIPType == "Private" and RemoteIPType == "Private"\n| where InitiatingProcessAccountName !endswith "$"\n| project Timestamp, DeviceName, RemoteIP, InitiatingProcessAccountName' },
+  'ZT-NET-06':{ portal:'defender', path:'Reports → Web protection → Network protection → DNS block events',
+    action:'Export the Network Protection DNS block log monthly. This evidences active DNS-layer filtering across all device groups. A populated log demonstrates ZT network policy enforcement is operational. Include in the monthly ZT posture review.' },
+  'ZT-APP-01':{ portal:'entra', path:'Security → Conditional Access → New policy → App condition',
+    action:'Create a CA policy targeting specific corporate apps (SharePoint, Exchange, Teams, Azure Portal). Require: MFA + Intune-compliant device. Applications are only accessible from trusted, enrolled, compliant devices. This is the ZT application access gate.' },
+  'ZT-APP-02':{ portal:'defender', path:'Settings → Advanced features → Microsoft Defender for Cloud Apps',
+    action:'Enable the Defender for Cloud Apps integration in MDE Advanced Features. Review the Cloud discovery dashboard for shadow IT. Sanction/unsanction cloud apps. Create a Cloud App CA policy to block unsanctioned apps. Review monthly.',
+    cmd:'// KQL: Cloud app access from MDE-managed devices\nCloudAppEvents\n| where Timestamp > ago(30d)\n| summarize Count=count() by Application, ActionType\n| order by Count desc' },
+  'ZT-APP-03':{ portal:'defender', path:'Hunting → Advanced hunting → New query',
+    action:'Create Advanced Hunting custom detections for application anomalies: unsigned binary execution from temp folders, process injection into system processes, macro execution from non-Office paths, first-time-seen binary execution. Schedule hourly. Route alerts to SOC.' },
+  'ZT-APP-04':{ portal:'intune', path:'Endpoint security → Application control → Create policy (WDAC)',
+    action:'Deploy Windows Defender Application Control policy for high-trust device groups (PAW, CDE). Start with Audit mode to catalogue allowed applications, then enforce Block for unsigned/unapproved binaries. This is the ZT application allowlisting control.' },
+  'ZT-DATA-01':{ portal:'intune', path:'Endpoint security → Disk encryption → BitLocker → Create policy',
+    action:'Deploy BitLocker: XTS-AES 256-bit OS drive, AES-CBC 256-bit data drives, TPM required, escrow keys to Entra ID. Enable the Intune Encryption report to monitor coverage. Target 100% encrypted. BitLocker ensures data is protected regardless of device trust state.',
+    cmd:'Get-BitLockerVolume | Select MountPoint, EncryptionMethod, VolumeStatus, ProtectionStatus' },
+  'ZT-DATA-02':{ portal:'intune', path:'Endpoint security → Attack surface reduction → Device control',
+    action:'Deploy device control policy blocking all unapproved removable storage. Allow only corporate-issued USB devices by device hardware ID. Block mobile phone sync and portable media players. Review device control events weekly. This enforces ZT data exfiltration prevention.' },
+  'ZT-DATA-03':{ portal:'intune', path:'Endpoint security → Attack surface reduction → Controlled folder access',
+    action:'Enable CFA in Block mode after an audit period. Define protected folders including user profile, finance, and HR directories. Whitelist only necessary applications. This protects data at rest from unauthorised write access — the ZT data integrity control.',
+    cmd:'Get-MpPreference | Select EnableControlledFolderAccess\n# 1 = Audit, 2 = Block' },
+  'ZT-DATA-04':{ portal:'defender', path:'Settings → Advanced features → Microsoft Purview data loss prevention',
+    action:'Enable the Purview DLP integration in MDE Advanced Features. Create a Purview DLP policy targeting sensitive data labels (Confidential, Highly Confidential). MDE enforces the policy at endpoint — blocking copy to USB, upload to unsanctioned cloud, print. Review DLP incidents weekly.' },
+  'ZT-VIS-01':{ portal:'sentinel', path:'Data connectors → Microsoft Defender XDR → Connect',
+    action:'Enable the Defender XDR Sentinel connector with all incident, alert, and raw telemetry tables. This provides unified ZT visibility: identity (Entra), device (MDE), network (Network Protection), app (CASB), and data (Purview) signals all in one workspace for cross-pillar correlation.' },
+  'ZT-VIS-02':{ portal:'sentinel', path:'Workbooks → Add workbook → Create new',
+    action:'Build a ZT Posture workbook in Sentinel tracking: % devices compliant (MDE risk ≤ Medium), % users with phishing-resistant MFA, Network Protection block rate per week, WDAC coverage %, Secure Score trend, and top anomalous identity events. Review monthly.' },
+  'ZT-VIS-03':{ portal:'defender', path:'Threat intelligence → Threat analytics + Settings → Advanced features → MDTI',
+    action:'Enable Microsoft Defender Threat Intelligence integration. Subscribe to Threat Analytics reports for active campaigns targeting your sector. Configure threat intelligence ingestion into Sentinel. ZT requires current threat intelligence to inform trust decisions dynamically.' },
+  'ZT-VIS-04':{ portal:'azure', path:'Power Automate → Logic Apps → Create playbook',
+    action:'Build Sentinel playbooks for automated ZT responses: (1) Block device + revoke session on Critical MDE alert, (2) Block IOC in MDE on TI match, (3) Enforce PIM re-activation on identity risk spike. Document each playbook as ZT automation & orchestration evidence.' },
+  'ZT-VIS-05':{ portal:'defender', path:'Secure Score → Improvement actions → History tab',
+    action:'Use Secure Score as the primary longitudinal ZT maturity metric. Map each improvement action to a ZT pillar (Identity/Devices/Network/Apps/Data). Set monthly score targets (+5 points minimum). Export Secure Score history as ZT posture trend evidence.' },
+
+  // ── NIST RMF ──
+  'RMF-PR-01':{ portal:'internal', path:'Risk management policy document (SharePoint / GRC)',
+    action:'Draft the MDE Risk Management Strategy: define organisational risk tolerance (Low/Moderate/High), risk acceptance authority levels, control review frequency, and the process for accepting residual risk. Obtain CISO sign-off. This is the foundational RMF Prepare document.' },
+  'RMF-PR-02':{ portal:'entra', path:'Roles → Security Administrator → Properties + Microsoft Trust Center',
+    action:'Document ISSO (SOC Manager), ISSM (Security Engineering Lead), and AO (CISO/Deputy CISO) with contact information. For inherited controls, download Microsoft\'s FedRAMP/ISO 27001 authorisation letters from trust.microsoft.com as evidence of inherited control coverage.' },
+  'RMF-PR-03':{ portal:'defender', path:'Assets → Devices → Export (system boundary inventory)',
+    action:'Define the MDE authorisation boundary: which devices, user populations, cloud services, and data types are in scope. Export the MDE device inventory as the boundary documentation. Have the AO review and formally agree the boundary before categorisation begins.' },
+  'RMF-PR-04':{ portal:'azure', path:'Microsoft Trust Center → Products → Defender for Endpoint',
+    action:'Review Microsoft\'s FedRAMP, ISO 27001, and SOC 2 authorisations for MDE at trust.microsoft.com. Identify which controls are fully inherited (Microsoft responsibility) vs. shared vs. organisation responsibility. Document in the control responsibility matrix.' },
+  'RMF-PR-05':{ portal:'sentinel', path:'Settings → Analytics rules + Defender portal → Reports → Defender Secure Score',
+    action:'Document the continuous monitoring strategy: which controls are monitored continuously (Sentinel analytics rules, MDE sensor health), which are monitored weekly (TVM scan, device compliance), and which are assessed annually (tabletop, pen test). File as the CM Strategy document.' },
+  'RMF-CAT-01':{ portal:'internal', path:'FIPS 199 categorisation document + NIST SP 800-60',
+    action:'Using NIST SP 800-60 Vol 2, identify all information types in MDE telemetry: Incident Management (C.3.4), Vulnerability Management (C.3.5), Identity Management (C.3.2). For each type, document the provisional FIPS 199 impact level (C/I/A = Low/Mod/High).' },
+  'RMF-CAT-02':{ portal:'internal', path:'Security categorisation document (GRC platform)',
+    action:'Apply FIPS 199 to determine the system security categorisation. The overall system categorisation is the high-water mark of all information type impact levels. Document the rationale for the final C/I/A impact levels and obtain the ISSO and AO signatures on the categorisation document.' },
+  'RMF-CAT-03':{ portal:'defender', path:'Settings → Advanced features + Azure Portal → Network topology',
+    action:'Create a data flow diagram showing: endpoint telemetry → MDE cloud ingestion → Log Analytics / Sentinel → SIEM outputs. For each flow: document data type, transport encryption (TLS 1.2+), storage location (Azure region), and data retention. Include in the SSP appendix.' },
+  'RMF-CAT-04':{ portal:'internal', path:'GRC platform / Risk register',
+    action:'Register the MDE system in the organisation\'s risk management programme or GRC tool. Assign: system name, AO name, ISSO name, authorisation boundary, categorisation level, ATO expiry date, and link to SSP. This creates the formal system record for RMF lifecycle tracking.' },
+  'RMF-SEL-01':{ portal:'internal', path:'SSP control table (GRC platform / spreadsheet)',
+    action:'Based on the FIPS 199 categorisation, select the appropriate NIST 800-53 Rev 5 baseline from NIST SP 800-53B (Low/Moderate/High). For most MDE deployments handling operational security data, the Moderate baseline is the minimum. Document the baseline selection with rationale.' },
+  'RMF-SEL-02':{ portal:'internal', path:'SSP control tailoring section',
+    action:'Review each baseline control for applicability to the MDE cloud deployment context. Apply scoping guidance: controls not applicable to cloud-hosted systems may be marked NA with justification. Add organisation-specific controls (e.g., PCI overlay, FedRAMP overlay). Document all tailoring decisions.' },
+  'RMF-SEL-03':{ portal:'internal', path:'SSP control implementation table',
+    action:'Populate the SSP control table: for each selected control document implementation status (Implemented/Planned/Inherited/NA), responsible party (Organisation/Microsoft/Shared), and a one-paragraph implementation description. Use this dashboard\'s NIST 800-53 framework tab as a reference.' },
+  'RMF-SEL-04':{ portal:'sentinel', path:'Analytics rules + Defender portal → Secure Score',
+    action:'Review the continuous monitoring controls (CA-7, SI-4, AU-6) selected. Map CA-7 to Sentinel analytics rules, SI-4 to MDE EDR + behavioral monitoring, AU-6 to the daily audit log review process. Document the mapping in the SSP to show how MDE satisfies each CM control.' },
+  'RMF-IMP-01':{ portal:'intune', path:'Endpoint security → All policy types → Create policies per SSP controls',
+    action:'Implement all SSP technical controls via Intune policies and MDE configuration. Use this dashboard\'s NIST 800-53 tab to track implementation status. Export the JSON config after each implementation sprint as a versioned implementation evidence artefact.' },
+  'RMF-IMP-02':{ portal:'internal', path:'SSP control narrative sections (GRC platform / Word doc)',
+    action:'For each implemented control, write the SSP implementation narrative: how it is implemented, which MDE/Intune/Entra feature satisfies it, configuration parameters, and known residual gaps. Use this dashboard\'s "How to comply" guidance as source material for the narratives.' },
+  'RMF-IMP-03':{ portal:'internal', path:'Policy management system (SharePoint)',
+    action:'Implement and document operational controls: Incident Response Plan, Change Management Procedure, User Access Review Process, Security Awareness Training records. Upload signed policy documents to SharePoint. Reference each document in the SSP operational controls section.' },
+  'RMF-IMP-04':{ portal:'defender', path:'All MDE configuration areas — use NIST 800-53 tab in this dashboard',
+    action:'Complete all tasks in the NIST 800-53 framework tab of this dashboard. Each task represents a control implementation step. Export the dashboard JSON config after completing each control family to create implementation snapshots. The completed dashboard state is the implementation evidence baseline.' },
+  'RMF-IMP-05':{ portal:'internal', path:'Governance framework document + Committee charter',
+    action:'Establish management controls: security governance committee charter, monthly security review meeting minutes, risk acceptance register with AO approval records, and annual security awareness training records. File each as management control evidence in the authorisation package.' },
+  'RMF-ASS-01':{ portal:'internal', path:'Security Assessment Plan document (GRC platform)',
+    action:'Write the SAP: define scope (all controls in the SSP), assessment methods per control (E=Examine, I=Interview, T=Test), assessor credentials (independent internal or third-party), schedule, and deliverables. AO must review and approve the SAP before assessment begins.' },
+  'RMF-ASS-02':{ portal:'defender', path:'All MDE portals — test per SAP assessment methods',
+    action:'Execute the SAP: Examine MDE configuration exports, Interview SOC analysts on operational procedures, Test controls (EICAR test, MFA enforcement, RBAC isolation, firewall rule verification, log review demonstration). Document each finding with: control ID, method, finding, severity.' },
+  'RMF-ASS-03':{ portal:'internal', path:'Security Assessment Report document (GRC platform)',
+    action:'Compile the SAR: list each control with assessment outcome (Satisfied/Other Than Satisfied/NA), evidence reviewed, and finding description for any OTS controls. OTS findings must include risk impact, risk level, and recommended remediation. Submit to AO with the raw evidence package.' },
+  'RMF-ASS-04':{ portal:'internal', path:'Plan of Action & Milestones (POA&M) document',
+    action:'For each OTS finding in the SAR, create a POA&M entry: weakness ID, description, responsible party, resources required, scheduled completion date, and milestone checkpoints. Prioritise by risk level. Update the SSP to reflect any controls remediated before authorisation submission.' },
+  'RMF-AUT-01':{ portal:'internal', path:'Authorisation package folder (GRC / SharePoint)',
+    action:'Assemble the authorisation package: System Security Plan (final version), Security Assessment Report, POA&M, and a 2-page Executive Summary covering system purpose, categorisation, residual risks, and the AO risk recommendation. Ensure all documents are internally consistent.' },
+  'RMF-AUT-02':{ portal:'internal', path:'Risk determination memo (AO sign-off)',
+    action:'The AO reviews the authorisation package and documents the risk determination: what is the overall residual risk level given the open POA&M items and control weaknesses? Is this risk acceptable given the mission? The risk determination memo is the AO\'s formal risk analysis.' },
+  'RMF-AUT-03':{ portal:'internal', path:'ATO decision memo (signed by AO)',
+    action:'Obtain the signed ATO memo from the AO. Content: authorisation decision (Authorised / Interim / Denied), authorisation conditions (POA&M completion milestones), ATO term (typically 3 years), and AO signature. Store in the GRC system and notify ISSO and ISSM.' },
+  'RMF-AUT-04':{ portal:'internal', path:'GRC system / Risk register → ATO record',
+    action:'Update the GRC system with the ATO decision: status, expiry date, conditions, and link to the signed ATO memo. Notify stakeholders. Schedule ATO renewal activities to begin 6 months before expiry. Communicate open POA&M conditions to responsible parties with milestones.' },
+  'RMF-MON-01':{ portal:'defender', path:'Reports → All reports + Sentinel → Analytics rules overview',
+    action:'Activate the continuous monitoring strategy: Sentinel analytics rules run continuously, MDE Secure Score reviewed monthly, device health reviewed weekly, TVM scan weekly, access review quarterly. Document monitoring outcomes in a monthly security status report.' },
+  'RMF-MON-02':{ portal:'defender', path:'Secure Score → History + Vulnerability management → Exposure score',
+    action:'Export Secure Score and TVM Exposure Score history monthly. Any score degradation triggers a control review investigation: which control weakened, root cause, and remediation plan. File the monthly score report with investigation notes as RMF Monitor CA-7 evidence.' },
+  'RMF-MON-03':{ portal:'sentinel', path:'Workbooks → [RMF Status Report workbook]',
+    action:'Build a Sentinel workbook for the monthly AO security status report: Secure Score, open POA&M items by risk level, new risks identified this month, significant incidents, control changes since last report. Export as PDF and submit to AO monthly.' },
+  'RMF-MON-04':{ portal:'internal', path:'Change management system (ServiceNow / Jira)',
+    action:'All MDE configuration changes go through the formal change management process. For each change, assess impact on the authorisation boundary. Significant changes (new integrations, policy major changes) require AO notification and may trigger partial re-assessment of affected controls.' },
+  'RMF-MON-05':{ portal:'internal', path:'POA&M tracking document (GRC platform)',
+    action:'Review the POA&M monthly. Close completed items with evidence and AO acknowledgement. Add new items for weaknesses found during monitoring. Escalate items overdue by >30 days to the AO. The living POA&M is the primary risk tracking document throughout the ATO lifecycle.' },
+
+  // ── NIST AI RMF ──
+  'AI-GV-01':{ portal:'internal', path:'AI risk governance policy document (SharePoint / GRC)',
+    action:'Draft an AI Risk Governance Policy for MDE. Sections: scope (which AI features are covered), risk tolerance for automated actions, human oversight requirements, escalation procedures for AI errors, review cadence, and accountable roles. Obtain CISO sign-off.' },
+  'AI-GV-02':{ portal:'internal', path:'RACI document / Governance policy',
+    action:'Designate: AI Risk Owner (CISO — accountable for AI outcomes), AI Oversight Lead (SOC Manager — monitors AI behaviour daily), AI Operations (Security Engineering — tunes AI settings). Document roles and responsibilities. Include in the AI Governance Policy as the accountability section.' },
+  'AI-GV-03':{ portal:'defender', path:'Settings → Endpoints → Automation level + Action center settings',
+    action:'Create the AI Use Policy documenting: which device groups use Full vs. Semi vs. Manual AIR and why. Policy must specify that critical and server device groups require human approval for all AI-triggered remediation actions. Obtain AO or CISO sign-off on automation level decisions.' },
+  'AI-GV-04':{ portal:'defender', path:'Settings → Endpoints → Automation level → Semi-automatic (servers/critical)',
+    action:'Configure AIR to Semi-automatic for all server and critical device groups. This means AI investigates and recommends, but a human must approve the remediation action. Full automation is only permitted for low-risk endpoint groups with explicit documented risk acceptance.',
+    cmd:'// KQL: Review pending AI remediation actions\nActionCenterHistory\n| where ActionType contains "Remediation"\n| where Status == "PendingApproval"\n| project Timestamp, DeviceName, ActionType, RecommendedAction' },
+  'AI-GV-05':{ portal:'azure', path:'Microsoft Trust Center → AI and Responsible AI documentation',
+    action:'Navigate to trust.microsoft.com and download Microsoft\'s Responsible AI documentation for MDE and Security Copilot. Review: what data the AI models use, how models are evaluated, what transparency is provided for detections. Document the review outcomes in the AI Governance Policy.' },
+  'AI-GV-06':{ portal:'azure', path:'Microsoft 365 admin → Settings → Security Copilot → Access control',
+    action:'If Security Copilot is licensed, configure access control: restrict to named SOC analysts and Security Engineers. Define a usage policy: permitted prompt types, validation requirements before acting on Copilot output, and logging. Enable Copilot audit logging to Sentinel.' },
+  'AI-MAP-01':{ portal:'defender', path:'Settings → Advanced features + Action center → Automated investigations',
+    action:'Produce an AI feature inventory. Walk through each MDE capability and identify AI/ML components: AIR engine, ML-based alert prioritisation scoring, anomaly detection, Security Copilot, TVM risk scoring, deception intelligence. For each: document automation level, data inputs, and human review mechanism.' },
+  'AI-MAP-02':{ portal:'defender', path:'Settings → Endpoints → Automation level → Review device groups',
+    action:'For each automated AI action, document the business impact of an incorrect action: Full device isolation of a production server (business disruption = Critical), file quarantine on a finance system (potential data loss = High). Use this impact map to set the automation thresholds in the AI Use Policy.' },
+  'AI-MAP-03':{ portal:'defender', path:'Reports → Threat protection → Alert classification',
+    action:'Analyse alert false positive rates by detection type over 90 days. Identify which ML-based alert types have the highest FP rate. Document these as AI risks. Use the analysis to create suppression rules for known FP patterns and to establish manual review thresholds for high-FP ML categories.',
+    cmd:'// KQL: FP rate by detection source\nAlertInfo\n| where Timestamp > ago(90d)\n| summarize Total=count(), FP=countif(Classification=="FalsePositive") by DetectionSource\n| extend FPRate=round(100.0*FP/Total,1)\n| order by FPRate desc' },
+  'AI-MAP-04':{ portal:'azure', path:'Microsoft Trust Center → Products → Defender for Endpoint → AI documentation',
+    action:'Download Microsoft\'s model documentation from trust.microsoft.com. Record: frequency of model updates, what endpoint telemetry inputs the ML models use, how Microsoft evaluates model performance, and the process for reporting model quality issues via the Microsoft Security Response Center.' },
+  'AI-MAP-05':{ portal:'defender', path:'Reports → Threat protection → Alert distribution by device group',
+    action:'Export alert distribution by device group and OS type over 90 days. Check if certain device groups, OS versions, or software stacks generate disproportionate ML alert volumes. Document any patterns that may indicate detection bias. Raise with the security engineering team for investigation.' },
+  'AI-MEA-01':{ portal:'sentinel', path:'Workbooks → Create → AI detection KPI workbook',
+    action:'Build a Sentinel workbook tracking monthly FP/FN rates: FP rate = (alerts closed as FP / total alerts) × 100. Target FP rate < 15% for ML-based alerts. Track trend over 6 months. Any FP rate spike (>20%) triggers a detection tuning sprint.',
+    cmd:'// KQL: Monthly FP rate by detection source\nAlertInfo\n| where Timestamp > ago(30d)\n| summarize Total=count(), FP=countif(Classification=="FalsePositive"), TruePos=countif(Classification=="TruePositive") by DetectionSource\n| extend FPRate=round(100.0*FP/Total,1)' },
+  'AI-MEA-02':{ portal:'defender', path:'Action center → History → Filter: Source = Automated investigation',
+    action:'Monthly: review all AIR automated actions in the Action center history. Identify any actions later classified as incorrect (e.g., isolation of a non-compromised device). Count incorrect actions / total AIR actions = AIR error rate. Any rate above 5% requires an AIR configuration review.' },
+  'AI-MEA-03':{ portal:'sentinel', path:'Workbooks → Alerts trend → Detection source breakdown',
+    action:'Build or deploy a Sentinel workbook showing weekly alert volume by detection source. A sustained change (>30% increase or decrease) in ML-generated alert volume may indicate model drift, a significant threat landscape change, or a configuration issue. Investigate and document any pattern changes.',
+    cmd:'// KQL: Alert volume trend by week\nAlertInfo\n| where Timestamp > ago(90d)\n| summarize Count=count() by bin(Timestamp,7d), DetectionSource\n| render timechart' },
+  'AI-MEA-04':{ portal:'internal', path:'Security Copilot quality review log (SharePoint)',
+    action:'Create a Copilot Quality Review log. Analysts rate sampled Copilot outputs monthly: accuracy (correct/partially correct/incorrect), usefulness (1-5), and flag any instances where incorrect Copilot output influenced a security decision. Calculate monthly average accuracy. Target > 85% correct outputs.' },
+  'AI-MEA-05':{ portal:'sentinel', path:'Workbooks → Create → AI performance KPI dashboard',
+    action:'Build an AI performance KPI dashboard: MTTD (AI-detected incidents), MTTD (human-detected incidents), FP rate trend (12 months), AIR error rate trend, Copilot accuracy score, Secure Score from AI-recommended actions closed monthly. Review in monthly security governance meeting.' },
+  'AI-MAN-01':{ portal:'defender', path:'Settings → Endpoints → Automation level → Semi (servers & critical)',
+    action:'Enforce human-in-the-loop for all AI-triggered remediation actions on critical device groups via Semi-automatic AIR. Configure Action center review SLA: analyst must approve or reject within 2 hours for High AIR recommendations. Document the oversight workflow in the AI Use Policy.' },
+  'AI-MAN-02':{ portal:'internal', path:'AI escalation procedure document + ServiceNow AI category',
+    action:'Document the formal AI override / escalation process: (1) Analyst identifies a suspected AI error (FP isolation, incorrect quarantine), (2) Analyst uses "Undo" action in Action center, (3) Analyst files an AI Incident report in the ticketing system, (4) Security Engineering reviews within 48 hours.' },
+  'AI-MAN-03':{ portal:'defender', path:'Settings → Endpoints → Alert tuning + Hunting → Detection rules',
+    action:'Run a monthly detection tuning sprint: export FP alerts by rule, create suppression rules for confirmed FP patterns, adjust custom KQL detection thresholds, and review AIR automation outcomes. Document each tuning decision with rationale. This is the AI risk treatment feedback loop.' },
+  'AI-MAN-04':{ portal:'internal', path:'AI incident log (ServiceNow / SharePoint)',
+    action:'Log AI-introduced false positives that caused business impact as AI Incidents. Required fields: AI feature, alert/action type, business impact, root cause (model FP, configuration, new software), remediation taken, and control improvement. Track AI incident count as a monthly KPI. Target < 2 per month.' },
+  'AI-MAN-05':{ portal:'internal', path:'AI incident handling procedure document',
+    action:'Create an AI Incident Handling Procedure covering: incorrect automated device isolation (rollback via Action center + Undo, verify device health, notify asset owner), false positive malware quarantine (restore from quarantine, whitelist process, document for model feedback), and Security Copilot incorrect output (document, escalate, retrain prompt template).' },
 };
 
 function getPortalBadge(portalKey) {
@@ -1557,7 +2072,7 @@ let activeCat = {};
 function initState() {
   const saved = localStorage.getItem('mde-multi-state-v2');
   if (saved) { try { STATE = JSON.parse(saved); } catch(e) {} }
-  ['csf','ce','ceplus','soc2','n53'].forEach(fid => {
+  ['csf','ce','ceplus','soc2','n53','pci','zt','rmf','airmf'].forEach(fid => {
     if (!STATE[fid]) STATE[fid] = {};
     FW[fid].cats.forEach(cat => {
       cat.tasks.forEach(t => {
@@ -1615,7 +2130,7 @@ function setFWColor(color) {
 
 function renderSwitcher() {
   const c = document.getElementById('fwSwitcher');
-  const fwList = ['overview','csf','ce','ceplus','soc2','n53','gap'];
+  const fwList = ['overview','csf','ce','ceplus','soc2','n53','pci','zt','rmf','airmf','gap'];
   c.innerHTML = fwList.map(fid => {
     const isGap = fid === 'gap';
     const fw = isGap ? { label: 'Gap Analysis', dot: '#7c3aed' } : FW[fid];
@@ -1654,7 +2169,7 @@ function renderMain() {
 }
 
 function renderOverviewPage() {
-  const fwIds = ['csf','ce','ceplus','soc2','n53'];
+  const fwIds = ['csf','ce','ceplus','soc2','n53','pci','zt','rmf','airmf'];
   const cards = fwIds.map(fid => {
     const fw = FW[fid];
     const s = fwStats(fid);
@@ -1895,7 +2410,7 @@ function refreshStats(fid) {
 //  EXPORTS
 // ════════════════════════════════════════════
 function buildExportData(fid) {
-  const ids = fid ? [fid] : ['csf','ce','ceplus','soc2','n53'];
+  const ids = fid ? [fid] : ['csf','ce','ceplus','soc2','n53','pci','zt','rmf','airmf'];
   return {
     meta: {
       tool: 'MDE Multi-Framework Audit Tracker',
@@ -1939,7 +2454,7 @@ function doExportJSON(fid) {
 }
 
 function doExportCSV(fid) {
-  const ids = fid ? [fid] : ['csf','ce','ceplus','soc2','n53'];
+  const ids = fid ? [fid] : ['csf','ce','ceplus','soc2','n53','pci','zt','rmf','airmf'];
   const rows = [['Framework','Category','Task ID','Task Name','Reference','Priority','Status','Notes']];
   ids.forEach(fid => {
     FW[fid].cats.forEach(cat => {
@@ -1959,7 +2474,7 @@ function doExportCSV(fid) {
 }
 
 function doExportHTML(fid) {
-  const ids = fid ? [fid] : ['csf','ce','ceplus','soc2','n53'];
+  const ids = fid ? [fid] : ['csf','ce','ceplus','soc2','n53','pci','zt','rmf','airmf'];
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
   const bg = isDark ? '#080c12' : '#f0f4f8';
   const cardBg = isDark ? '#131c2e' : '#ffffff';
@@ -2155,7 +2670,7 @@ function computeGap(uploadedData) {
     });
   });
 
-  const fwIds = ['csf', 'ce', 'ceplus', 'soc2', 'n53'];
+  const fwIds = ['csf','ce','ceplus','soc2','n53','pci','zt','rmf','airmf'];
   const result = { meta: uploadedData.meta || {}, frameworks: {}, totals: {} };
   const totals = { compliant:0, improved:0, regression:0, gap:0, blocked:0, progress:0, new:0, total:0 };
 
@@ -2219,7 +2734,7 @@ function renderGapPage() {
     { key:'new', label:`🆕 New (${t.new||0})` },
   ].map(f => `<button class="gap-filter-btn${GAP_FILTER===f.key?' active':''}" onclick="setGapFilter('${f.key}')">${f.label}</button>`).join('');
 
-  const fwSections = ['csf','ce','ceplus','soc2','n53'].map(fid => {
+  const fwSections = ['csf','ce','ceplus','soc2','n53','pci','zt','rmf','airmf'].map(fid => {
     const fw = FW[fid];
     const fwTasks = fw.cats.flatMap(cat => GAP_RESULT.frameworks[fid].cats[cat.id]);
     const filtered = GAP_FILTER === 'all' ? fwTasks : fwTasks.filter(t => t.delta === GAP_FILTER);
@@ -2324,7 +2839,7 @@ function clearGap() {
 function exportGapCSV() {
   if (!GAP_RESULT) return;
   const rows = [['Framework','Category','Task ID','Task Name','Reference','Priority','Baseline Status','Current Status','Delta']];
-  ['csf','ce','ceplus','soc2','n53'].forEach(fid => {
+  ['csf','ce','ceplus','soc2','n53','pci','zt','rmf','airmf'].forEach(fid => {
     FW[fid].cats.forEach(cat => {
       GAP_RESULT.frameworks[fid].cats[cat.id].forEach(t => {
         rows.push([FW[fid].shortName, cat.id, t.id, `"${t.name}"`, t.ref, t.pri, t.uploadedStatus, t.currentStatus, t.delta]);
@@ -2391,7 +2906,7 @@ function exportGapHTML() {
   });
   html += `</div>`;
 
-  ['csf','ce','ceplus','soc2','n53'].forEach(fid => {
+  ['csf','ce','ceplus','soc2','n53','pci','zt','rmf','airmf'].forEach(fid => {
     const fw = FW[fid];
     html += `<div class="fw-block"><div class="fw-title" style="background:${fw.color}">${fw.emoji} ${fw.shortName} — ${fw.label}</div>
     <table><tr><th>Task</th><th>Ref</th><th>Priority</th><th>Baseline</th><th>Current</th><th>Delta</th></tr>`;
