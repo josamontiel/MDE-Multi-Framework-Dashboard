@@ -354,34 +354,106 @@ header{
 .fw-stat-val{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700}
 .fw-stat-label{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px}
 
-/* Cross-framework table */
+/* Cross-framework comparison — stacked cards, no table */
 .cross-table-wrap{
   background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;
   margin-bottom:28px;
 }
 .cross-table-hdr{
   padding:14px 18px;border-bottom:1px solid var(--border);
-  display:flex;align-items:center;justify-content:space-between;
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;
 }
 .cross-table-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--t1)}
-table.cross-tbl{width:100%;border-collapse:collapse}
-table.cross-tbl th{
-  padding:9px 14px;font-size:10px;font-weight:600;
-  letter-spacing:.7px;text-transform:uppercase;color:var(--t3);
-  border-bottom:1px solid var(--border);text-align:left;
-  background:var(--bg1);
+
+/* Stacked framework rows — no table, no horizontal scroll */
+.fw-row{
+  display:grid;
+  grid-template-columns:140px 1fr auto;
+  align-items:center;gap:12px;
+  padding:11px 18px;
+  border-bottom:1px solid var(--border);
+  transition:background .15s;
 }
-table.cross-tbl td{
-  padding:10px 14px;font-size:12px;
-  border-bottom:1px solid var(--border);vertical-align:middle;
-}
-table.cross-tbl tr:last-child td{border-bottom:none}
-table.cross-tbl tbody tr:hover td{background:var(--bg3)}
+.fw-row:last-child{border-bottom:none}
+.fw-row:hover{background:var(--bg3)}
+.fw-row-left{display:flex;align-items:center;gap:8px;min-width:0}
 .fw-badge{
   display:inline-flex;align-items:center;gap:4px;
   font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;
-  padding:3px 9px;border-radius:5px;
+  padding:3px 9px;border-radius:5px;white-space:nowrap;flex-shrink:0;
 }
+.fw-row-name{font-size:12px;font-weight:600;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fw-row-mid{display:flex;flex-direction:column;gap:4px;min-width:0}
+.fw-row-bar-wrap{display:flex;align-items:center;gap:8px}
+.fw-row-bar{flex:1;height:5px;background:var(--border);border-radius:3px;overflow:hidden}
+.fw-row-bar-fill{height:100%;border-radius:3px;transition:width .6s cubic-bezier(.4,0,.2,1)}
+.fw-row-pct{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;white-space:nowrap}
+.fw-row-stats{display:flex;gap:14px;flex-wrap:wrap}
+.fw-row-stat{font-size:10.5px;color:var(--t3);white-space:nowrap}
+.fw-row-stat span{font-family:'JetBrains Mono',monospace;font-weight:700}
+.fw-row-right{flex-shrink:0}
+
+@media(max-width:640px){
+  .fw-row{grid-template-columns:1fr auto;grid-template-rows:auto auto;gap:8px;padding:12px 14px}
+  .fw-row-left{grid-column:1;grid-row:1}
+  .fw-row-right{grid-column:2;grid-row:1;align-self:start}
+  .fw-row-mid{grid-column:1/-1;grid-row:2}
+  .fw-row-name{display:none} /* shown in badge on mobile */
+  .cross-table-hdr{padding:12px 14px}
+}
+
+/* ── Shareholder Report ── */
+.sh-modal{max-width:680px;width:95%;max-height:90vh;overflow-y:auto}
+.sh-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:20px;gap:12px;flex-wrap:wrap;
+}
+.sh-header-left{flex:1;min-width:0}
+.sh-title{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;color:var(--t1);margin-bottom:2px}
+.sh-sub{font-size:11px;color:var(--t3)}
+.sh-overall{
+  display:flex;flex-direction:column;align-items:center;
+  background:var(--bg3);border:1px solid var(--border);
+  border-radius:10px;padding:12px 20px;flex-shrink:0;
+}
+.sh-overall-pct{font-family:'JetBrains Mono',monospace;font-size:32px;font-weight:800;color:var(--fw-color,#0078D4);line-height:1}
+.sh-overall-label{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.8px;margin-top:3px}
+.sh-section-title{
+  font-family:'Syne',sans-serif;font-size:11px;font-weight:700;
+  letter-spacing:.8px;text-transform:uppercase;
+  color:var(--t3);margin:18px 0 10px;
+  padding-bottom:6px;border-bottom:1px solid var(--border);
+}
+.sh-fw-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:4px}
+.sh-fw-pill{
+  background:var(--bg3);border:1px solid var(--border);
+  border-radius:9px;padding:12px 14px;
+  border-left:3px solid var(--pill-color);
+  transition:all .18s;
+}
+.sh-fw-pill-name{font-size:11px;font-weight:700;color:var(--t1);margin-bottom:6px}
+.sh-fw-pill-bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:6px}
+.sh-fw-pill-fill{height:100%;border-radius:2px;background:var(--pill-color);transition:width .5s}
+.sh-fw-pill-stats{display:flex;justify-content:space-between;font-size:10px;color:var(--t3)}
+.sh-fw-pill-pct{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--pill-color)}
+.sh-risk-grid{display:flex;flex-direction:column;gap:6px}
+.sh-risk-item{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 12px;background:var(--bg3);
+  border:1px solid var(--border);border-radius:7px;
+}
+.sh-risk-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.sh-risk-text{flex:1;font-size:12px;color:var(--t1)}
+.sh-risk-badge{
+  font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;
+  padding:2px 8px;border-radius:4px;
+}
+.sh-summary-box{
+  background:var(--bg3);border:1px solid var(--border);border-radius:9px;
+  padding:14px 16px;font-size:12.5px;color:var(--t2);line-height:1.65;
+}
+.sh-actions-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
+
 
 /* ── FRAMEWORK VIEW ── */
 .fw-view{display:none}
@@ -654,8 +726,6 @@ table.cross-tbl tbody tr:hover td{background:var(--bg3)}
   .fw-view-stats { flex-wrap: wrap; }
   .fw-stat-pill { min-width: 54px; padding: 7px 10px; }
   .fw-stat-pill-val { font-size: 15px; }
-  .cross-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  table.cross-tbl { min-width: 640px; }
 }
 
 /* ══════════════════════════════════════
@@ -686,8 +756,7 @@ table.cross-tbl tbody tr:hover td{background:var(--bg3)}
   .fw-card-pct { font-size: 22px; }
 
   /* Cross-framework comparison table: horizontal scroll */
-  .cross-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  table.cross-tbl { min-width: 580px; }
+  /* cross-table-wrap now uses fw-row layout — no scroll needed */
 
   /* ── Framework view header: stack vertically ── */
   .fw-view-header {
@@ -964,6 +1033,39 @@ table.cross-tbl tbody tr:hover td{background:var(--bg3)}
 </header>
 
 <div class="main" id="mainArea"></div>
+
+<!-- SHAREHOLDER REPORT MODAL -->
+<div class="overlay" id="shareholderOverlay">
+  <div class="modal sh-modal">
+    <div class="sh-header">
+      <div class="sh-header-left">
+        <div class="sh-title">Security Posture Report</div>
+        <div class="sh-sub" id="shReportDate"></div>
+      </div>
+      <div class="sh-overall">
+        <div class="sh-overall-pct" id="shOverallPct">0%</div>
+        <div class="sh-overall-label">Overall Progress</div>
+      </div>
+    </div>
+
+    <div class="sh-section-title">Executive Summary</div>
+    <div class="sh-summary-box" id="shSummaryBox"></div>
+
+    <div class="sh-section-title">Framework Status</div>
+    <div class="sh-fw-grid" id="shFwGrid"></div>
+
+    <div class="sh-section-title">Risk Indicators</div>
+    <div class="sh-risk-grid" id="shRiskGrid"></div>
+
+    <div class="sh-section-title">Recommended Next Steps</div>
+    <div class="sh-risk-grid" id="shNextSteps"></div>
+
+    <div class="sh-actions-row">
+      <button class="btn btn-accent" onclick="exportShareholderPDF()">🖨️ Export as PDF</button>
+      <button class="btn" onclick="closeOverlay('shareholderOverlay')">Close</button>
+    </div>
+  </div>
+</div>
 
 <!-- EXPORT MODAL -->
 <div class="overlay" id="exportOverlay">
@@ -2618,39 +2720,50 @@ function renderOverviewPage() {
     </div>`;
   }).join('');
 
-  const tableRows = fwIds.map(fid => {
+  const fwRows = fwIds.map(fid => {
     const fw = FW[fid];
-    const s = fwStats(fid);
-    const barW = s.pct;
-    return `<tr>
-      <td><span class="fw-badge" style="color:${fw.color};background:color-mix(in srgb,${fw.color} 12%,transparent)">${fw.shortName}</span></td>
-      <td style="font-weight:600">${fw.label}</td>
-      <td style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:${fw.color}">${s.pct}%</td>
-      <td><div style="width:120px;height:5px;background:var(--border);border-radius:3px;overflow:hidden"><div style="width:${barW}%;height:100%;background:${fw.color};border-radius:3px;transition:width .6s"></div></div></td>
-      <td style="color:var(--s-complete);font-family:'JetBrains Mono',monospace">${s.complete}/${s.total}</td>
-      <td style="color:var(--s-progress);font-family:'JetBrains Mono',monospace">${s.progress}</td>
-      <td style="color:var(--s-blocked);font-family:'JetBrains Mono',monospace">${s.blocked}</td>
-      <td style="color:var(--p-high);font-family:'JetBrains Mono',monospace">${s.hiPri}</td>
-      <td><button class="btn" style="font-size:10.5px;padding:4px 10px" onclick="switchFW('${fid}')">Open →</button></td>
-    </tr>`;
+    const s  = fwStats(fid);
+    return `<div class="fw-row">
+      <div class="fw-row-left">
+        <span class="fw-badge" style="color:${fw.color};background:color-mix(in srgb,${fw.color} 12%,transparent)">${fw.shortName}</span>
+        <span class="fw-row-name">${fw.label}</span>
+      </div>
+      <div class="fw-row-mid">
+        <div class="fw-row-bar-wrap">
+          <div class="fw-row-bar"><div class="fw-row-bar-fill" style="width:${s.pct}%;background:${fw.color}"></div></div>
+          <span class="fw-row-pct" style="color:${fw.color}">${s.pct}%</span>
+        </div>
+        <div class="fw-row-stats">
+          <span class="fw-row-stat">Done <span style="color:var(--s-complete)">${s.complete}</span></span>
+          <span class="fw-row-stat">Active <span style="color:var(--s-progress)">${s.progress}</span></span>
+          <span class="fw-row-stat">Blocked <span style="color:var(--s-blocked)">${s.blocked}</span></span>
+          <span class="fw-row-stat">High-Pri <span style="color:var(--p-high)">${s.hiPri}</span></span>
+          <span class="fw-row-stat">Total <span>${s.total}</span></span>
+        </div>
+      </div>
+      <div class="fw-row-right">
+        <button class="btn" style="font-size:10.5px;padding:4px 10px" onclick="switchFW('${fid}')">Open →</button>
+      </div>
+    </div>`;
   }).join('');
 
   const grandTotal = fwIds.reduce((s,f)=>s+fwStats(f).total,0);
   const grandDone  = fwIds.reduce((s,f)=>s+fwStats(f).complete,0);
 
   return `<div class="ov-page">
-    <div class="ov-page-title">🛡️ MDE Multi-Framework Audit Dashboard</div>
-    <div class="ov-page-sub">Microsoft Defender for Endpoint · MSSP Security Operations · ${grandDone} of ${grandTotal} tasks complete across all frameworks</div>
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:6px">
+      <div>
+        <div class="ov-page-title">MDE Multi-Framework Audit Dashboard</div>
+        <div class="ov-page-sub">Microsoft Defender for Endpoint · MSSP Security Operations · ${grandDone} of ${grandTotal} tasks complete across all frameworks</div>
+      </div>
+    </div>
     <div class="fw-cards">${cards}</div>
     <div class="cross-table-wrap">
       <div class="cross-table-hdr">
         <div class="cross-table-title">Framework Comparison</div>
         <span style="font-size:11px;color:var(--t3)">${grandDone}/${grandTotal} total tasks · ${Math.round(grandDone/grandTotal*100)}% overall</span>
       </div>
-      <table class="cross-tbl">
-        <thead><tr><th>ID</th><th>Framework</th><th>Progress</th><th>Bar</th><th>Done</th><th>Active</th><th>Blocked</th><th>High Pri</th><th></th></tr></thead>
-        <tbody>${tableRows}</tbody>
-      </table>
+      ${fwRows}
     </div>
   </div>`;
 }
@@ -2736,13 +2849,18 @@ function renderFWPage(fw) {
           <div class="fw-view-name">${fw.label}</div>
           <div class="fw-view-desc">${fw.desc}</div>
         </div>
-        <div class="fw-view-stats">
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:10px;flex-shrink:0">
+          <button class="btn" style="font-size:11px;white-space:nowrap" onclick="openShareholderReport('${fw.id}')">
+            📄 Stakeholder Report
+          </button>
+          <div class="fw-view-stats">
           <div class="fw-stat-pill"><div class="fw-stat-pill-val" style="color:${fw.color}">${s.pct}%</div><div class="fw-stat-pill-label">Complete</div></div>
           <div class="fw-stat-pill"><div class="fw-stat-pill-val" style="color:var(--s-complete)">${s.complete}</div><div class="fw-stat-pill-label">Done</div></div>
           <div class="fw-stat-pill"><div class="fw-stat-pill-val" style="color:var(--s-progress)">${s.progress}</div><div class="fw-stat-pill-label">Active</div></div>
           <div class="fw-stat-pill"><div class="fw-stat-pill-val" style="color:var(--s-blocked)">${s.blocked}</div><div class="fw-stat-pill-label">Blocked</div></div>
           <div class="fw-stat-pill"><div class="fw-stat-pill-val" style="color:var(--p-high)">${s.hiPri}</div><div class="fw-stat-pill-label">High Pri</div></div>
           <div class="fw-stat-pill"><div class="fw-stat-pill-val" style="color:var(--t2)">${s.total}</div><div class="fw-stat-pill-label">Total</div></div>
+        </div>
         </div>
       </div>
       ${catDropdownHtml()}
@@ -3510,6 +3628,238 @@ document.addEventListener('click', function(e) {
   const actSwitcher = document.getElementById('actSwitcher');
   if (actSwitcher && !actSwitcher.contains(e.target)) closeActions();
 });
+
+// ════════════════════════════════════════════
+//  SHAREHOLDER REPORT
+// ════════════════════════════════════════════
+function openShareholderReport(fid) {
+  const reportFid = fid || null;
+  const fw = reportFid ? FW[reportFid] : null;
+  const fwIds = reportFid ? [reportFid] : ['csf','ce','ceplus','soc2','n53','pci','zt','rmf','airmf'];
+
+  const grandTotal = fwIds.reduce((s,f) => s + fwStats(f).total, 0);
+  const grandDone  = fwIds.reduce((s,f) => s + fwStats(f).complete, 0);
+  const grandPct   = grandTotal ? Math.round(grandDone / grandTotal * 100) : 0;
+
+  // ── Date & title ──
+  const reportTitle = fw ? `${fw.label} — Stakeholder Report` : 'Security Posture Report';
+  document.getElementById('shReportDate').textContent =
+    `Generated ${new Date().toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' })} · Microsoft Defender for Endpoint`;
+
+  // Store fid for export
+  document.getElementById('shareholderOverlay').dataset.fid = reportFid || '';
+
+  // Update modal title
+  document.querySelector('.sh-title').textContent = reportTitle;
+
+  // ── Overall % ──
+  document.getElementById('shOverallPct').textContent = grandPct + '%';
+
+  // ── Executive Summary ──
+  const totalBlocked  = fwIds.reduce((s,f) => s + fwStats(f).blocked, 0);
+  const totalProgress = fwIds.reduce((s,f) => s + fwStats(f).progress, 0);
+  const totalHiPri    = fwIds.reduce((s,f) => s + fwStats(f).hiPri, 0);
+
+  let posture   = grandPct >= 75 ? 'strong' : grandPct >= 40 ? 'progressing' : 'in early stages';
+  let sentiment = grandPct >= 75
+    ? 'The organisation is well-positioned across its security control obligations.'
+    : grandPct >= 40
+    ? 'Good progress has been made. Continued focus on outstanding controls is recommended.'
+    : 'A structured deployment plan is underway. Priority should be given to completing high-priority controls.';
+
+  const fwScope = fw ? `the <strong>${fw.label}</strong> framework` : `<strong>${fwIds.length} compliance frameworks</strong>`;
+  document.getElementById('shSummaryBox').innerHTML =
+    `The security programme is <strong>${posture}</strong> with <strong>${grandPct}%</strong> of controls completed
+    across ${fwScope} and <strong>${grandTotal} total controls</strong>.
+    ${grandDone} controls are fully implemented, ${totalProgress} are currently in progress, and
+    ${totalBlocked} are blocked pending resolution.
+    ${totalHiPri > 0
+      ? `<strong>${totalHiPri} high-priority control${totalHiPri>1?'s':''}</strong> remain incomplete and should be prioritised.`
+      : 'All high-priority controls have been addressed.'}
+    <br><br>${sentiment}`;
+
+  // ── Framework pills ──
+  document.getElementById('shFwGrid').innerHTML = fwIds.map(f => {
+    const fwItem = FW[f];
+    const s = fwStats(f);
+    const status = s.pct >= 75 ? 'On Track' : s.pct >= 40 ? 'In Progress' : 'Getting Started';
+    return `<div class="sh-fw-pill" style="--pill-color:${fwItem.color}">
+      <div class="sh-fw-pill-name">${fwItem.label}</div>
+      <div class="sh-fw-pill-bar"><div class="sh-fw-pill-fill" style="width:${s.pct}%"></div></div>
+      <div class="sh-fw-pill-stats">
+        <span class="sh-fw-pill-pct">${s.pct}%</span>
+        <span>${s.complete}/${s.total} controls</span>
+        <span style="color:${s.pct>=75?'var(--s-complete)':s.pct>=40?'var(--s-progress)':'var(--s-blocked)'}">${status}</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  // ── Risk indicators ──
+  const risks = [];
+  if (totalBlocked > 0)
+    risks.push({ color:'var(--s-blocked)', label:`${totalBlocked} control${totalBlocked>1?'s':''} are currently blocked`, badge:'Action Required', bc:'rgba(239,68,68,.12)', tc:'var(--s-blocked)' });
+  if (totalHiPri > 0)
+    risks.push({ color:'var(--p-high)', label:`${totalHiPri} high-priority control${totalHiPri>1?'s':''} remain incomplete`, badge:'Priority', bc:'rgba(248,113,113,.12)', tc:'var(--p-high)' });
+  fwIds.forEach(f => {
+    const fwItem = FW[f]; const s = fwStats(f);
+    if (s.pct === 0)
+      risks.push({ color:fwItem.color, label:`${fwItem.label} deployment has not yet started`, badge:'Not Started', bc:`color-mix(in srgb,${fwItem.color} 10%,transparent)`, tc:fwItem.color });
+    else if (s.pct < 25)
+      risks.push({ color:fwItem.color, label:`${fwItem.label} is at early stage (${s.pct}% complete)`, badge:'Low Coverage', bc:`color-mix(in srgb,${fwItem.color} 10%,transparent)`, tc:fwItem.color });
+  });
+  if (risks.length === 0)
+    risks.push({ color:'var(--s-complete)', label:'No critical risk indicators identified at this time', badge:'Low Risk', bc:'rgba(16,185,129,.1)', tc:'var(--s-complete)' });
+
+  document.getElementById('shRiskGrid').innerHTML = risks.map(r =>
+    `<div class="sh-risk-item">
+      <div class="sh-risk-dot" style="background:${r.color}"></div>
+      <div class="sh-risk-text">${r.label}</div>
+      <span class="sh-risk-badge" style="color:${r.tc};background:${r.bc}">${r.badge}</span>
+    </div>`).join('');
+
+  // ── Next steps ──
+  const steps = [];
+  const lowestFW = [...fwIds].sort((a,b) => fwStats(a).pct - fwStats(b).pct).slice(0,3);
+  lowestFW.forEach(f => {
+    const fwItem = FW[f]; const s = fwStats(f);
+    if (s.pct < 100) {
+      const nextTask = fwItem.cats.flatMap(c => c.tasks).find(t => t.pri==='high' && STATE[f]?.[t.id]?.status !== 'complete');
+      const hint = nextTask ? `Next high-priority action: ${nextTask.name}` : `Complete remaining ${s.total-s.complete} controls`;
+      steps.push({ color:fwItem.color, label:`${fwItem.label}: ${s.pct}% complete — ${hint}`, badge:`${s.total-s.complete} remaining`, bc:`color-mix(in srgb,${fwItem.color} 10%,transparent)`, tc:fwItem.color });
+    }
+  });
+  if (totalBlocked > 0)
+    steps.push({ color:'var(--s-blocked)', label:`Resolve ${totalBlocked} blocked control${totalBlocked>1?'s':''} — review notes for blocker details`, badge:'Unblock', bc:'rgba(239,68,68,.1)', tc:'var(--s-blocked)' });
+  if (steps.length === 0)
+    steps.push({ color:'var(--s-complete)', label:'All frameworks are well progressed. Continue maintaining control currency.', badge:'Maintain', bc:'rgba(16,185,129,.1)', tc:'var(--s-complete)' });
+
+  document.getElementById('shNextSteps').innerHTML = steps.map(r =>
+    `<div class="sh-risk-item">
+      <div class="sh-risk-dot" style="background:${r.color}"></div>
+      <div class="sh-risk-text">${r.label}</div>
+      <span class="sh-risk-badge" style="color:${r.tc};background:${r.bc}">${r.badge}</span>
+    </div>`).join('');
+
+  document.getElementById('shareholderOverlay').classList.add('open');
+}
+
+function exportShareholderPDF() {
+  // Gather rendered content from the open modal
+  const overlay  = document.getElementById('shareholderOverlay');
+  const title    = document.querySelector('.sh-title')?.textContent || 'Stakeholder Report';
+  const date     = document.getElementById('shReportDate').textContent;
+  const pct      = document.getElementById('shOverallPct').textContent;
+  const sumBox   = document.getElementById('shSummaryBox').innerHTML;
+  const fwGrid   = document.getElementById('shFwGrid').innerHTML;
+  const riskGrid = document.getElementById('shRiskGrid').innerHTML;
+  const nextSteps= document.getElementById('shNextSteps').innerHTML;
+
+  const html = `<!DOCTYPE html>
+<html><head>
+<meta charset="UTF-8"/>
+<title>${title}</title>
+<style>
+  @page { size: A4; margin: 18mm 16mm 18mm 16mm; }
+  @media print {
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .no-print { display: none !important; }
+    .section { break-inside: avoid; }
+    h2 { break-after: avoid; }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, -apple-system, sans-serif; background: #fff; color: #0f172a; font-size: 12px; line-height: 1.6; }
+  .hdr { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 22px; padding-bottom: 14px; border-bottom: 2px solid #0078D4; }
+  .hdr-left h1 { font-size: 20px; font-weight: 800; color: #0f172a; margin-bottom: 3px; }
+  .hdr-left .meta { font-size: 10px; color: #64748b; }
+  .overall { text-align: center; background: #f0f7ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 12px 20px; flex-shrink: 0; }
+  .overall-pct { font-size: 32px; font-weight: 800; color: #0078D4; line-height: 1; }
+  .overall-label { font-size: 9px; color: #64748b; text-transform: uppercase; letter-spacing: .8px; margin-top: 2px; }
+  h2 { font-size: 9.5px; font-weight: 700; letter-spacing: .9px; text-transform: uppercase; color: #64748b; margin: 18px 0 8px; padding-bottom: 5px; border-bottom: 1px solid #e2e8f0; }
+  .summary-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 7px; padding: 12px 14px; font-size: 12px; line-height: 1.65; }
+  .fw-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .fw-pill { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 7px; padding: 10px 12px; border-left: 3px solid var(--c, #0078D4); }
+  .fw-pill-name { font-size: 10px; font-weight: 700; color: #0f172a; margin-bottom: 5px; }
+  .fw-pill-bar-wrap { height: 3px; background: #e2e8f0; border-radius: 2px; overflow: hidden; margin-bottom: 5px; }
+  .fw-pill-bar-fill { height: 100%; border-radius: 2px; background: var(--c, #0078D4); }
+  .fw-pill-stats { display: flex; justify-content: space-between; font-size: 9.5px; color: #64748b; }
+  .fw-pill-pct { font-weight: 700; color: var(--c, #0078D4); }
+  .risk-list { display: flex; flex-direction: column; gap: 5px; }
+  .risk-item { display: flex; align-items: center; gap: 9px; padding: 8px 11px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; }
+  .risk-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--c, #64748b); flex-shrink: 0; }
+  .risk-text { flex: 1; font-size: 11.5px; color: #0f172a; }
+  .risk-badge { font-size: 9.5px; font-weight: 700; padding: 2px 7px; border-radius: 4px; white-space: nowrap; background: var(--bc, #f1f5f9); color: var(--c, #64748b); }
+  .footer { margin-top: 22px; padding-top: 10px; border-top: 1px solid #e2e8f0; font-size: 9.5px; color: #94a3b8; display: flex; justify-content: space-between; }
+</style>
+</head>
+<body>
+<div class="hdr">
+  <div class="hdr-left">
+    <h1>${title}</h1>
+    <div class="meta">${date}</div>
+  </div>
+  <div class="overall">
+    <div class="overall-pct">${pct}</div>
+    <div class="overall-label">Overall Progress</div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>Executive Summary</h2>
+  <div class="summary-box">${sumBox}</div>
+</div>
+
+<div class="section">
+  <h2>Framework Status</h2>
+  <div class="fw-grid">
+    ${fwGrid
+      .replace(/class="sh-fw-pill"/g, 'class="fw-pill"')
+      .replace(/--pill-color:/g, '--c:')
+      .replace(/class="sh-fw-pill-name"/g, 'class="fw-pill-name"')
+      .replace(/class="sh-fw-pill-bar"><div class="sh-fw-pill-fill"/g, 'class="fw-pill-bar-wrap"><div class="fw-pill-bar-fill"')
+      .replace(/class="sh-fw-pill-stats"/g, 'class="fw-pill-stats"')
+      .replace(/class="sh-fw-pill-pct"/g, 'class="fw-pill-pct"')}
+  </div>
+</div>
+
+<div class="section">
+  <h2>Risk Indicators</h2>
+  <div class="risk-list">
+    ${riskGrid
+      .replace(/class="sh-risk-item"/g, 'class="risk-item"')
+      .replace(/class="sh-risk-dot"/g, 'class="risk-dot"')
+      .replace(/class="sh-risk-text"/g, 'class="risk-text"')
+      .replace(/class="sh-risk-badge"/g, 'class="risk-badge"')}
+  </div>
+</div>
+
+<div class="section">
+  <h2>Recommended Next Steps</h2>
+  <div class="risk-list">
+    ${nextSteps
+      .replace(/class="sh-risk-item"/g, 'class="risk-item"')
+      .replace(/class="sh-risk-dot"/g, 'class="risk-dot"')
+      .replace(/class="sh-risk-text"/g, 'class="risk-text"')
+      .replace(/class="sh-risk-badge"/g, 'class="risk-badge"')}
+  </div>
+</div>
+
+<div class="footer">
+  <span>MDE Multi-Framework Audit Tracker · Microsoft Defender for Endpoint</span>
+  <span>${new Date().toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' })}</span>
+</div>
+
+<script>window.onload = function(){ window.print(); }<\/script>
+</body></html>`;
+
+  const w = window.open('', '_blank', 'width=900,height=700');
+  if (!w) {
+    showToast('⚠️ Allow pop-ups to generate PDF');
+    return;
+  }
+  w.document.write(html);
+  w.document.close();
+  showToast('🖨️ Print dialog opened — save as PDF');
+}
 
 // ════════════════════════════════════════════
 //  BOOT
