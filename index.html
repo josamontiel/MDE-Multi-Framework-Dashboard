@@ -2488,7 +2488,7 @@ function renderSwitcher() {
         style="--item-color:${meta.dot}"
         onclick="selectFW('${fid}')">
         <span class="fw-dd-dot" style="background:${meta.dot}"></span>
-        ${meta.emoji} ${meta.label}
+        ${meta.label}
         ${liveBadge}
         ${countBadge(fid)}
       </button>`;
@@ -2513,8 +2513,37 @@ function renderSwitcher() {
     </div>`;
 }
 
+// ── Mutual-close: closing all dropdowns except one ──
+function closeAllDropdowns(except) {
+  // Framework switcher
+  if (except !== 'fw') {
+    const dd = document.getElementById('fwDropdown');
+    const tr = document.getElementById('fwTrigger');
+    if (dd) dd.classList.remove('open');
+    if (tr) tr.classList.remove('open');
+  }
+  // Actions
+  if (except !== 'act') {
+    const dd = document.getElementById('actDropdown');
+    const tr = document.getElementById('actTrigger');
+    if (dd) dd.classList.remove('open');
+    if (tr) tr.classList.remove('open');
+  }
+  // All category dropdowns
+  if (except !== 'cat') {
+    document.querySelectorAll('.cat-dd-wrap').forEach(wrap => {
+      const fid = wrap.id.replace('catDDWrap-', '');
+      const dd  = document.getElementById(`catDropdown-${fid}`);
+      const tr  = document.getElementById(`catTrigger-${fid}`);
+      if (dd) dd.classList.remove('open');
+      if (tr) tr.classList.remove('open');
+    });
+  }
+}
+
 function toggleSwitcher(e) {
   e.stopPropagation();
+  closeAllDropdowns('fw');
   const trigger = document.getElementById('fwTrigger');
   const dd = document.getElementById('fwDropdown');
   if (!trigger || !dd) return;
@@ -2523,15 +2552,11 @@ function toggleSwitcher(e) {
 }
 
 function selectFW(fid) {
-  // Close dropdown first
-  const trigger = document.getElementById('fwTrigger');
-  const dd = document.getElementById('fwDropdown');
-  if (dd) dd.classList.remove('open');
-  if (trigger) trigger.classList.remove('open');
+  closeAllDropdowns(null);
   switchFW(fid);
 }
 
-// Close dropdown when clicking outside
+// Close fw dropdown when clicking outside
 document.addEventListener('click', function(e) {
   const switcher = document.getElementById('fwSwitcher');
   if (switcher && !switcher.contains(e.target)) {
@@ -2561,7 +2586,7 @@ function renderMain() {
   if (activeView === 'gap')      { area.innerHTML = renderGapPage();      return; }
   const fw = FW[activeView];
   if (!fw || !fw.cats) return;
-  const defaultCat = activeCat[activeView] || fw.cats[0].id;
+  const defaultCat = activeCat[activeView] || '__all__';
   activeCat[activeView] = defaultCat;
   area.innerHTML = renderFWPage(fw);
 }
@@ -2632,22 +2657,22 @@ function renderOverviewPage() {
 
 function renderFWPage(fw) {
   const s = fwStats(fw.id);
-  const defaultCat = activeCat[fw.id] || fw.cats[0].id;
+  const defaultCat = activeCat[fw.id] || '__all__';
 
   // Build category dropdown
   function catDropdownHtml() {
     const activeMeta = defaultCat === '__all__'
-      ? { label: 'All Controls', emoji: '📋', count: `${s.complete}/${s.total}` }
+      ? { label: 'All Controls', count: `${s.complete}/${s.total}` }
       : (() => {
           const cat = fw.cats.find(c => c.id === defaultCat);
           const cs  = catStats(fw.id, defaultCat);
-          return { label: cat?.name || defaultCat, emoji: cat?.emoji || '', count: `${cs.complete}/${cs.total}` };
+          return { label: cat ? `${cat.id} — ${cat.name}` : defaultCat, count: `${cs.complete}/${cs.total}` };
         })();
 
     const allItem = `<button class="cat-dd-btn${defaultCat==='__all__'?' active':''}"
         onclick="switchCatDD('${fw.id}','__all__')">
       <div class="cat-dd-btn-left">
-        <div class="cat-dd-btn-title">📋 All Controls</div>
+        <div class="cat-dd-btn-title">All Controls</div>
         <div class="cat-dd-btn-sub">View all ${fw.cats.length} categories together</div>
       </div>
       <div class="cat-dd-btn-right">
@@ -2662,7 +2687,7 @@ function renderFWPage(fw) {
       return `<button class="cat-dd-btn${defaultCat===cat.id?' active':''}"
           onclick="switchCatDD('${fw.id}','${cat.id}')">
         <div class="cat-dd-btn-left">
-          <div class="cat-dd-btn-title">${cat.emoji} ${cat.id} — ${cat.name}</div>
+          <div class="cat-dd-btn-title">${cat.id} — ${cat.name}</div>
           <div class="cat-dd-btn-sub">${cat.desc.slice(0, 70)}…</div>
         </div>
         <div class="cat-dd-btn-right">
@@ -2676,7 +2701,6 @@ function renderFWPage(fw) {
       <div class="cat-dd-wrap" id="catDDWrap-${fw.id}">
         <button class="cat-trigger" id="catTrigger-${fw.id}" onclick="toggleCatDD('${fw.id}',event)">
           <div class="cat-trigger-inner">
-            <span>${activeMeta.emoji}</span>
             <span class="cat-trigger-label" id="catTriggerLabel-${fw.id}">${activeMeta.label}</span>
           </div>
           <span class="cat-trigger-count" id="catTriggerCount-${fw.id}">${activeMeta.count}</span>
@@ -2791,6 +2815,7 @@ function renderTask(fid, t, color) {
 // ════════════════════════════════════════════
 function toggleCatDD(fid, e) {
   e.stopPropagation();
+  closeAllDropdowns('cat');
   const trigger = document.getElementById(`catTrigger-${fid}`);
   const dd      = document.getElementById(`catDropdown-${fid}`);
   if (!trigger || !dd) return;
@@ -2815,15 +2840,14 @@ function switchCatDD(fid, catId) {
   // Update trigger label + count
   const fw = FW[fid];
   const s  = fwStats(fid);
-  let label, emoji, count;
+  let label, count;
   if (catId === '__all__') {
-    label = 'All Controls'; emoji = '📋';
+    label = 'All Controls';
     count = `${s.complete}/${s.total}`;
   } else {
     const cat = fw?.cats.find(c => c.id === catId);
     const cs  = catStats(fid, catId);
-    label = cat?.name || catId;
-    emoji = cat?.emoji || '';
+    label = cat ? `${cat.id} — ${cat.name}` : catId;
     count = `${cs.complete}/${cs.total}`;
   }
   const lbl = document.getElementById(`catTriggerLabel-${fid}`);
@@ -3465,6 +3489,7 @@ function exportGapHTML() {
 // ════════════════════════════════════════════
 function toggleActions(e) {
   e.stopPropagation();
+  closeAllDropdowns('act');
   const trigger = document.getElementById('actTrigger');
   const dd      = document.getElementById('actDropdown');
   if (!trigger || !dd) return;
