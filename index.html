@@ -205,6 +205,98 @@ header{
   color: var(--t4);
 }
 
+/* ── Actions dropdown ── */
+.act-switcher {
+  position: relative;
+  flex-shrink: 0;
+}
+.act-trigger {
+  display: flex; align-items: center; gap: 7px;
+  padding: 6px 11px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg2);
+  color: var(--t2);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px; font-weight: 600;
+  cursor: pointer; white-space: nowrap;
+  transition: all .18s;
+}
+.act-trigger:hover { border-color: var(--fw-color, #0078D4); color: var(--t1); background: var(--bg3); }
+.act-trigger.open { border-color: var(--fw-color, #0078D4); color: var(--t1); background: var(--bg3); }
+.act-trigger-caret { font-size: 10px; color: var(--t3); transition: transform .2s; }
+.act-trigger.open .act-trigger-caret { transform: rotate(180deg); }
+
+.act-dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 210px;
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  z-index: 300;
+  animation: dd-in .15s ease;
+}
+.act-dropdown.open { display: block; }
+
+.act-dd-section { padding: 5px; }
+.act-dd-divider { height: 1px; background: var(--border); margin: 3px 0; }
+.act-dd-label {
+  padding: 4px 10px 2px;
+  font-size: 9px; font-weight: 700;
+  letter-spacing: .9px; text-transform: uppercase;
+  color: var(--t4);
+}
+.act-dd-item {
+  display: flex; align-items: center; gap: 9px;
+  width: 100%; padding: 8px 10px;
+  border: none; border-radius: 7px;
+  background: transparent;
+  color: var(--t2);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px; font-weight: 500;
+  cursor: pointer; text-align: left;
+  transition: all .14s;
+  white-space: nowrap;
+  text-decoration: none;
+}
+.act-dd-item:hover { background: var(--bg3); color: var(--t1); }
+.act-dd-item-icon { font-size: 14px; width: 18px; text-align: center; flex-shrink: 0; }
+.act-dd-item-label { flex: 1; }
+.act-dd-item-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; color: var(--t3);
+  padding: 1px 6px; border-radius: 8px;
+  background: var(--bg0);
+}
+.act-dd-theme-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 7px 10px; border-radius: 7px;
+  transition: background .14s;
+}
+.act-dd-theme-row:hover { background: var(--bg3); }
+.act-dd-theme-row span { font-size: 12px; font-weight: 500; color: var(--t2); display: flex; align-items: center; gap: 9px; }
+.theme-pill {
+  display: flex; gap: 2px;
+  background: var(--bg0); border: 1px solid var(--border);
+  border-radius: 20px; padding: 2px;
+}
+.theme-pill-opt {
+  padding: 3px 9px; border-radius: 16px;
+  border: none; background: transparent;
+  font-size: 11px; cursor: pointer; font-weight: 600;
+  color: var(--t3); transition: all .15s;
+}
+.theme-pill-opt.active {
+  background: var(--bg2);
+  color: var(--t1);
+  box-shadow: var(--shadow-sm);
+}
+
 
 .hdr-right{display:flex;align-items:center;gap:6px;margin-left:auto;flex-shrink:0}
 .btn{
@@ -684,8 +776,7 @@ table.cross-tbl tbody tr:hover td{background:var(--bg3)}
 @media (max-width: 480px) {
   .hdr-brand { font-size: 12px; }
   .hdr-logo-icon { width: 26px; height: 26px; font-size: 12px; border-radius: 6px; }
-  /* Collapse Export + JSON buttons to icons only */
-  .btn-label { display: none; }
+  /* Collapse Export + JSON buttons to icons only — now handled by actions dropdown */
   .main { padding: 10px 10px 56px; }
   .fw-view-name { font-size: 15px; }
   .ov-page-title { font-size: 15px; }
@@ -713,14 +804,66 @@ table.cross-tbl tbody tr:hover td{background:var(--bg3)}
     <div class="fw-switcher" id="fwSwitcher"></div>
 
     <div class="hdr-right">
-      <button class="btn" onclick="openImport()" title="Upload config for gap analysis">⬆ <span class="btn-label">Import</span></button>
-      <button class="btn" onclick="openExport()">⬇ <span class="btn-label">Export</span></button>
-      <button class="btn btn-accent" id="jsonBtn" onclick="openJSON()">{ } <span class="btn-label">JSON</span></button>
-      <a class="btn" href="https://github.com/josamontiel/MDE-Multi-Framework-Dashboard/issues" target="_blank" rel="noopener noreferrer" title="Report an issue or request a feature on GitHub">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
-        <span class="btn-label">Feedback</span>
-      </a>
-      <button class="btn btn-icon" id="themeBtn" onclick="toggleTheme()">🌙</button>
+      <!-- Actions dropdown -->
+      <div class="act-switcher" id="actSwitcher">
+        <button class="act-trigger" id="actTrigger" onclick="toggleActions(event)">
+          ⚙️ <span class="btn-label">Actions</span>
+          <span class="act-trigger-caret">▼</span>
+        </button>
+        <div class="act-dropdown" id="actDropdown">
+
+          <!-- Data actions -->
+          <div class="act-dd-section">
+            <div class="act-dd-label">Data</div>
+            <button class="act-dd-item" onclick="closeActions();openImport()">
+              <span class="act-dd-item-icon">⬆</span>
+              <span class="act-dd-item-label">Import Config</span>
+              <span class="act-dd-item-badge">Gap Analysis</span>
+            </button>
+            <button class="act-dd-item" onclick="closeActions();openExport()">
+              <span class="act-dd-item-icon">⬇</span>
+              <span class="act-dd-item-label">Export</span>
+              <span class="act-dd-item-badge">CSV · HTML · JSON</span>
+            </button>
+            <button class="act-dd-item" id="actJsonBtn" onclick="closeActions();openJSON()">
+              <span class="act-dd-item-icon">{ }</span>
+              <span class="act-dd-item-label">JSON Config</span>
+              <span class="act-dd-item-badge">Preview &amp; download</span>
+            </button>
+          </div>
+
+          <div class="act-dd-divider"></div>
+
+          <!-- Appearance -->
+          <div class="act-dd-section">
+            <div class="act-dd-label">Appearance</div>
+            <div class="act-dd-theme-row">
+              <span><span class="act-dd-item-icon">🎨</span> Theme</span>
+              <div class="theme-pill">
+                <button class="theme-pill-opt" id="themeDark"  onclick="setTheme('dark')" >🌙 Dark</button>
+                <button class="theme-pill-opt" id="themeLight" onclick="setTheme('light')">☀️ Light</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="act-dd-divider"></div>
+
+          <!-- Links -->
+          <div class="act-dd-section">
+            <div class="act-dd-label">Links</div>
+            <a class="act-dd-item"
+               href="https://github.com/josamontiel/MDE-Multi-Framework-Dashboard/issues"
+               target="_blank" rel="noopener noreferrer"
+               onclick="closeActions()">
+              <span class="act-dd-item-icon">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+              </span>
+              <span class="act-dd-item-label">Report Issue / Feature</span>
+            </a>
+          </div>
+
+        </div>
+      </div>
     </div>
   </div>
 </header>
@@ -2170,16 +2313,27 @@ function catStats(fid, catId) {
 // ════════════════════════════════════════════
 //  THEME
 // ════════════════════════════════════════════
+function setTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('mde-theme', theme);
+  syncThemePill();
+  closeActions();
+}
 function toggleTheme() {
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
-  document.getElementById('themeBtn').textContent = isDark ? '🌙' : '☀️';
-  localStorage.setItem('mde-theme', isDark ? 'light' : 'dark');
+  setTheme(isDark ? 'light' : 'dark');
+}
+function syncThemePill() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const d = document.getElementById('themeDark');
+  const l = document.getElementById('themeLight');
+  if (d) d.classList.toggle('active', isDark);
+  if (l) l.classList.toggle('active', !isDark);
 }
 function initTheme() {
   const saved = localStorage.getItem('mde-theme') || 'dark';
   document.documentElement.setAttribute('data-theme', saved);
-  document.getElementById('themeBtn').textContent = saved === 'dark' ? '🌙' : '☀️';
+  // pill sync happens after dropdown renders
 }
 
 // ════════════════════════════════════════════
@@ -2298,9 +2452,10 @@ function switchFW(fid) {
   const colorMap = { gap: '#7c3aed' };
   const color = colorMap[fid] || FW[fid]?.color;
   setFWColor(color || '#0078D4');
-  document.getElementById('jsonBtn').style.background = color || '#0078D4';
-  document.getElementById('jsonBtn').style.borderColor = color || '#0078D4';
-  document.getElementById('logoIcon').style.background = color ? `linear-gradient(135deg,${color},color-mix(in srgb,${color} 60%,#000))` : '';
+  const logo = document.getElementById('logoIcon');
+  if (logo) logo.style.background = color
+    ? `linear-gradient(135deg,${color},color-mix(in srgb,${color} 60%,#000))`
+    : '';
   renderSwitcher();
   renderMain();
 }
@@ -3082,6 +3237,32 @@ function exportGapHTML() {
 }
 
 // ════════════════════════════════════════════
+//  ACTIONS DROPDOWN
+// ════════════════════════════════════════════
+function toggleActions(e) {
+  e.stopPropagation();
+  const trigger = document.getElementById('actTrigger');
+  const dd      = document.getElementById('actDropdown');
+  if (!trigger || !dd) return;
+  const isOpen = dd.classList.toggle('open');
+  trigger.classList.toggle('open', isOpen);
+  if (isOpen) syncThemePill();
+}
+
+function closeActions() {
+  const trigger = document.getElementById('actTrigger');
+  const dd      = document.getElementById('actDropdown');
+  if (dd)      dd.classList.remove('open');
+  if (trigger) trigger.classList.remove('open');
+}
+
+// Close actions dropdown when clicking outside
+document.addEventListener('click', function(e) {
+  const actSwitcher = document.getElementById('actSwitcher');
+  if (actSwitcher && !actSwitcher.contains(e.target)) closeActions();
+});
+
+// ════════════════════════════════════════════
 //  BOOT
 // ════════════════════════════════════════════
 initTheme();
@@ -3089,6 +3270,7 @@ initState();
 setFWColor('#0078D4');
 renderSwitcher();
 renderMain();
+syncThemePill();
 </script>
 <footer style="
   border-top:1px solid var(--border);
