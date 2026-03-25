@@ -106,28 +106,105 @@ header{
 .hdr-brand{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;letter-spacing:-.3px;color:var(--t1)}
 .hdr-sub{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3);letter-spacing:.8px;text-transform:uppercase;margin-top:-2px}
 
-/* Framework switcher */
-.fw-switcher{
-  display:flex;align-items:center;gap:3px;
-  background:var(--bg0);
-  border:1px solid var(--border);
-  border-radius:9px;padding:3px;
-  flex-shrink:0;
+
+/* Framework switcher — custom dropdown */
+.fw-switcher {
+  position: relative;
+  flex-shrink: 0;
 }
-.fw-btn{
-  padding:5px 12px;
-  border-radius:6px;border:none;
-  background:transparent;
-  color:var(--t3);
-  font-family:'DM Sans',sans-serif;font-size:11.5px;font-weight:600;
-  cursor:pointer;white-space:nowrap;
-  transition:all .18s;
-  display:flex;align-items:center;gap:5px;
+.fw-trigger {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 12px 6px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg2);
+  color: var(--t1);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px; font-weight: 600;
+  cursor: pointer; white-space: nowrap;
+  transition: all .18s;
+  min-width: 0;
+  max-width: 240px;
 }
-.fw-btn .fw-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
-.fw-btn:hover{background:var(--bg2);color:var(--t2)}
-.fw-btn.active{background:var(--bg2);color:var(--t1);box-shadow:var(--shadow-sm)}
-.fw-btn.active .fw-dot{box-shadow:0 0 0 2px color-mix(in srgb,var(--dot-color,#888) 40%,transparent)}
+.fw-trigger:hover { border-color: var(--fw-color, #0078D4); background: var(--bg3); }
+.fw-trigger.open { border-color: var(--fw-color, #0078D4); background: var(--bg3); }
+.fw-trigger-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.fw-trigger-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.fw-trigger-badge {
+  background: #7c3aed; color: #fff;
+  border-radius: 4px; padding: 1px 5px;
+  font-size: 9px; font-weight: 700; flex-shrink: 0;
+}
+.fw-trigger-caret {
+  flex-shrink: 0; color: var(--t3); font-size: 10px;
+  transition: transform .2s;
+}
+.fw-trigger.open .fw-trigger-caret { transform: rotate(180deg); }
+
+.fw-dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 220px;
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  z-index: 300;
+  animation: dd-in .15s ease;
+}
+.fw-dropdown.open { display: block; }
+@keyframes dd-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.fw-dd-section {
+  padding: 5px;
+}
+.fw-dd-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 3px 0;
+}
+.fw-dd-item {
+  display: flex; align-items: center; gap: 9px;
+  width: 100%; padding: 8px 10px;
+  border: none; border-radius: 7px;
+  background: transparent;
+  color: var(--t2);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px; font-weight: 500;
+  cursor: pointer; text-align: left;
+  transition: all .14s;
+  white-space: nowrap;
+}
+.fw-dd-item:hover { background: var(--bg3); color: var(--t1); }
+.fw-dd-item.active {
+  background: color-mix(in srgb, var(--item-color, #0078D4) 10%, transparent);
+  color: var(--item-color, #0078D4);
+  font-weight: 700;
+}
+.fw-dd-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.fw-dd-count {
+  margin-left: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  color: var(--t3);
+  padding: 1px 6px;
+  background: var(--bg0);
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+.fw-dd-label-row {
+  padding: 4px 10px 2px;
+  font-size: 9px; font-weight: 700;
+  letter-spacing: .9px; text-transform: uppercase;
+  color: var(--t4);
+}
+
 
 .hdr-right{display:flex;align-items:center;gap:6px;margin-left:auto;flex-shrink:0}
 .btn{
@@ -378,12 +455,9 @@ table.cross-tbl tbody tr:hover td{background:var(--bg3)}
    RESPONSIVE — TABLET  (≤900px)
 ══════════════════════════════════════ */
 @media (max-width: 900px) {
-  /* Shrink fw-switcher labels */
-  .fw-btn { padding: 5px 9px; font-size: 11px; }
   .fw-view-stats { flex-wrap: wrap; }
   .fw-stat-pill { min-width: 54px; padding: 7px 10px; }
   .fw-stat-pill-val { font-size: 15px; }
-  /* Cross table scrollable */
   .cross-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
   table.cross-tbl { min-width: 640px; }
 }
@@ -393,31 +467,18 @@ table.cross-tbl tbody tr:hover td{background:var(--bg3)}
 ══════════════════════════════════════ */
 @media (max-width: 768px) {
 
-  /* ── Header: two-row layout ── */
+  /* ── Header: single row, switcher inline ── */
   .hdr {
     flex-wrap: wrap;
     height: auto;
-    padding: 10px 14px 0 14px;
+    padding: 10px 14px;
     gap: 8px;
     align-items: center;
   }
   .hdr-logo { flex: 1; min-width: 0; }
   .hdr-right { flex-shrink: 0; }
-  /* Hide subtitle on small screens */
   .hdr-sub { display: none; }
-  /* Switcher fills full width on its own row */
-  .fw-switcher {
-    order: 3;
-    width: 100%;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    border-radius: 8px;
-    margin-bottom: 10px;
-    flex-shrink: 0;
-  }
-  .fw-switcher::-webkit-scrollbar { display: none; }
-  .fw-btn { padding: 6px 10px; font-size: 11px; flex-shrink: 0; }
+  /* Dropdown is naturally compact — no special treatment needed */
 
   /* ── Main padding ── */
   .main { padding: 12px 12px 56px; }
@@ -2130,20 +2191,107 @@ function setFWColor(color) {
 
 function renderSwitcher() {
   const c = document.getElementById('fwSwitcher');
-  const fwList = ['overview','csf','ce','ceplus','soc2','n53','pci','zt','rmf','airmf','gap'];
-  c.innerHTML = fwList.map(fid => {
-    const isGap = fid === 'gap';
-    const fw = isGap ? { label: 'Gap Analysis', dot: '#7c3aed' } : FW[fid];
-    const isActive = fid === activeView;
-    const dot = fw.dot || '#888';
-    const hasGap = isGap && GAP_RESULT !== null;
-    const badge = hasGap ? ` <span style="background:#7c3aed;color:#fff;border-radius:4px;padding:1px 5px;font-size:9px;font-weight:700">LIVE</span>` : '';
-    return `<button class="fw-btn${isActive?' active':''}" onclick="switchFW('${fid}')" style="--dot-color:${dot}">
-      ${fid === 'overview' ? '📊 ' : fid === 'gap' ? '🔍 ' : `<span class="fw-dot" style="background:${dot}"></span>`}
-      ${fw.label}${badge}
-    </button>`;
+
+  const fwGroups = [
+    { label: 'Dashboard', items: ['overview', 'gap'] },
+    { label: 'Frameworks', items: ['csf', 'ce', 'ceplus', 'soc2', 'n53', 'pci', 'zt', 'rmf', 'airmf'] },
+  ];
+
+  const fwMeta = {
+    overview: { label: 'Overview',          dot: '#8b9fc0', emoji: '📊' },
+    gap:      { label: 'Gap Analysis',       dot: '#7c3aed', emoji: '🔍' },
+    csf:      { label: 'NIST CSF 2.0',       dot: '#0078D4', emoji: '🔵' },
+    ce:       { label: 'Cyber Essentials',   dot: '#16a34a', emoji: '🟢' },
+    ceplus:   { label: 'Cyber Essentials+',  dot: '#0d9488', emoji: '🟩' },
+    soc2:     { label: 'SOC 2',              dot: '#7c3aed', emoji: '🟣' },
+    n53:      { label: 'NIST 800-53',        dot: '#ea580c', emoji: '🟠' },
+    pci:      { label: 'PCI DSS v4.0',       dot: '#dc2626', emoji: '🔴' },
+    zt:       { label: 'NIST Zero Trust',    dot: '#6d28d9', emoji: '🟣' },
+    rmf:      { label: 'NIST RMF',           dot: '#b45309', emoji: '🟤' },
+    airmf:    { label: 'NIST AI RMF',        dot: '#0891b2', emoji: '🤖' },
+  };
+
+  const active = fwMeta[activeView] || fwMeta.overview;
+  const activeDot = active.dot;
+  const activeLabel = active.label;
+  const isGapLive = activeView === 'gap' && GAP_RESULT !== null;
+  const gapHasResult = GAP_RESULT !== null;
+
+  // Build task count badge for framework items
+  function countBadge(fid) {
+    if (['overview','gap'].includes(fid)) return '';
+    const fw = FW[fid];
+    if (!fw || !fw.cats) return '';
+    const total = fw.cats.reduce((s,c) => s + c.tasks.length, 0);
+    const done  = fw.cats.flatMap(c => c.tasks).filter(t => STATE[fid]?.[t.id]?.status === 'complete').length;
+    return `<span class="fw-dd-count">${done}/${total}</span>`;
+  }
+
+  // Build dropdown items per group
+  const groupsHtml = fwGroups.map((group, gi) => {
+    const items = group.items.map(fid => {
+      const meta = fwMeta[fid];
+      const isActive = fid === activeView;
+      const isGapItem = fid === 'gap';
+      const liveBadge = isGapItem && gapHasResult
+        ? `<span class="fw-trigger-badge">LIVE</span>` : '';
+      return `<button class="fw-dd-item${isActive ? ' active' : ''}"
+        style="--item-color:${meta.dot}"
+        onclick="selectFW('${fid}')">
+        <span class="fw-dd-dot" style="background:${meta.dot}"></span>
+        ${meta.emoji} ${meta.label}
+        ${liveBadge}
+        ${countBadge(fid)}
+      </button>`;
+    }).join('');
+    const divider = gi < fwGroups.length - 1 ? '<div class="fw-dd-divider"></div>' : '';
+    return `<div class="fw-dd-section">
+      <div class="fw-dd-label-row">${group.label}</div>
+      ${items}
+    </div>${divider}`;
   }).join('');
+
+  c.innerHTML = `
+    <button class="fw-trigger${document.getElementById('fwDropdown')?.classList.contains('open') ? ' open' : ''}"
+      id="fwTrigger" onclick="toggleSwitcher(event)">
+      <span class="fw-trigger-dot" style="background:${activeDot}"></span>
+      <span class="fw-trigger-label">${activeLabel}</span>
+      ${isGapLive ? '<span class="fw-trigger-badge">LIVE</span>' : ''}
+      <span class="fw-trigger-caret">▼</span>
+    </button>
+    <div class="fw-dropdown" id="fwDropdown">
+      ${groupsHtml}
+    </div>`;
 }
+
+function toggleSwitcher(e) {
+  e.stopPropagation();
+  const trigger = document.getElementById('fwTrigger');
+  const dd = document.getElementById('fwDropdown');
+  if (!trigger || !dd) return;
+  const isOpen = dd.classList.toggle('open');
+  trigger.classList.toggle('open', isOpen);
+}
+
+function selectFW(fid) {
+  // Close dropdown first
+  const trigger = document.getElementById('fwTrigger');
+  const dd = document.getElementById('fwDropdown');
+  if (dd) dd.classList.remove('open');
+  if (trigger) trigger.classList.remove('open');
+  switchFW(fid);
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(e) {
+  const switcher = document.getElementById('fwSwitcher');
+  if (switcher && !switcher.contains(e.target)) {
+    const dd = document.getElementById('fwDropdown');
+    const trigger = document.getElementById('fwTrigger');
+    if (dd) dd.classList.remove('open');
+    if (trigger) trigger.classList.remove('open');
+  }
+});
 
 function switchFW(fid) {
   activeView = fid;
