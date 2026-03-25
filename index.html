@@ -410,21 +410,125 @@ table.cross-tbl tbody tr:hover td{background:var(--bg3)}
 .fw-stat-pill-val{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700}
 .fw-stat-pill-label{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-top:1px}
 
-/* Category tabs */
-.cat-tabs{display:flex;gap:3px;margin-bottom:16px;overflow-x:auto;padding-bottom:4px;flex-wrap:nowrap}
-.cat-tab{
-  padding:7px 14px;border-radius:7px;border:1px solid transparent;
-  background:transparent;color:var(--t3);
-  font-family:'DM Sans',sans-serif;font-size:11.5px;font-weight:600;
-  cursor:pointer;white-space:nowrap;transition:all .18s;
-  display:flex;align-items:center;gap:5px;
+/* ── Category dropdown (replaces horizontal tab strip) ── */
+.cat-nav {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
 }
-.cat-tab:hover{background:var(--bg2);color:var(--t2)}
-.cat-tab.active{background:var(--bg2);border-color:var(--border);color:var(--t1)}
-.cat-tab-count{
-  font-family:'JetBrains Mono',monospace;font-size:9.5px;
-  padding:1px 6px;border-radius:9px;background:var(--bg0);color:var(--t3);
+.cat-dd-wrap {
+  position: relative;
+  flex-shrink: 0;
 }
+.cat-trigger {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg2);
+  color: var(--t1);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px; font-weight: 600;
+  cursor: pointer; white-space: nowrap;
+  transition: all .18s;
+  min-width: 200px; max-width: 320px;
+}
+.cat-trigger:hover,
+.cat-trigger.open {
+  border-color: var(--fw-color, #0078D4);
+  background: var(--bg3);
+}
+.cat-trigger-inner {
+  flex: 1; display: flex; align-items: center;
+  gap: 7px; min-width: 0; overflow: hidden;
+}
+.cat-trigger-label {
+  flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.cat-trigger-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; color: var(--t3);
+  background: var(--bg0);
+  padding: 1px 7px; border-radius: 8px;
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.cat-trigger-caret {
+  font-size: 10px; color: var(--t3);
+  flex-shrink: 0; transition: transform .2s;
+}
+.cat-trigger.open .cat-trigger-caret { transform: rotate(180deg); }
+
+.cat-dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+  min-width: 280px;
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+  z-index: 250;
+  overflow: hidden;
+  animation: dd-in .15s ease;
+}
+.cat-dropdown.open { display: block; }
+
+.cat-dd-inner { padding: 5px; }
+.cat-dd-btn {
+  display: flex; align-items: center; gap: 9px;
+  width: 100%; padding: 9px 10px;
+  border: none; border-radius: 7px;
+  background: transparent;
+  color: var(--t2);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px; font-weight: 500;
+  cursor: pointer; text-align: left;
+  transition: background .14s;
+}
+.cat-dd-btn:hover { background: var(--bg3); color: var(--t1); }
+.cat-dd-btn.active {
+  background: color-mix(in srgb, var(--fw-color, #0078D4) 10%, transparent);
+  color: var(--fw-color, #0078D4);
+  font-weight: 700;
+}
+.cat-dd-btn-left {
+  display: flex; flex-direction: column;
+  gap: 3px; flex: 1; min-width: 0;
+}
+.cat-dd-btn-title {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 600; line-height: 1.2;
+}
+.cat-dd-btn-sub {
+  font-size: 10.5px; color: var(--t3); line-height: 1.3;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  max-width: 200px;
+}
+.cat-dd-btn-right {
+  display: flex; flex-direction: column;
+  align-items: flex-end; gap: 3px; flex-shrink: 0;
+}
+.cat-dd-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; color: var(--t3);
+  white-space: nowrap;
+}
+.cat-dd-bar {
+  width: 52px; height: 3px;
+  background: var(--border); border-radius: 2px; overflow: hidden;
+}
+.cat-dd-bar-fill {
+  height: 100%; border-radius: 2px;
+  background: var(--fw-color, #0078D4);
+  transition: width .4s cubic-bezier(.4,0,.2,1);
+}
+.cat-nav-info {
+  font-size: 11px; color: var(--t3);
+  display: flex; align-items: center; gap: 6px;
+}
+
 
 /* Category section */
 .cat-section{display:none}
@@ -607,16 +711,7 @@ table.cross-tbl tbody tr:hover td{background:var(--bg3)}
   .cat-hdr-pct { text-align: left; }
   .cat-hdr-title { font-size: 13px; }
 
-  /* ── Category tabs: scrollable strip ── */
-  .cat-tabs {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    padding-bottom: 6px;
-  }
-  .cat-tabs::-webkit-scrollbar { display: none; }
-  .cat-tab { padding: 6px 10px; font-size: 11px; flex-shrink: 0; }
+  /* ── Category nav: dropdown is naturally mobile-friendly ── */
 
   /* ── Task rows: mobile 2-col grid ── */
   .task {
@@ -2539,18 +2634,66 @@ function renderFWPage(fw) {
   const s = fwStats(fw.id);
   const defaultCat = activeCat[fw.id] || fw.cats[0].id;
 
-  const tabs = `<div class="cat-tabs" id="catTabs-${fw.id}">
-    <button class="cat-tab${defaultCat==='__all__'?' active':''}" onclick="switchCat('${fw.id}','__all__',this)">
-      All <span class="cat-tab-count">${s.complete}/${s.total}</span>
-    </button>
-    ${fw.cats.map(cat => {
-      const cs = catStats(fw.id, cat.id);
-      return `<button class="cat-tab${defaultCat===cat.id?' active':''}" onclick="switchCat('${fw.id}','${cat.id}',this)">
-        ${cat.emoji} ${cat.id}
-        <span class="cat-tab-count">${cs.complete}/${cs.total}</span>
+  // Build category dropdown
+  function catDropdownHtml() {
+    const activeMeta = defaultCat === '__all__'
+      ? { label: 'All Controls', emoji: '📋', count: `${s.complete}/${s.total}` }
+      : (() => {
+          const cat = fw.cats.find(c => c.id === defaultCat);
+          const cs  = catStats(fw.id, defaultCat);
+          return { label: cat?.name || defaultCat, emoji: cat?.emoji || '', count: `${cs.complete}/${cs.total}` };
+        })();
+
+    const allItem = `<button class="cat-dd-btn${defaultCat==='__all__'?' active':''}"
+        onclick="switchCatDD('${fw.id}','__all__')">
+      <div class="cat-dd-btn-left">
+        <div class="cat-dd-btn-title">📋 All Controls</div>
+        <div class="cat-dd-btn-sub">View all ${fw.cats.length} categories together</div>
+      </div>
+      <div class="cat-dd-btn-right">
+        <span class="cat-dd-count" id="cat-dd-all-count-${fw.id}">${s.complete}/${s.total}</span>
+        <div class="cat-dd-bar"><div class="cat-dd-bar-fill" id="cat-dd-all-bar-${fw.id}" style="width:${s.pct}%"></div></div>
+      </div>
+    </button>`;
+
+    const catItems = fw.cats.map(cat => {
+      const cs  = catStats(fw.id, cat.id);
+      const pct = cs.total ? Math.round(cs.complete / cs.total * 100) : 0;
+      return `<button class="cat-dd-btn${defaultCat===cat.id?' active':''}"
+          onclick="switchCatDD('${fw.id}','${cat.id}')">
+        <div class="cat-dd-btn-left">
+          <div class="cat-dd-btn-title">${cat.emoji} ${cat.id} — ${cat.name}</div>
+          <div class="cat-dd-btn-sub">${cat.desc.slice(0, 70)}…</div>
+        </div>
+        <div class="cat-dd-btn-right">
+          <span class="cat-dd-count" id="cat-dd-count-${fw.id}-${cat.id}">${cs.complete}/${cs.total}</span>
+          <div class="cat-dd-bar"><div class="cat-dd-bar-fill" id="cat-dd-bar-${fw.id}-${cat.id}" style="width:${pct}%"></div></div>
+        </div>
       </button>`;
-    }).join('')}
-  </div>`;
+    }).join('');
+
+    return `<div class="cat-nav">
+      <div class="cat-dd-wrap" id="catDDWrap-${fw.id}">
+        <button class="cat-trigger" id="catTrigger-${fw.id}" onclick="toggleCatDD('${fw.id}',event)">
+          <div class="cat-trigger-inner">
+            <span>${activeMeta.emoji}</span>
+            <span class="cat-trigger-label" id="catTriggerLabel-${fw.id}">${activeMeta.label}</span>
+          </div>
+          <span class="cat-trigger-count" id="catTriggerCount-${fw.id}">${activeMeta.count}</span>
+          <span class="cat-trigger-caret">▼</span>
+        </button>
+        <div class="cat-dropdown" id="catDropdown-${fw.id}">
+          <div class="cat-dd-inner">
+            ${allItem}
+            ${catItems}
+          </div>
+        </div>
+      </div>
+      <span class="cat-nav-info" id="catNavInfo-${fw.id}">
+        ${fw.cats.length} categories · ${s.complete} of ${s.total} complete
+      </span>
+    </div>`;
+  }
 
   const sections = [`<div class="cat-section${defaultCat==='__all__'?' active':''}" id="cat-${fw.id}-__all__">
     ${fw.cats.map(cat => renderCatBlock(fw, cat)).join('')}
@@ -2578,7 +2721,7 @@ function renderFWPage(fw) {
           <div class="fw-stat-pill"><div class="fw-stat-pill-val" style="color:var(--t2)">${s.total}</div><div class="fw-stat-pill-label">Total</div></div>
         </div>
       </div>
-      ${tabs}
+      ${catDropdownHtml()}
       <div id="catSections-${fw.id}">${sections.join('')}</div>
     </div>`;
 }
@@ -2646,12 +2789,115 @@ function renderTask(fid, t, color) {
 // ════════════════════════════════════════════
 //  INTERACTIONS
 // ════════════════════════════════════════════
-function switchCat(fid, catId, el) {
+function toggleCatDD(fid, e) {
+  e.stopPropagation();
+  const trigger = document.getElementById(`catTrigger-${fid}`);
+  const dd      = document.getElementById(`catDropdown-${fid}`);
+  if (!trigger || !dd) return;
+  const isOpen = dd.classList.toggle('open');
+  trigger.classList.toggle('open', isOpen);
+}
+
+function switchCatDD(fid, catId) {
   activeCat[fid] = catId;
-  document.querySelectorAll(`#catTabs-${fid} .cat-tab`).forEach(t => t.classList.remove('active'));
-  el.classList.add('active');
+
+  // Close the dropdown
+  const trigger = document.getElementById(`catTrigger-${fid}`);
+  const dd      = document.getElementById(`catDropdown-${fid}`);
+  if (dd)      dd.classList.remove('open');
+  if (trigger) trigger.classList.remove('open');
+
+  // Update active state on dropdown items
+  dd?.querySelectorAll('.cat-dd-btn').forEach(btn => btn.classList.remove('active'));
+  const activeBtn = dd?.querySelector(`[onclick*="'${catId}'"]`);
+  if (activeBtn) activeBtn.classList.add('active');
+
+  // Update trigger label + count
+  const fw = FW[fid];
+  const s  = fwStats(fid);
+  let label, emoji, count;
+  if (catId === '__all__') {
+    label = 'All Controls'; emoji = '📋';
+    count = `${s.complete}/${s.total}`;
+  } else {
+    const cat = fw?.cats.find(c => c.id === catId);
+    const cs  = catStats(fid, catId);
+    label = cat?.name || catId;
+    emoji = cat?.emoji || '';
+    count = `${cs.complete}/${cs.total}`;
+  }
+  const lbl = document.getElementById(`catTriggerLabel-${fid}`);
+  const cnt = document.getElementById(`catTriggerCount-${fid}`);
+  if (lbl) lbl.textContent = label;
+  if (cnt) cnt.textContent = count;
+
+  // Show/hide sections
   document.querySelectorAll(`#catSections-${fid} .cat-section`).forEach(s => s.classList.remove('active'));
   document.getElementById(`cat-${fid}-${catId}`)?.classList.add('active');
+}
+
+// Close any open category dropdown when clicking outside
+document.addEventListener('click', function(e) {
+  document.querySelectorAll('.cat-dd-wrap').forEach(wrap => {
+    if (!wrap.contains(e.target)) {
+      const fid = wrap.id.replace('catDDWrap-', '');
+      const dd  = document.getElementById(`catDropdown-${fid}`);
+      const tr  = document.getElementById(`catTrigger-${fid}`);
+      if (dd) dd.classList.remove('open');
+      if (tr) tr.classList.remove('open');
+    }
+  });
+});
+
+function refreshStats(fid) {
+  const s = fwStats(fid);
+
+  // Header stat pills
+  const view = document.getElementById(`fwview-${fid}`);
+  if (view) {
+    const pills = view.querySelectorAll('.fw-stat-pill-val');
+    if (pills[0]) pills[0].textContent = s.pct + '%';
+    if (pills[1]) pills[1].textContent = s.complete;
+    if (pills[2]) pills[2].textContent = s.progress;
+    if (pills[3]) pills[3].textContent = s.blocked;
+    if (pills[4]) pills[4].textContent = s.hiPri;
+  }
+
+  // Category dropdown counts + bars
+  const fw = FW[fid];
+  if (!fw) return;
+
+  // All-entry
+  const allCount = document.getElementById(`cat-dd-all-count-${fid}`);
+  const allBar   = document.getElementById(`cat-dd-all-bar-${fid}`);
+  if (allCount) allCount.textContent = `${s.complete}/${s.total}`;
+  if (allBar)   allBar.style.width   = `${s.pct}%`;
+
+  // Trigger count (if "All" is active)
+  if ((activeCat[fid] || '__all__') === '__all__') {
+    const cnt = document.getElementById(`catTriggerCount-${fid}`);
+    if (cnt) cnt.textContent = `${s.complete}/${s.total}`;
+  }
+
+  // Per-category
+  fw.cats.forEach(cat => {
+    const cs  = catStats(fid, cat.id);
+    const pct = cs.total ? Math.round(cs.complete / cs.total * 100) : 0;
+    const countEl = document.getElementById(`cat-dd-count-${fid}-${cat.id}`);
+    const barEl   = document.getElementById(`cat-dd-bar-${fid}-${cat.id}`);
+    if (countEl) countEl.textContent = `${cs.complete}/${cs.total}`;
+    if (barEl)   barEl.style.width   = `${pct}%`;
+
+    // Trigger count (if this cat is active)
+    if (activeCat[fid] === cat.id) {
+      const cnt = document.getElementById(`catTriggerCount-${fid}`);
+      if (cnt) cnt.textContent = `${cs.complete}/${cs.total}`;
+    }
+  });
+
+  // Nav info line
+  const info = document.getElementById(`catNavInfo-${fid}`);
+  if (info) info.textContent = `${fw.cats.length} categories · ${s.complete} of ${s.total} complete`;
 }
 
 function toggleDone(fid, tid, el) {
@@ -2686,28 +2932,6 @@ function updateNotes(fid, tid, el) {
   save();
 }
 
-function refreshStats(fid) {
-  const s = fwStats(fid);
-  // Update header stat pills
-  const view = document.getElementById(`fwview-${fid}`);
-  if (view) {
-    const pills = view.querySelectorAll('.fw-stat-pill-val');
-    if (pills[0]) pills[0].textContent = s.pct + '%';
-    if (pills[1]) pills[1].textContent = s.complete;
-    if (pills[2]) pills[2].textContent = s.progress;
-    if (pills[3]) pills[3].textContent = s.blocked;
-    if (pills[4]) pills[4].textContent = s.hiPri;
-  }
-  // Update cat tab counts for this fw
-  FW[fid].cats.forEach(cat => {
-    const cs = catStats(fid, cat.id);
-    const tab = document.querySelector(`#catTabs-${fid} [onclick*="'${cat.id}'"] .cat-tab-count`);
-    if (tab) tab.textContent = `${cs.complete}/${cs.total}`;
-    // Update all-tab count
-    const allTab = document.querySelector(`#catTabs-${fid} [onclick*="__all__"] .cat-tab-count`);
-    if (allTab) allTab.textContent = `${s.complete}/${s.total}`;
-  });
-}
 
 // ════════════════════════════════════════════
 //  EXPORTS
