@@ -1,6 +1,7 @@
 # MDE Multi-Framework Audit Tracker
 
 A self-contained browser-based audit tracker for MSSP security engineers. Covers 9 compliance frameworks, approximately 270 Microsoft Defender for Endpoint-mapped tasks, per-task compliance guidance with portal navigation paths and PowerShell/KQL commands, gap analysis, stakeholder reporting, and full export support. No server, no login, no installation required.
+<img width="796" height="655" alt="Screenshot 2026-03-27 at 20 56 31" src="https://github.com/user-attachments/assets/a85d4043-97cb-4c68-81b3-635a90368ba3" />
 
 ---
 
