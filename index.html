@@ -2860,7 +2860,7 @@ document.addEventListener('click', function(e) {
 function switchFW(fid) {
   // Clear product filter when leaving a framework view
   if (activeView !== fid && activeView !== 'overview' && activeView !== 'gap') {
-    activeProductFilter[activeView] = null;
+    activeProductFilter[activeView] = new Set();
   }
   activeView = fid;
   const colorMap = { gap: '#7c3aed' };
@@ -3143,12 +3143,15 @@ function buildProductFilterBar(fid) {
 
   // Only show portals that have at least one task in this framework
   const relevantPortals = Object.keys(PORTALS).filter(p => portalCounts[p] > 0);
-  const active = activeProductFilter[fid] || null;
+
+  // activeProductFilter[fid] is now a Set
+  if (!activeProductFilter[fid]) activeProductFilter[fid] = new Set();
+  const active = activeProductFilter[fid];
 
   const btns = relevantPortals.map(pkey => {
-    const p = PORTALS[pkey];
+    const p     = PORTALS[pkey];
     const count = portalCounts[pkey] || 0;
-    const isActive = active === pkey;
+    const isActive = active.has(pkey);
     return `<button class="pf-btn${isActive ? ' active' : ''}"
         style="--pf-color:${p.color}"
         onclick="setProductFilter('${fid}','${pkey}')">
@@ -3158,9 +3161,9 @@ function buildProductFilterBar(fid) {
     </button>`;
   }).join('');
 
-  const clearBtn = active
-    ? `<button class="pf-btn" style="color:var(--t3)" onclick="setProductFilter('${fid}',null)">
-        Clear filter
+  const clearBtn = active.size > 0
+    ? `<button class="pf-btn" style="color:var(--t3);margin-left:2px" onclick="clearProductFilter('${fid}')">
+        Clear (${active.size})
       </button>`
     : '';
 
@@ -3168,28 +3171,43 @@ function buildProductFilterBar(fid) {
 }
 
 function setProductFilter(fid, portalKey) {
-  // Toggle off if clicking same filter
-  if (activeProductFilter[fid] === portalKey) portalKey = null;
-  activeProductFilter[fid] = portalKey || null;
+  if (!activeProductFilter[fid]) activeProductFilter[fid] = new Set();
+  const active = activeProductFilter[fid];
+
+  // Toggle: if already selected, deselect; otherwise add to selection
+  if (active.has(portalKey)) {
+    active.delete(portalKey);
+  } else {
+    active.add(portalKey);
+  }
 
   // Rebuild filter bar
   const bar = document.getElementById(`pfBar-${fid}`);
   if (bar) bar.innerHTML = buildProductFilterBar(fid);
 
-  // Show/hide tasks based on filter
+  applyProductFilter(fid);
+}
+
+function clearProductFilter(fid) {
+  activeProductFilter[fid] = new Set();
+
+  const bar = document.getElementById(`pfBar-${fid}`);
+  if (bar) bar.innerHTML = buildProductFilterBar(fid);
+
   applyProductFilter(fid);
 }
 
 function applyProductFilter(fid) {
-  const portal = activeProductFilter[fid] || null;
+  if (!activeProductFilter[fid]) activeProductFilter[fid] = new Set();
+  const active = activeProductFilter[fid];
 
-  // Find all task divs within this framework's sections
   const sections = document.getElementById(`catSections-${fid}`);
   if (!sections) return;
 
+  // Show/hide tasks — show all when no filters active, else show if portal is in selection
   const tasks = sections.querySelectorAll('.task[data-portal]');
   tasks.forEach(el => {
-    if (!portal || el.dataset.portal === portal) {
+    if (active.size === 0 || active.has(el.dataset.portal)) {
       el.classList.remove('pf-hidden');
     } else {
       el.classList.add('pf-hidden');
@@ -3199,28 +3217,32 @@ function applyProductFilter(fid) {
   // Show/hide empty state messages per task list
   sections.querySelectorAll('.tasks-list').forEach(list => {
     const visibleTasks = list.querySelectorAll('.task:not(.pf-hidden)');
-    let emptyMsg = list.nextElementSibling;
+    const emptyMsg = list.nextElementSibling;
     if (emptyMsg && emptyMsg.classList.contains('cat-section-empty-msg')) {
       emptyMsg.remove();
     }
-    if (portal && visibleTasks.length === 0) {
+    if (active.size > 0 && visibleTasks.length === 0) {
       const msg = document.createElement('div');
       msg.className = 'cat-section-empty-msg';
-      msg.textContent = `No controls in this category require ${PORTALS[portal]?.label || portal}.`;
+      const labels = [...active].map(p => PORTALS[p]?.label || p).join(' or ');
+      msg.textContent = `No controls in this category require ${labels}.`;
       list.insertAdjacentElement('afterend', msg);
     }
   });
 
   // Update nav info text
   const allTasks = sections.querySelectorAll('.task[data-portal]');
-  const visible = sections.querySelectorAll('.task[data-portal]:not(.pf-hidden)');
-  const info = document.getElementById(`catNavInfo-${fid}`);
+  const visible  = sections.querySelectorAll('.task[data-portal]:not(.pf-hidden)');
+  const info     = document.getElementById(`catNavInfo-${fid}`);
   if (info) {
     const fw = FW[fid];
-    const s = fwStats(fid);
-    if (portal) {
-      const p = PORTALS[portal];
-      info.innerHTML = `Showing <strong style="color:${p.color}">${visible.length}</strong> of ${allTasks.length} controls requiring ${p.label}`;
+    const s  = fwStats(fid);
+    if (active.size > 0) {
+      const labels = [...active].map(p => {
+        const meta = PORTALS[p];
+        return `<strong style="color:${meta?.color || '#888'}">${meta?.label || p}</strong>`;
+      }).join(' + ');
+      info.innerHTML = `Showing ${visible.length} of ${allTasks.length} controls requiring ${labels}`;
     } else {
       info.textContent = `${fw.cats.length} categories · ${s.complete} of ${s.total} complete`;
     }
@@ -3274,7 +3296,7 @@ function switchCatDD(fid, catId) {
   document.getElementById(`cat-${fid}-${catId}`)?.classList.add('active');
 
   // Re-apply product filter if active
-  if (activeProductFilter[fid]) applyProductFilter(fid);
+  if (activeProductFilter[fid]?.size > 0) applyProductFilter(fid);
 }
 
 // Close any open category dropdown when clicking outside
