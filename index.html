@@ -64,6 +64,7 @@
   --zt-c:#6d28d9;  --zt-g:rgba(109,40,217,.12);
   --rmf-c:#b45309; --rmf-g:rgba(180,83,9,.12);
   --ai-c:#0891b2;  --ai-g:rgba(8,145,178,.12);
+  --gdpr-c:#4f46e5; --gdpr-g:rgba(79,70,229,.12);
   --soc-c:#7c3aed; --soc-g:rgba(124,58,237,.12);
   --n53-c:#ea580c; --n53-g:rgba(234,88,12,.12);
 }
@@ -599,6 +600,46 @@ header{
 .cat-nav-info {
   font-size: 11px; color: var(--t3);
   display: flex; align-items: center; gap: 6px;
+}
+
+/* ── Product filter bar ── */
+.product-filter-bar {
+  display: flex; align-items: center; gap: 6px;
+  flex-wrap: wrap; margin-bottom: 14px;
+}
+.pf-label {
+  font-size: 10.5px; font-weight: 600; color: var(--t3);
+  white-space: nowrap; flex-shrink: 0;
+}
+.pf-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 11px; border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg2); color: var(--t3);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px; font-weight: 600;
+  cursor: pointer; white-space: nowrap;
+  transition: all .16s;
+}
+.pf-btn:hover { border-color: var(--border2); color: var(--t2); background: var(--bg3); }
+.pf-btn.active {
+  background: color-mix(in srgb, var(--pf-color, #0078D4) 10%, transparent);
+  border-color: var(--pf-color, #0078D4);
+  color: var(--pf-color, #0078D4);
+}
+.pf-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.pf-count {
+  font-family: 'JetBrains Mono', monospace; font-size: 9px;
+  padding: 1px 5px; border-radius: 8px;
+  background: var(--bg0); color: var(--t3);
+}
+.pf-btn.active .pf-count { background: color-mix(in srgb, var(--pf-color,#0078D4) 15%, transparent); color: var(--pf-color,#0078D4); }
+.task.pf-hidden { display: none !important; }
+.cat-section-empty-msg {
+  padding: 18px; text-align: center;
+  font-size: 12px; color: var(--t3);
+  background: var(--bg2); border: 1px dashed var(--border);
+  border-radius: 8px; margin-bottom: 12px;
 }
 
 
@@ -1702,6 +1743,69 @@ const FW = {
           {id:'AI-MAN-05',name:'Document AI Incident Handling Procedures',ref:'AI RMF:Manage 4.1',pri:'med',desc:'Create an AI-specific incident handling procedure covering: incorrect automated isolation, false positive malware quarantine that disrupts a business process, Security Copilot providing incorrect guidance acted upon. Include rollback steps and post-incident review requirements.'},
         ]}
     ]
+  },
+
+  /* ── GDPR ── */
+  gdpr: {
+    id:'gdpr', label:'GDPR', shortName:'GDPR', dot:'#4f46e5', color:'#4f46e5', gradient:'var(--gdpr-g)',
+    emoji:'🇪🇺',
+    desc:'General Data Protection Regulation (EU) 2016/679 — maps Microsoft Defender for Endpoint and the Microsoft Security stack to GDPR obligations covering security of processing (Article 32), breach detection and notification (Articles 33-34), data protection by design (Article 25), access controls, audit accountability, and governance requirements including Data Protection Officer obligations and Records of Processing Activities.',
+    cats:[
+      { id:'ART32', name:'SECURITY OF PROCESSING', emoji:'🔒', desc:'Article 32 requires appropriate technical and organisational measures to ensure a level of security appropriate to the risk, including encryption, pseudonymisation, confidentiality, integrity, availability, and resilience of processing systems.',
+        tasks:[
+          {id:'GDPR-A32-01',name:'Enforce Encryption at Rest — BitLocker on All Endpoints',ref:'Art 32(1)(a)',pri:'high',desc:'Deploy BitLocker via Intune Endpoint Security for all devices processing personal data: XTS-AES 256-bit for OS drives, AES-CBC 256-bit for data drives. Escrow recovery keys to Entra ID. Encryption at rest is an explicit Article 32 pseudonymisation and encryption measure.'},
+          {id:'GDPR-A32-02',name:'Enforce Encryption in Transit — TLS Policy Verification',ref:'Art 32(1)(a)',pri:'high',desc:'Verify that all MDE telemetry and data transmission uses TLS 1.2 or higher. Confirm via Microsoft Trust Center documentation that data flows from endpoints to MDE cloud use encrypted channels. Document as Article 32 encryption measure.'},
+          {id:'GDPR-A32-03',name:'Configure NGAV and Behavioral Monitoring — Confidentiality Control',ref:'Art 32(1)(b)',pri:'high',desc:'Enable NGAV with cloud protection High+, real-time protection, and behavioral monitoring on all devices processing personal data. This directly supports the Article 32 requirement for confidentiality and integrity of processing systems by preventing unauthorised access via malware.'},
+          {id:'GDPR-A32-04',name:'Enable EDR Sensor Coverage — Availability and Resilience',ref:'Art 32(1)(b)',pri:'high',desc:'Achieve 100% Active sensor status on all in-scope devices. EDR continuous monitoring supports Article 32 resilience requirements — it enables rapid detection of events that could affect the availability or integrity of processing systems. Export sensor health report monthly as evidence.'},
+          {id:'GDPR-A32-05',name:'Deploy Tamper Protection — Integrity of Security Controls',ref:'Art 32(1)(b)',pri:'high',desc:'Enable Tamper Protection via Intune for all devices processing personal data. Prevents attackers from disabling security controls, directly supporting the Article 32 obligation to maintain ongoing confidentiality, integrity, and availability of processing systems.'},
+          {id:'GDPR-A32-06',name:'Conduct Regular Testing — Secure Score and TVM Reviews',ref:'Art 32(1)(d)',pri:'high',desc:'Article 32(1)(d) requires a process for regularly testing, assessing, and evaluating the effectiveness of technical measures. Use MDE Secure Score and TVM Exposure Score as the primary testing metrics. Review monthly and document outcomes as Article 32 evidence.'},
+          {id:'GDPR-A32-07',name:'Document Article 32 Technical Measures',ref:'Art 32(1)',pri:'high',desc:'Produce a formal Article 32 technical measures document listing all security controls in place for systems processing personal data: encryption, access controls, malware protection, monitoring, backup, and patch management. This document is reviewed by the DPA during audits and by processors under Article 28 contracts.'},
+          {id:'GDPR-A32-08',name:'Patch Management — Vulnerability Remediation SLA',ref:'Art 32(1)(b)',pri:'high',desc:'Configure TVM to track vulnerabilities on devices processing personal data. Establish a formal patch SLA: Critical CVSS ≥9 within 7 days, High within 14 days. Unpatched vulnerabilities on systems processing personal data represent a directly measurable risk under Article 32. Export remediation closure report monthly.'},
+        ]},
+      { id:'ART3334', name:'BREACH NOTIFICATION', emoji:'🚨', desc:'Articles 33 and 34 require notification of personal data breaches to the supervisory authority within 72 hours and, where high risk to individuals, direct notification to affected data subjects without undue delay. MDE detection and incident response capabilities underpin these obligations.',
+        tasks:[
+          {id:'GDPR-B-01',name:'Define Personal Data Breach Detection Workflow via MDE',ref:'Art 33(1)',pri:'high',desc:'Document a formal workflow for identifying when an MDE security incident constitutes a personal data breach under GDPR: which alert types and severities trigger a breach assessment, who makes the determination, and what the 72-hour clock start trigger is. Link MDE incident severity levels to breach notification tiers.'},
+          {id:'GDPR-B-02',name:'Configure MDE Alert Notifications for Breach-Relevant Events',ref:'Art 33(1)',pri:'high',desc:'Set up MDE email notifications for High and Critical incidents that could involve personal data (lateral movement, credential theft, data exfiltration indicators, ransomware). Route to DPO or privacy team alongside SOC. The 72-hour notification window begins at discovery — fast alert routing is essential.'},
+          {id:'GDPR-B-03',name:'Integrate MDE with Sentinel for Breach Detection Monitoring',ref:'Art 33(1)',pri:'high',desc:'Connect MDE to Sentinel and create analytics rules for exfiltration-pattern events: large outbound data transfers, USB write events on sensitive device groups, access to personal data stores from unusual processes. These rules support the ability to detect breaches quickly and begin the 72-hour clock accurately.'},
+          {id:'GDPR-B-04',name:'Document Breach Notification Procedure — 72-Hour Process',ref:'Art 33(1)',pri:'high',desc:'Write and publish a formal breach notification procedure covering: breach confirmation steps using MDE investigation data, the information required for Article 33(3) notification (nature of breach, categories of data, approximate number of subjects, likely consequences, measures taken), and the process for notifying the relevant supervisory authority within 72 hours.'},
+          {id:'GDPR-B-05',name:'Establish Breach Register (Article 33(5) Record)',ref:'Art 33(5)',pri:'high',desc:'Create and maintain a breach register documenting all personal data breaches including those not reported to the supervisory authority (where risk was insufficient). For each entry record: date, description, categories affected, notification decision, and basis. MDE incident data feeds the factual record. Review quarterly.'},
+          {id:'GDPR-B-06',name:'Test Breach Notification Process Annually',ref:'Art 33(1)',pri:'med',desc:'Conduct an annual tabletop exercise simulating a personal data breach scenario detected through MDE (for example, a ransomware incident affecting a database server containing personal data). Walk through the full 72-hour notification window, document gaps, and update the breach notification procedure accordingly.'},
+        ]},
+      { id:'ART25', name:'PRIVACY BY DESIGN', emoji:'🔧', desc:'Article 25 requires data protection by design and by default — technical and organisational measures implemented at the time of system design and operation to minimise data processing and protect personal data. MDE configuration choices and device control policies directly implement these principles.',
+        tasks:[
+          {id:'GDPR-D-01',name:'Enable Device Control — Prevent Unauthorised Data Export',ref:'Art 25(1)',pri:'high',desc:'Deploy device control policy blocking unapproved removable storage and mobile device sync on endpoints processing personal data. Data protection by design includes technical measures that prevent personal data from leaving controlled environments via unauthorised channels. Define an approved device allow-list.'},
+          {id:'GDPR-D-02',name:'Enable Controlled Folder Access — Data Integrity by Design',ref:'Art 25(1)',pri:'high',desc:'Enable CFA to protect folders containing personal data from unauthorised write access. This implements the privacy by design principle of integrity — personal data is protected from modification or destruction by malicious software as a built-in architectural control rather than an afterthought.'},
+          {id:'GDPR-D-03',name:'Configure Web Content Filtering — Default Data Minimisation',ref:'Art 25(2)',pri:'med',desc:'Deploy WCF to block data-leakage and high-risk categories (file sharing, personal cloud storage, social media upload sites) on devices processing personal data. Article 25(2) requires that by default only necessary personal data is processed — this control prevents data from reaching unapproved destinations by default.'},
+          {id:'GDPR-D-04',name:'Integrate MDE with Microsoft Purview DLP',ref:'Art 25(1)',pri:'high',desc:'Enable the Purview DLP integration in MDE Advanced Features. Configure DLP policies targeting sensitive data labels (containing personal data). MDE enforces Purview policies at the endpoint, blocking personal data from being copied to USB, printed, emailed to personal accounts, or uploaded to unsanctioned cloud services — a direct implementation of privacy by design.'},
+          {id:'GDPR-D-05',name:'Apply Least Privilege — MDE RBAC Scoped to Minimum Necessary',ref:'Art 25(2)',pri:'high',desc:'Configure MDE RBAC so that every analyst can access only the device groups and data required for their specific role. Privacy by default requires that personal data visible through the security platform (device names, user activities, file access logs) is restricted to those with a legitimate operational need. Conduct quarterly access reviews.'},
+        ]},
+      { id:'ART5', name:'DATA PROTECTION PRINCIPLES', emoji:'⚖️', desc:'Article 5 establishes the core principles of GDPR: lawfulness, fairness and transparency; purpose limitation; data minimisation; accuracy; storage limitation; integrity and confidentiality; and accountability. The accountability principle requires demonstrable compliance — the controller must be able to prove adherence to all principles.',
+        tasks:[
+          {id:'GDPR-P-01',name:'Establish Accountability — MDE Compliance Evidence Register',ref:'Art 5(2)',pri:'high',desc:'Create a formal compliance evidence register for the MDE deployment. For each Article 32 technical measure, document: what it is, how it is implemented, how it is monitored, and where the evidence is stored. This register is the primary accountability artefact under Article 5(2) and is the first thing a supervisory authority will request during an investigation.'},
+          {id:'GDPR-P-02',name:'Configure Audit Logging — Integrity and Confidentiality Evidence',ref:'Art 5(1)(f)',pri:'high',desc:'Enable MDE admin audit logging and ingest to Sentinel. Retain logs for minimum 12 months. The integrity and confidentiality principle (Article 5(1)(f)) requires appropriate security of personal data. Audit logs demonstrate that access to systems processing personal data is recorded and reviewable — a core accountability evidence document.'},
+          {id:'GDPR-P-03',name:'Define Log Retention Policy — Storage Limitation Compliance',ref:'Art 5(1)(e)',pri:'med',desc:'Define a formal log retention policy that aligns MDE and Sentinel log retention with GDPR storage limitation requirements. Logs that contain personal data (device names, user identities, activity records) should be retained only as long as necessary for the security purpose. Document the retention period and its justification.'},
+          {id:'GDPR-P-04',name:'TVM Software Inventory — Accuracy of Processing Systems',ref:'Art 5(1)(d)',pri:'med',desc:'Use TVM software inventory to maintain an accurate record of all software processing personal data. Outdated software that processes personal data but is no longer receiving security updates represents both an accuracy (systems are not as described) and integrity (unpatched vulnerabilities) risk under Article 5. Review EOS software monthly.'},
+        ]},
+      { id:'ACAU', name:'ACCESS CONTROL & AUDIT', emoji:'🔑', desc:'Effective access control and audit logging underpin multiple GDPR obligations — limiting who can access personal data, ensuring that access is recorded, and providing the evidence needed to demonstrate compliance to supervisory authorities under Article 5(2).',
+        tasks:[
+          {id:'GDPR-AC-01',name:'Enforce MFA for All Access to Personal Data Systems',ref:'Art 32(1)',pri:'high',desc:'Configure Entra Conditional Access requiring MFA for all users accessing systems that process personal data. Single-factor authentication on systems processing personal data is widely regarded as insufficient by European supervisory authorities. Use phishing-resistant MFA (FIDO2 or Authenticator app) for privileged accounts.'},
+          {id:'GDPR-AC-02',name:'Implement PIM for Privileged Access to Personal Data',ref:'Art 32(1)',pri:'high',desc:'Configure Entra PIM for all roles with access to systems processing personal data. Privileged access should be time-limited, require justification, and be logged. PIM activation logs provide the evidence trail needed to demonstrate that access to personal data systems is controlled and monitored.'},
+          {id:'GDPR-AC-03',name:'Conduct Quarterly Access Reviews — Personal Data Systems',ref:'Art 5(2)',pri:'high',desc:'Perform quarterly access reviews of all accounts with access to MDE device groups containing personal data systems. Remove or downgrade any access that is no longer required. Document the review outcomes as Article 5(2) accountability evidence. Unnecessary access to systems processing personal data is a compliance risk.'},
+          {id:'GDPR-AC-04',name:'Disable Inactive Accounts — 30-Day Threshold',ref:'Art 32(1)',pri:'med',desc:'Configure Entra Lifecycle Workflows to disable accounts with no activity for 30 days. Inactive accounts with access to systems processing personal data represent an unnecessary exposure. Supervisory authorities regularly cite failure to remove stale access as a contributing factor in personal data breach investigations.'},
+          {id:'GDPR-AU-01',name:'Enable and Retain MDE Audit Logs — Minimum 12 Months',ref:'Art 5(2)',pri:'high',desc:'Enable MDE portal admin audit logs and ingest to Sentinel. Set retention to 12 months minimum. Configure log immutability. These logs are the primary evidence of who accessed or modified the security configuration of systems processing personal data — a core accountability document under Article 5(2).'},
+          {id:'GDPR-AU-02',name:'Create Daily Audit Log Review Process',ref:'Art 32(1)(d)',pri:'med',desc:'Establish a daily review of audit events on systems processing personal data using a Sentinel workbook or scheduled KQL query. Article 32(1)(d) requires regular testing of security measures. Daily review of audit logs is a direct implementation of this requirement. Document review outcomes as evidence.'},
+        ]},
+      { id:'GOV', name:'GOVERNANCE & RECORDS', emoji:'📋', desc:'GDPR imposes organisational governance obligations including appointing a Data Protection Officer where required (Articles 37-39), maintaining Records of Processing Activities (Article 30), conducting Data Protection Impact Assessments for high-risk processing (Article 35), and managing processor relationships (Article 28).',
+        tasks:[
+          {id:'GDPR-GV-01',name:'Document Microsoft as Data Processor — Article 28 Contract',ref:'Art 28',pri:'high',desc:'Review and document the Data Processing Agreement (DPA) with Microsoft covering MDE, Intune, Sentinel, and Entra ID. Download the Microsoft DPA from the Microsoft Trust Center (trust.microsoft.com). Confirm the DPA covers all Microsoft services used to process personal data. Store in the vendor register with annual review date.'},
+          {id:'GDPR-GV-02',name:'Confirm MDE Data Residency — Personal Data Location',ref:'Art 44-49',pri:'high',desc:'Confirm the geographic region where MDE stores telemetry data (set during MDE tenant creation). If the organisation is subject to EU data residency requirements, confirm the region is within the EEA. Document the data residency configuration and Microsoft\'s applicable transfer mechanisms as part of the Article 44 international transfer record.'},
+          {id:'GDPR-GV-03',name:'Include MDE in Records of Processing Activities (ROPA)',ref:'Art 30',pri:'high',desc:'Add the MDE deployment as an entry in the organisation\'s Records of Processing Activities. The entry should cover: purpose (endpoint security monitoring), categories of personal data processed (device identifiers, user activity, file access logs), retention period, security measures (reference to the Article 32 technical measures document), and the Microsoft DPA reference.'},
+          {id:'GDPR-GV-04',name:'Conduct DPIA for High-Risk MDE Deployments',ref:'Art 35',pri:'high',desc:'Assess whether the MDE deployment requires a Data Protection Impact Assessment under Article 35. DPIA is required where processing is likely to result in high risk to individuals — systematic monitoring of employees or processing on a large scale are relevant criteria. If required, conduct and document the DPIA before deployment. Consult the DPO.'},
+          {id:'GDPR-GV-05',name:'Appoint or Consult DPO for MDE Deployment',ref:'Art 37-39',pri:'high',desc:'Where a DPO is required or appointed, involve them in decisions about the MDE deployment — particularly scope of monitoring, retention of personal data in logs, and the Article 35 DPIA determination. Document DPO involvement as evidence of governance compliance. Where no DPO is required, document the assessment that concluded this.'},
+          {id:'GDPR-GV-06',name:'Define Data Subject Rights Process for MDE Data',ref:'Art 15-22',pri:'med',desc:'Identify whether and how individuals could exercise data subject rights (access, erasure, restriction) in relation to personal data held in MDE telemetry logs (device activity, user identity data). Define a procedure for handling such requests. Most MDE telemetry data is processed for security purposes under legitimate interests, but a documented process for evaluating and responding to rights requests is required.'},
+          {id:'GDPR-GV-07',name:'Annual Review of GDPR Compliance Measures',ref:'Art 5(2)',pri:'med',desc:'Schedule an annual review of all GDPR-relevant MDE configurations and documentation. Confirm that technical measures remain appropriate, that the ROPA entry remains accurate, that the Microsoft DPA is current, that access reviews have been completed, and that the breach notification procedure has been tested. Document the review as Article 5(2) accountability evidence.'},
+        ]}
+    ]
   }
 };
 
@@ -2447,6 +2551,88 @@ const REMEDIES = {
     action:'Log AI-introduced false positives that caused business impact as AI Incidents. Required fields: AI feature, alert/action type, business impact, root cause (model FP, configuration, new software), remediation taken, and control improvement. Track AI incident count as a monthly KPI. Target < 2 per month.' },
   'AI-MAN-05':{ portal:'internal', path:'AI incident handling procedure document',
     action:'Create an AI Incident Handling Procedure covering: incorrect automated device isolation (rollback via Action center + Undo, verify device health, notify asset owner), false positive malware quarantine (restore from quarantine, whitelist process, document for model feedback), and Security Copilot incorrect output (document, escalate, retrain prompt template).' },
+
+  // ── GDPR ──
+  'GDPR-A32-01':{ portal:'intune', path:'Endpoint security → Disk encryption → BitLocker → Create policy',
+    action:'Configure BitLocker: XTS-AES 256-bit for OS drives, AES-CBC 256-bit for data drives. Require TPM, escrow recovery keys to Entra ID. Monitor coverage via Intune Encryption report. Target 100% encrypted for all devices processing personal data. Export the encryption compliance report as Article 32 evidence.',
+    cmd:'Get-BitLockerVolume | Select MountPoint, EncryptionMethod, VolumeStatus, ProtectionStatus' },
+  'GDPR-A32-02':{ portal:'azure', path:'Microsoft Trust Center → trust.microsoft.com → Products → Defender for Endpoint → Security',
+    action:'Navigate to trust.microsoft.com and download the data protection documentation for MDE. Confirm TLS version used for data in transit. Document the Microsoft service encryption commitments (TLS 1.2+ for all data flows) as the Article 32(1)(a) encryption in transit evidence. File in the compliance evidence register.' },
+  'GDPR-A32-03':{ portal:'intune', path:'Endpoint security → Antivirus → Create policy → Windows → Microsoft Defender Antivirus',
+    action:'Configure NGAV with Cloud-delivered protection = High+, Real-time protection = Enabled, Behavior monitoring = Enabled, MAPS = Advanced, Auto-sample submission = Enabled. Apply to all device groups processing personal data. Export the Intune antivirus compliance report as Article 32(1)(b) technical measure evidence.',
+    cmd:'Get-MpPreference | Select CloudBlockLevel, RealTimeProtectionEnabled, BehaviorMonitoringEnabled' },
+  'GDPR-A32-04':{ portal:'defender', path:'Reports → Device health and compliance → Sensor health tab',
+    action:'Filter to in-scope personal data processing devices. All must show Sensor health = Active. Create an alert for devices Inactive > 24 hours. Export the sensor health report monthly. 100% active coverage demonstrates the resilience of processing systems required by Article 32(1)(b). File export as evidence.' },
+  'GDPR-A32-05':{ portal:'intune', path:'Endpoint security → Antivirus → [Policy] → Tamper protection',
+    action:'Enable Tamper Protection = Enabled in the Intune Antivirus policy for all devices processing personal data. Verify via Intune device status report. Export the compliance status as Article 32 evidence. Tamper Protection ensures the integrity of security controls — preventing attackers from disabling them to access personal data.',
+    cmd:'Get-MpComputerStatus | Select IsTamperProtected, AMRunningMode' },
+  'GDPR-A32-06':{ portal:'defender', path:'Secure Score → Overview + Vulnerability management → Exposure score',
+    action:'Review Secure Score and TVM Exposure Score monthly. Record the scores and top improvement actions. Document the review as Article 32(1)(d) evidence of regular testing of technical measures. A declining or stable score demonstrates ongoing evaluation. Export both scores with trend data as monthly compliance evidence.' },
+  'GDPR-A32-07':{ portal:'internal', path:'Compliance evidence register / DPO documentation system',
+    action:'Create an Article 32 Technical Measures document. Sections: 1) Encryption at rest (BitLocker), 2) Encryption in transit (TLS — Microsoft documentation), 3) Access controls (MFA, RBAC, PIM), 4) Malware protection (NGAV, EDR), 5) Monitoring (Sentinel, audit logs), 6) Testing (Secure Score, TVM). Obtain DPO or CISO sign-off. Review annually.' },
+  'GDPR-A32-08':{ portal:'defender', path:'Vulnerability management → Recommendations → Request remediation',
+    action:'Create remediation requests for CVEs on personal data processing devices with CVSS ≥ 7.0. Set SLA: Critical ≤ 7 days, High ≤ 14 days. Track via TVM Remediation tab. Export the remediation closure report monthly. Supervisory authorities treat unpatched critical vulnerabilities on systems processing personal data as a prima facie Article 32 failure.',
+    cmd:'// KQL: Overdue patches on personal data devices\nDeviceTvmSoftwareVulnerabilities\n| where VulnerabilitySeverityLevel in ("Critical","High")\n| extend DaysOpen = datetime_diff("day",now(),PublishedDate)\n| where DaysOpen > 14\n| summarize count() by DeviceName, CveId, DaysOpen' },
+  'GDPR-B-01':{ portal:'internal', path:'Incident response procedure / DPO documentation',
+    action:'Write a breach determination procedure mapping MDE incident types to breach categories: ransomware on personal data system = presumptive breach (notify), credential theft alert = assess scope before determining, malware detection with no lateral movement = likely no breach. Define who makes the final determination (DPO + CISO) and document the 72-hour clock start as the moment the organisation becomes "aware" per Art 33(1).' },
+  'GDPR-B-02':{ portal:'defender', path:'Settings → Email notifications → Incidents tab → Add notification rule',
+    action:'Create incident-level notifications for High and Critical severity incidents. Add DPO and privacy team to the recipient list alongside SOC. Include the rule conditions in the breach notification procedure — analysts must know which alert types require immediate DPO notification. Test delivery and confirm receipt as evidence.' },
+  'GDPR-B-03':{ portal:'sentinel', path:'Analytics → Create rule → Scheduled query rule',
+    action:'Create Sentinel analytics rules for exfiltration-pattern events: large outbound data transfers (DeviceNetworkEvents), USB write events on personal data device groups (DeviceEvents where ActionType == RemovableStorageDriveMount), and access to data store paths from unexpected processes. Set alert severity to High and route to DPO notification workflow.',
+    cmd:'// KQL: Detect large outbound transfers\nDeviceNetworkEvents\n| where RemoteIPType == "Public"\n| where SentBytes > 10000000\n| summarize TotalSent=sum(SentBytes) by DeviceName, RemoteIP, bin(Timestamp,1h)\n| where TotalSent > 50000000' },
+  'GDPR-B-04':{ portal:'internal', path:'Breach notification procedure document (SharePoint / GRC)',
+    action:'Write the Art 33 breach notification procedure: Step 1 — confirm breach using MDE investigation data (incident timeline, affected devices, data accessed). Step 2 — gather Art 33(3) notification content: nature, data categories, number of subjects, likely consequences, measures taken/proposed. Step 3 — notify supervisory authority within 72 hours. Step 4 — assess Art 34 subject notification requirement. Include DPA contact details for the relevant supervisory authority.' },
+  'GDPR-B-05':{ portal:'internal', path:'Breach register document (DPO / GRC system)',
+    action:'Create and maintain an Article 33(5) breach register. Each entry must record: breach reference, date of discovery, date became aware (72-hour clock start), description, data categories, approximate number of subjects affected, notification decision (notified/not notified), reason if not notified, and measures taken. Review quarterly with DPO. MDE incident data provides the factual record for each entry.' },
+  'GDPR-B-06':{ portal:'defender', path:'Email & collaboration → Attack simulator training + Internal tabletop exercise',
+    action:'Conduct annual breach notification exercise: simulate a ransomware incident via Attack Simulator on a nominated test device, walk through the full breach determination and notification workflow, measure time from detection to draft notification, identify gaps in the procedure. Document the exercise outcomes and update the breach notification procedure. File as Art 33 preparedness evidence.' },
+  'GDPR-D-01':{ portal:'intune', path:'Endpoint security → Attack surface reduction → Device control',
+    action:'Deploy device control policy for all devices processing personal data: block all unapproved removable storage, block mobile phone sync, block portable media players. Define an approved USB device allow-list by hardware ID for business-necessary exceptions. Review device control events weekly. This implements Art 25 privacy by design by preventing unauthorised data export by default.' },
+  'GDPR-D-02':{ portal:'intune', path:'Endpoint security → Attack surface reduction → Controlled folder access',
+    action:'Enable CFA in Block mode after an audit period for devices processing personal data. Define protected folders to include directories containing personal data. Whitelist only necessary applications. This implements Art 25(1) privacy by design — personal data integrity is protected as an architectural control, not dependent on individual user behaviour.',
+    cmd:'Get-MpPreference | Select EnableControlledFolderAccess, ControlledFolderAccessAllowedApplications' },
+  'GDPR-D-03':{ portal:'defender', path:'Settings → Endpoints → Web content filtering → Add policy',
+    action:'Create a WCF policy for personal data processing device groups. Block: Personal file sharing (Dropbox, WeTransfer, Google Drive personal), Social media with upload capability, Webmail (personal email). This implements Art 25(2) privacy by default — personal data cannot reach unapproved destinations without an explicit decision. Review WCF block log monthly.' },
+  'GDPR-D-04':{ portal:'defender', path:'Settings → Advanced features → Microsoft Purview data loss prevention',
+    action:'Enable Purview DLP integration in MDE Advanced Features. Configure DLP policies in Microsoft Purview targeting sensitivity labels for personal data categories (e.g., EU GDPR template). MDE enforces policies at endpoint level — blocking copy to USB, upload to unsanctioned sites, print. Review DLP incidents weekly. This is a direct technical implementation of Art 25 privacy by design.' },
+  'GDPR-D-05':{ portal:'defender', path:'Settings → Permissions → Roles → Add role',
+    action:'Audit and refine MDE RBAC so every analyst accesses only the device groups relevant to their role. Security telemetry (device names, user activity, file access) constitutes personal data — Art 25(2) requires that by default only necessary data is accessible. Conduct quarterly access reviews. Document each role scope and the business justification as Art 25 evidence.' },
+  'GDPR-P-01':{ portal:'internal', path:'Compliance evidence register (SharePoint / GRC platform)',
+    action:'Create an Article 5(2) compliance evidence register for the MDE deployment. Structure: one row per technical or organisational measure, columns for: measure description, implementation date, how monitored, evidence location, last review date. This register is the primary accountability document. Present it to the DPO at the annual review and make it available for supervisory authority inspection.' },
+  'GDPR-P-02':{ portal:'sentinel', path:'Data connectors → Microsoft Defender XDR → Connect',
+    action:'Enable MDE admin audit logs in Sentinel with 12-month retention and immutable storage. Configure the Log Analytics workspace retention policy. Audit logs of access to systems processing personal data are core Art 5(1)(f) integrity and confidentiality evidence. Export a sample audit log query result as evidence that logging is operational.',
+    cmd:'// KQL: MDE admin actions audit log\nCloudAppEvents\n| where Application == "Microsoft Defender ATP"\n| where Timestamp > ago(30d)\n| project Timestamp, AccountDisplayName, ActionType, ObjectName' },
+  'GDPR-P-03':{ portal:'sentinel', path:'Settings → Workspace settings → Usage and estimated costs → Data retention',
+    action:'Set Log Analytics workspace retention to match the organisation\'s defined log retention policy. For GDPR, logs containing personal data (user identities, device activity) should be retained only as long as necessary for the security purpose. Document the retention period chosen and the justification. Set archival for older logs where historical access may be needed for breach investigation.' },
+  'GDPR-P-04':{ portal:'defender', path:'Vulnerability management → Software inventory → Filter: End of support = Yes',
+    action:'Filter TVM software inventory to EOS products on personal data processing devices. EOS software processing personal data creates both an Art 5(1)(d) accuracy risk (the system is not as the ROPA describes) and an Art 5(1)(f) integrity risk (unpatched vulnerabilities). Remediate or formally document risk acceptance for each EOS product. Export as monthly evidence.' },
+  'GDPR-AC-01':{ portal:'entra', path:'Security → Conditional Access → New policy → All users, personal data apps',
+    action:'Create a CA policy requiring phishing-resistant MFA (FIDO2 or Authenticator) for all users accessing systems that process personal data. European supervisory authorities (including the CNIL and ICO) have found that failure to enforce MFA on personal data systems contributed to breach severity. Enforce for all accounts — no exceptions without formal, documented risk acceptance.' },
+  'GDPR-AC-02':{ portal:'entra', path:'Identity Governance → Privileged Identity Management → Roles',
+    action:'Configure PIM for all roles with access to personal data systems: JIT activation, max 4-hour sessions, justification required, manager approval. Export PIM activation logs quarterly as evidence that privileged access to systems processing personal data is controlled and time-limited. This supports Art 32(1) and Art 5(2) accountability.' },
+  'GDPR-AC-03':{ portal:'entra', path:'Identity Governance → Access reviews → Create access review',
+    action:'Create a quarterly access review targeting all roles with access to MDE device groups containing personal data systems. Assign to Security Manager as reviewer. Apply auto-revocation for accounts not reviewed. Document outcomes as Art 5(2) accountability evidence. Unnecessary access to personal data systems is a direct compliance risk under Art 5(1)(f).' },
+  'GDPR-AC-04':{ portal:'entra', path:'Identity → Lifecycle workflows → Create workflow → Leaver workflow',
+    action:'Configure an Entra Lifecycle Workflow to disable accounts with no sign-in activity for 30 days. For accounts with access to personal data systems, apply a stricter threshold than general accounts. Export the inactive account audit monthly. File as Art 32 technical measure evidence and Art 5(2) accountability evidence.' },
+  'GDPR-AU-01':{ portal:'sentinel', path:'Data connectors → Microsoft Defender XDR → Connect',
+    action:'Enable MDE audit log ingestion to Sentinel. Set retention to 12 months minimum with immutable storage. Configure a Sentinel alert for any attempt to delete or modify log data. Audit logs of access to personal data systems are the primary Art 5(2) accountability artefact. Present the log retention policy and a sample query to the DPO at the annual review.',
+    cmd:'// KQL: Query admin access audit log\nCloudAppEvents\n| where Application has "Defender"\n| where ActionType has_any ("Login","ConfigurationChange","RoleAssignment")\n| project Timestamp, AccountDisplayName, ActionType, IPAddress' },
+  'GDPR-AU-02':{ portal:'sentinel', path:'Workbooks → Add workbook → Create new',
+    action:'Build a Sentinel workbook showing daily security events on personal data processing device groups: alert count, failed login attempts, device compliance status, DLP policy triggers. Assign a named reviewer for daily review. Document review outcomes (normal/anomaly/escalated) as Art 32(1)(d) regular testing evidence. Retain records for 12 months.' },
+  'GDPR-GV-01':{ portal:'azure', path:'Microsoft Trust Center → trust.microsoft.com → Downloads → Data Processing Agreement',
+    action:'Download the Microsoft Data Processing Agreement from trust.microsoft.com. Verify it covers MDE, Intune, Sentinel, and Entra ID. Confirm Microsoft\'s role as processor under Art 28, the sub-processor list, and the applicable standard contractual clauses or alternative transfer mechanism for international transfers. Store in the vendor register with annual review date.' },
+  'GDPR-GV-02':{ portal:'defender', path:'Settings → Endpoints → Data storage and privacy',
+    action:'Navigate to the MDE data storage settings and confirm the geographic region where tenant data is stored. For EU-based organisations, confirm the region is within the EEA. If data is stored outside the EEA, document the applicable transfer mechanism (Standard Contractual Clauses in the Microsoft DPA). Record in the ROPA entry and the Art 44 transfer records.' },
+  'GDPR-GV-03':{ portal:'internal', path:'ROPA document (DPO / GRC system)',
+    action:'Add the MDE deployment as an entry in the Records of Processing Activities. Required fields: Controller name, DPO contact, Purpose (endpoint security monitoring), Legal basis (legitimate interests — security of network and information systems), Categories of personal data (device identifiers, user activity logs, file access events, network connection logs), Recipients (Microsoft as processor), Retention period, Security measures (reference Article 32 document), International transfers (if applicable).' },
+  'GDPR-GV-04':{ portal:'internal', path:'DPIA document (DPO / GRC system)',
+    action:'Assess whether a DPIA is required under Art 35 for the MDE deployment. Triggering criteria: systematic monitoring of employees (relevant if MDE is used to monitor employee activity), large-scale processing of personal data, use of new technologies. If required, conduct the DPIA before deployment begins (or retrospectively if already deployed). Consult DPO. Document the DPIA determination regardless of outcome — both a positive and negative determination require documentation.' },
+  'GDPR-GV-05':{ portal:'internal', path:'DPO engagement record (email / meeting minutes)',
+    action:'Document DPO involvement in the MDE deployment decision. This should include: DPO review of the Art 35 DPIA determination, DPO input on the scope of monitoring (which device groups, what data), DPO review of the ROPA entry, and DPO sign-off on the breach notification procedure. File meeting minutes or email confirmation as governance evidence.' },
+  'GDPR-GV-06':{ portal:'internal', path:'Data subject rights procedure document',
+    action:'Define a procedure for handling data subject rights requests relating to MDE data. Assess which rights apply (access — likely applicable to logs; erasure — likely restricted by security purpose; restriction — assess case by case). Define how requests are received, who responds, what data can be provided, and the 30-day response SLA. Involve DPO in developing the procedure. Test with a sample request annually.' },
+  'GDPR-GV-07':{ portal:'internal', path:'Annual review calendar item + compliance evidence register',
+    action:'Schedule an annual GDPR compliance review for the MDE deployment. Agenda: confirm Article 32 measures remain appropriate, update the ROPA entry, verify the Microsoft DPA is current, review breach register, confirm access reviews completed, test breach notification procedure, review DPO involvement record. Document outcomes as Art 5(2) accountability evidence.' },
 };
 
 function getPortalBadge(portalKey) {
@@ -2469,11 +2655,12 @@ function toggleComply(btn) {
 let STATE = {};
 let activeView = 'overview';
 let activeCat = {};
+let activeProductFilter = {}; // fid -> portal key or null
 
 function initState() {
   const saved = localStorage.getItem('mde-multi-state-v2');
   if (saved) { try { STATE = JSON.parse(saved); } catch(e) {} }
-  ['csf','ce','ceplus','soc2','n53','pci','zt','rmf','airmf'].forEach(fid => {
+  ['csf','ce','ceplus','soc2','n53','pci','zt','rmf','airmf','gdpr'].forEach(fid => {
     if (!STATE[fid]) STATE[fid] = {};
     FW[fid].cats.forEach(cat => {
       cat.tasks.forEach(t => {
@@ -2545,7 +2732,7 @@ function renderSwitcher() {
 
   const fwGroups = [
     { label: 'Dashboard', items: ['overview', 'gap'] },
-    { label: 'Frameworks', items: ['csf', 'ce', 'ceplus', 'soc2', 'n53', 'pci', 'zt', 'rmf', 'airmf'] },
+    { label: 'Frameworks', items: ['csf', 'ce', 'ceplus', 'soc2', 'n53', 'pci', 'zt', 'rmf', 'airmf', 'gdpr'] },
   ];
 
   const fwMeta = {
@@ -2560,6 +2747,7 @@ function renderSwitcher() {
     zt:       { label: 'NIST Zero Trust',    dot: '#6d28d9', emoji: '🟣' },
     rmf:      { label: 'NIST RMF',           dot: '#b45309', emoji: '🟤' },
     airmf:    { label: 'NIST AI RMF',        dot: '#0891b2', emoji: '🤖' },
+    gdpr:     { label: 'GDPR',               dot: '#4f46e5', emoji: '🇪🇺' },
   };
 
   const active = fwMeta[activeView] || fwMeta.overview;
@@ -2670,6 +2858,10 @@ document.addEventListener('click', function(e) {
 });
 
 function switchFW(fid) {
+  // Clear product filter when leaving a framework view
+  if (activeView !== fid && activeView !== 'overview' && activeView !== 'gap') {
+    activeProductFilter[activeView] = null;
+  }
   activeView = fid;
   const colorMap = { gap: '#7c3aed' };
   const color = colorMap[fid] || FW[fid]?.color;
@@ -2694,7 +2886,7 @@ function renderMain() {
 }
 
 function renderOverviewPage() {
-  const fwIds = ['csf','ce','ceplus','soc2','n53','pci','zt','rmf','airmf'];
+  const fwIds = ['csf','ce','ceplus','soc2','n53','pci','zt','rmf','airmf','gdpr'];
   const cards = fwIds.map(fid => {
     const fw = FW[fid];
     const s = fwStats(fid);
@@ -2829,7 +3021,8 @@ function renderFWPage(fw) {
       <span class="cat-nav-info" id="catNavInfo-${fw.id}">
         ${fw.cats.length} categories · ${s.complete} of ${s.total} complete
       </span>
-    </div>`;
+    </div>
+    <div class="product-filter-bar" id="pfBar-${fw.id}">${buildProductFilterBar(fw.id)}</div>`;
   }
 
   const sections = [`<div class="cat-section${defaultCat==='__all__'?' active':''}" id="cat-${fw.id}-__all__">
@@ -2892,6 +3085,7 @@ function renderTask(fid, t, color) {
   const s = STATE[fid][t.id] || { status:'pending', notes:'' };
   const done = s.status === 'complete';
   const remedy = REMEDIES[t.id];
+  const taskPortal = remedy?.portal || 'internal';
   const complyHtml = remedy ? `
     <button class="comply-toggle" onclick="toggleComply(this)">
       <i class="comply-arrow">▸</i> How to comply
@@ -2906,7 +3100,7 @@ function renderTask(fid, t, color) {
         ${remedy.cmd ? `<div class="comply-cmd-wrap"><div class="comply-cmd-label">💻 Command / Query</div><div class="comply-cmd">${remedy.cmd}</div></div>` : ''}
       </div>
     </div>` : '';
-  return `<div class="task${done?' done':''}" id="tr-${fid}-${t.id}" style="--fw-color:${color}">
+  return `<div class="task${done?' done':''}" id="tr-${fid}-${t.id}" data-portal="${taskPortal}" style="--fw-color:${color}">
     <input type="checkbox" class="task-cb" ${done?'checked':''} onchange="toggleDone('${fid}','${t.id}',this)"/>
     <div class="task-body">
       <div class="task-name">${t.name}</div>
@@ -2931,6 +3125,108 @@ function renderTask(fid, t, color) {
 // ════════════════════════════════════════════
 //  INTERACTIONS
 // ════════════════════════════════════════════
+// ════════════════════════════════════════════
+//  PRODUCT FILTER
+// ════════════════════════════════════════════
+
+function buildProductFilterBar(fid) {
+  const fw = FW[fid];
+  if (!fw) return '';
+  const allTasks = fw.cats.flatMap(c => c.tasks);
+
+  // Count tasks per portal
+  const portalCounts = {};
+  allTasks.forEach(t => {
+    const p = REMEDIES[t.id]?.portal || 'internal';
+    portalCounts[p] = (portalCounts[p] || 0) + 1;
+  });
+
+  // Only show portals that have at least one task in this framework
+  const relevantPortals = Object.keys(PORTALS).filter(p => portalCounts[p] > 0);
+  const active = activeProductFilter[fid] || null;
+
+  const btns = relevantPortals.map(pkey => {
+    const p = PORTALS[pkey];
+    const count = portalCounts[pkey] || 0;
+    const isActive = active === pkey;
+    return `<button class="pf-btn${isActive ? ' active' : ''}"
+        style="--pf-color:${p.color}"
+        onclick="setProductFilter('${fid}','${pkey}')">
+      <span class="pf-dot" style="background:${p.color}"></span>
+      ${p.label}
+      <span class="pf-count">${count}</span>
+    </button>`;
+  }).join('');
+
+  const clearBtn = active
+    ? `<button class="pf-btn" style="color:var(--t3)" onclick="setProductFilter('${fid}',null)">
+        Clear filter
+      </button>`
+    : '';
+
+  return `<span class="pf-label">Filter by product:</span>${btns}${clearBtn}`;
+}
+
+function setProductFilter(fid, portalKey) {
+  // Toggle off if clicking same filter
+  if (activeProductFilter[fid] === portalKey) portalKey = null;
+  activeProductFilter[fid] = portalKey || null;
+
+  // Rebuild filter bar
+  const bar = document.getElementById(`pfBar-${fid}`);
+  if (bar) bar.innerHTML = buildProductFilterBar(fid);
+
+  // Show/hide tasks based on filter
+  applyProductFilter(fid);
+}
+
+function applyProductFilter(fid) {
+  const portal = activeProductFilter[fid] || null;
+
+  // Find all task divs within this framework's sections
+  const sections = document.getElementById(`catSections-${fid}`);
+  if (!sections) return;
+
+  const tasks = sections.querySelectorAll('.task[data-portal]');
+  tasks.forEach(el => {
+    if (!portal || el.dataset.portal === portal) {
+      el.classList.remove('pf-hidden');
+    } else {
+      el.classList.add('pf-hidden');
+    }
+  });
+
+  // Show/hide empty state messages per task list
+  sections.querySelectorAll('.tasks-list').forEach(list => {
+    const visibleTasks = list.querySelectorAll('.task:not(.pf-hidden)');
+    let emptyMsg = list.nextElementSibling;
+    if (emptyMsg && emptyMsg.classList.contains('cat-section-empty-msg')) {
+      emptyMsg.remove();
+    }
+    if (portal && visibleTasks.length === 0) {
+      const msg = document.createElement('div');
+      msg.className = 'cat-section-empty-msg';
+      msg.textContent = `No controls in this category require ${PORTALS[portal]?.label || portal}.`;
+      list.insertAdjacentElement('afterend', msg);
+    }
+  });
+
+  // Update nav info text
+  const allTasks = sections.querySelectorAll('.task[data-portal]');
+  const visible = sections.querySelectorAll('.task[data-portal]:not(.pf-hidden)');
+  const info = document.getElementById(`catNavInfo-${fid}`);
+  if (info) {
+    const fw = FW[fid];
+    const s = fwStats(fid);
+    if (portal) {
+      const p = PORTALS[portal];
+      info.innerHTML = `Showing <strong style="color:${p.color}">${visible.length}</strong> of ${allTasks.length} controls requiring ${p.label}`;
+    } else {
+      info.textContent = `${fw.cats.length} categories · ${s.complete} of ${s.total} complete`;
+    }
+  }
+}
+
 function toggleCatDD(fid, e) {
   e.stopPropagation();
   closeAllDropdowns('cat');
@@ -2976,6 +3272,9 @@ function switchCatDD(fid, catId) {
   // Show/hide sections
   document.querySelectorAll(`#catSections-${fid} .cat-section`).forEach(s => s.classList.remove('active'));
   document.getElementById(`cat-${fid}-${catId}`)?.classList.add('active');
+
+  // Re-apply product filter if active
+  if (activeProductFilter[fid]) applyProductFilter(fid);
 }
 
 // Close any open category dropdown when clicking outside
@@ -3079,7 +3378,7 @@ function updateNotes(fid, tid, el) {
 //  EXPORTS
 // ════════════════════════════════════════════
 function buildExportData(fid) {
-  const ids = fid ? [fid] : ['csf','ce','ceplus','soc2','n53','pci','zt','rmf','airmf'];
+  const ids = fid ? [fid] : ['csf','ce','ceplus','soc2','n53','pci','zt','rmf','airmf','gdpr'];
   return {
     meta: {
       tool: 'MDE Multi-Framework Audit Tracker',
@@ -3123,7 +3422,7 @@ function doExportJSON(fid) {
 }
 
 function doExportCSV(fid) {
-  const ids = fid ? [fid] : ['csf','ce','ceplus','soc2','n53','pci','zt','rmf','airmf'];
+  const ids = fid ? [fid] : ['csf','ce','ceplus','soc2','n53','pci','zt','rmf','airmf','gdpr'];
   const rows = [['Framework','Category','Task ID','Task Name','Reference','Priority','Status','Notes']];
   ids.forEach(fid => {
     FW[fid].cats.forEach(cat => {
@@ -3143,7 +3442,7 @@ function doExportCSV(fid) {
 }
 
 function doExportHTML(fid) {
-  const ids = fid ? [fid] : ['csf','ce','ceplus','soc2','n53','pci','zt','rmf','airmf'];
+  const ids = fid ? [fid] : ['csf','ce','ceplus','soc2','n53','pci','zt','rmf','airmf','gdpr'];
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
   const bg = isDark ? '#080c12' : '#f0f4f8';
   const cardBg = isDark ? '#131c2e' : '#ffffff';
@@ -3339,7 +3638,7 @@ function computeGap(uploadedData) {
     });
   });
 
-  const fwIds = ['csf','ce','ceplus','soc2','n53','pci','zt','rmf','airmf'];
+  const fwIds = ['csf','ce','ceplus','soc2','n53','pci','zt','rmf','airmf','gdpr'];
   const result = { meta: uploadedData.meta || {}, frameworks: {}, totals: {} };
   const totals = { compliant:0, improved:0, regression:0, gap:0, blocked:0, progress:0, new:0, total:0 };
 
@@ -3403,7 +3702,7 @@ function renderGapPage() {
     { key:'new', label:`🆕 New (${t.new||0})` },
   ].map(f => `<button class="gap-filter-btn${GAP_FILTER===f.key?' active':''}" onclick="setGapFilter('${f.key}')">${f.label}</button>`).join('');
 
-  const fwSections = ['csf','ce','ceplus','soc2','n53','pci','zt','rmf','airmf'].map(fid => {
+  const fwSections = ['csf','ce','ceplus','soc2','n53','pci','zt','rmf','airmf','gdpr'].map(fid => {
     const fw = FW[fid];
     const fwTasks = fw.cats.flatMap(cat => GAP_RESULT.frameworks[fid].cats[cat.id]);
     const filtered = GAP_FILTER === 'all' ? fwTasks : fwTasks.filter(t => t.delta === GAP_FILTER);
@@ -3508,7 +3807,7 @@ function clearGap() {
 function exportGapCSV() {
   if (!GAP_RESULT) return;
   const rows = [['Framework','Category','Task ID','Task Name','Reference','Priority','Baseline Status','Current Status','Delta']];
-  ['csf','ce','ceplus','soc2','n53','pci','zt','rmf','airmf'].forEach(fid => {
+  ['csf','ce','ceplus','soc2','n53','pci','zt','rmf','airmf','gdpr'].forEach(fid => {
     FW[fid].cats.forEach(cat => {
       GAP_RESULT.frameworks[fid].cats[cat.id].forEach(t => {
         rows.push([FW[fid].shortName, cat.id, t.id, `"${t.name}"`, t.ref, t.pri, t.uploadedStatus, t.currentStatus, t.delta]);
@@ -3575,7 +3874,7 @@ function exportGapHTML() {
   });
   html += `</div>`;
 
-  ['csf','ce','ceplus','soc2','n53','pci','zt','rmf','airmf'].forEach(fid => {
+  ['csf','ce','ceplus','soc2','n53','pci','zt','rmf','airmf','gdpr'].forEach(fid => {
     const fw = FW[fid];
     html += `<div class="fw-block"><div class="fw-title" style="background:${fw.color}">${fw.emoji} ${fw.shortName} — ${fw.label}</div>
     <table><tr><th>Task</th><th>Ref</th><th>Priority</th><th>Baseline</th><th>Current</th><th>Delta</th></tr>`;
@@ -3635,7 +3934,7 @@ document.addEventListener('click', function(e) {
 function openShareholderReport(fid) {
   const reportFid = fid || null;
   const fw = reportFid ? FW[reportFid] : null;
-  const fwIds = reportFid ? [reportFid] : ['csf','ce','ceplus','soc2','n53','pci','zt','rmf','airmf'];
+  const fwIds = reportFid ? [reportFid] : ['csf','ce','ceplus','soc2','n53','pci','zt','rmf','airmf','gdpr'];
 
   const grandTotal = fwIds.reduce((s,f) => s + fwStats(f).total, 0);
   const grandDone  = fwIds.reduce((s,f) => s + fwStats(f).complete, 0);
