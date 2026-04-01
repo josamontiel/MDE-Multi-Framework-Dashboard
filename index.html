@@ -3214,21 +3214,8 @@ function applyProductFilter(fid) {
     }
   });
 
-  // Show/hide empty state messages per task list
-  sections.querySelectorAll('.tasks-list').forEach(list => {
-    const visibleTasks = list.querySelectorAll('.task:not(.pf-hidden)');
-    const emptyMsg = list.nextElementSibling;
-    if (emptyMsg && emptyMsg.classList.contains('cat-section-empty-msg')) {
-      emptyMsg.remove();
-    }
-    if (active.size > 0 && visibleTasks.length === 0) {
-      const msg = document.createElement('div');
-      msg.className = 'cat-section-empty-msg';
-      const labels = [...active].map(p => PORTALS[p]?.label || p).join(' or ');
-      msg.textContent = `No controls in this category require ${labels}.`;
-      list.insertAdjacentElement('afterend', msg);
-    }
-  });
+  // Clean up any previously inserted empty state messages
+  sections.querySelectorAll('.cat-section-empty-msg').forEach(el => el.remove());
 
   // Update nav info text
   const allTasks = sections.querySelectorAll('.task[data-portal]');
@@ -3660,12 +3647,15 @@ function computeGap(uploadedData) {
     });
   });
 
-  const fwIds = ['csf','ce','ceplus','soc2','n53','pci','zt','rmf','airmf','gdpr'];
-  const result = { meta: uploadedData.meta || {}, frameworks: {}, totals: {} };
+  // Only analyse frameworks present in the uploaded file AND defined in FW
+  const fwIds = uploadedData.frameworks
+    .map(fw => fw.id)
+    .filter(fid => !!FW[fid]);
+
+  const result = { meta: uploadedData.meta || {}, frameworks: {}, totals: {}, fwIds };
   const totals = { compliant:0, improved:0, regression:0, gap:0, blocked:0, progress:0, new:0, total:0 };
 
   fwIds.forEach(fid => {
-    if (!FW[fid]) return;
     const fwResult = { cats: {} };
     FW[fid].cats.forEach(cat => {
       fwResult.cats[cat.id] = cat.tasks.map(t => {
@@ -3724,8 +3714,9 @@ function renderGapPage() {
     { key:'new', label:`🆕 New (${t.new||0})` },
   ].map(f => `<button class="gap-filter-btn${GAP_FILTER===f.key?' active':''}" onclick="setGapFilter('${f.key}')">${f.label}</button>`).join('');
 
-  const fwSections = ['csf','ce','ceplus','soc2','n53','pci','zt','rmf','airmf','gdpr'].map(fid => {
+  const fwSections = (GAP_RESULT.fwIds || []).map(fid => {
     const fw = FW[fid];
+    if (!fw || !GAP_RESULT.frameworks[fid]) return '';
     const fwTasks = fw.cats.flatMap(cat => GAP_RESULT.frameworks[fid].cats[cat.id]);
     const filtered = GAP_FILTER === 'all' ? fwTasks : fwTasks.filter(t => t.delta === GAP_FILTER);
     if (filtered.length === 0) return '';
@@ -3829,7 +3820,8 @@ function clearGap() {
 function exportGapCSV() {
   if (!GAP_RESULT) return;
   const rows = [['Framework','Category','Task ID','Task Name','Reference','Priority','Baseline Status','Current Status','Delta']];
-  ['csf','ce','ceplus','soc2','n53','pci','zt','rmf','airmf','gdpr'].forEach(fid => {
+  (GAP_RESULT.fwIds || []).forEach(fid => {
+    if (!FW[fid] || !GAP_RESULT.frameworks[fid]) return;
     FW[fid].cats.forEach(cat => {
       GAP_RESULT.frameworks[fid].cats[cat.id].forEach(t => {
         rows.push([FW[fid].shortName, cat.id, t.id, `"${t.name}"`, t.ref, t.pri, t.uploadedStatus, t.currentStatus, t.delta]);
@@ -3896,8 +3888,9 @@ function exportGapHTML() {
   });
   html += `</div>`;
 
-  ['csf','ce','ceplus','soc2','n53','pci','zt','rmf','airmf','gdpr'].forEach(fid => {
+  (GAP_RESULT.fwIds || []).forEach(fid => {
     const fw = FW[fid];
+    if (!fw || !GAP_RESULT.frameworks[fid]) return;
     html += `<div class="fw-block"><div class="fw-title" style="background:${fw.color}">${fw.emoji} ${fw.shortName} — ${fw.label}</div>
     <table><tr><th>Task</th><th>Ref</th><th>Priority</th><th>Baseline</th><th>Current</th><th>Delta</th></tr>`;
     fw.cats.forEach(cat => {
